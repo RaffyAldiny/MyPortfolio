@@ -174,9 +174,10 @@ export default function LandingBackground() {
     let h = 0;
     let dpr = 1;
 
-    // More particles
+    // Keep background particle sizes the same as your original.
     let FLOW = 320;
-    let SHP = 320;
+    // Increase object (cluster) particles a lot for detail.
+    let SHP = 720;
 
     // Flow arrays
     let fx = new Float32Array(0);
@@ -218,9 +219,11 @@ export default function LandingBackground() {
       const isMobile = w < 640;
 
       FLOW = isMobile ? 240 : 360;
-      SHP = isMobile ? 220 : 340;
 
-      // Bigger and brighter so they show on white, but still refined
+      // ✅ Increase object particles only
+      SHP = isMobile ? 520 : 820;
+
+      // ✅ Keep background particle sizes exactly like original
       const sizes = isMobile ? [9, 14, 22] : [8, 13, 20];
       const cores = isMobile ? [1.0, 1.25, 1.55] : [1.0, 1.2, 1.5];
 
@@ -268,7 +271,7 @@ export default function LandingBackground() {
         sizeIdx[i] = pick < 0.55 ? 0 : pick < 0.85 ? 1 : 2;
       }
 
-      // Shape attributes (colored, detailed)
+      // Shape attributes (same sprite sizes, just more points)
       const rngS = mulberry32(246813579);
       shHue = new Uint16Array(SHP);
       shSize = new Uint8Array(SHP);
@@ -322,21 +325,21 @@ export default function LandingBackground() {
 
       const hueShift = (Math.floor(now / 260) + hueBias) % H;
 
-      // Main cluster (colored, vivid)
+      // Main cluster (more particles = more detail)
       for (let i = 0; i < SHP; i++) {
         const x = ax + driftX + (A.xs[i] * (1 - t) + B.xs[i] * t);
         const y = ay + driftY + (A.ys[i] * (1 - t) + B.ys[i] * t);
 
         const tw = 0.68 + 0.32 * Math.sin(shPhase[i] + now * 0.0026);
-        ctx.globalAlpha = 0.40 + tw * 0.60;
+        ctx.globalAlpha = 0.36 + tw * 0.64;
 
         const hi = (shHue[i] + hueShift + (i % 7)) % H;
         const spr = sprites[hi][shSize[i]];
         ctx.drawImage(spr, x - spr.width / 2, y - spr.height / 2);
 
-        // Extra bloom to spread glow like a light source
-        if ((i & 3) === 0) {
-          ctx.globalAlpha *= 0.35;
+        // keep bloom but slightly sparser because SHP is much higher now
+        if ((i % 5) === 0) {
+          ctx.globalAlpha *= 0.30;
           const bloom = sprites[hi][2];
           ctx.drawImage(bloom, x - bloom.width / 2, y - bloom.height / 2);
         }

@@ -13,7 +13,6 @@ const profile = {
   name: "Rafael Agoncillo",
   title: "Computer Science Graduate • Full-Stack Developer",
   bio: "I build clean interfaces with strong APIs, and I like turning complex systems into experiences that feel simple and polished.",
-  labels: ["Next.js", "Material UI", "Django REST Framework", "Full-stack"],
   imageSrc: "/me.jpg",
 };
 

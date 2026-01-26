@@ -7,7 +7,6 @@ type ProfileIntroProps = {
   name: string;
   title: string;
   bio: string;
-  labels: string[];
   imageSrc: string; // "/me.jpg"
 };
 
@@ -15,7 +14,6 @@ export default function ProfileIntro({
   name,
   title,
   bio,
-  labels,
   imageSrc,
 }: ProfileIntroProps) {
   return (
@@ -80,20 +78,6 @@ export default function ProfileIntro({
         justifyContent="center"
         sx={{ mt: 0.5 }}
       >
-        {labels.map((l) => (
-          <Chip
-            key={l}
-            label={l}
-            variant="outlined"
-            sx={(theme) => ({
-              borderColor: alpha(theme.palette.common.white, 0.35),
-              backgroundColor: alpha(theme.palette.common.white, 0.10),
-              backdropFilter: "blur(10px)",
-              WebkitBackdropFilter: "blur(10px)",
-              fontWeight: 800,
-            })}
-          />
-        ))}
       </Stack>
     </Stack>
   );
