@@ -1,3 +1,4 @@
+//src/components/SkillShowcase.tsx
 "use client";
 
 import * as React from "react";
@@ -19,6 +20,39 @@ const initials = (name: string) => {
   const p = name.split(" ").filter(Boolean);
   return p.length === 1 ? p[0].slice(0, 2).toUpperCase() : (p[0][0] + p[1][0]).toUpperCase();
 };
+
+/**
+ * GLASSY TEXT (subtle smudgy dark outline)
+ * - keeps text readable on bright backgrounds
+ * - adds a soft “glass edge” vibe via layered shadows
+ */
+const glassTitleSx = {
+  fontWeight: 950,
+  letterSpacing: -0.4,
+
+  // main fill stays clean
+  color: alpha("#fff", 0.92),
+
+  // smudgy outline: multiple soft shadows, not too black
+  textShadow: `
+    0 1px 0 ${alpha("#000", 0.22)},
+    0 2px 10px ${alpha("#000", 0.20)},
+    0 10px 26px ${alpha("#000", 0.14)}
+  `,
+} as const;
+
+const glassSubtitleSx = {
+  mt: 0.6,
+  fontSize: 14,
+  opacity: 0.9,
+  color: alpha("#fff", 0.78),
+
+  textShadow: `
+    0 1px 0 ${alpha("#000", 0.18)},
+    0 2px 10px ${alpha("#000", 0.16)},
+    0 10px 22px ${alpha("#000", 0.12)}
+  `,
+} as const;
 
 /**
  * SUB-COMPONENT: SkillPill
@@ -46,7 +80,7 @@ function SkillPill({ name, color, textColor, icon }: Skill) {
         transition: "transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease",
         "&:hover": {
           transform: "translateY(-2px)",
-          borderColor: alpha(color, 0.50),
+          borderColor: alpha(color, 0.5),
           boxShadow: `0 16px 34px ${alpha(color, 0.14)}, 0 12px 24px ${alpha("#000", 0.08)}, inset 0 1px 0 ${alpha(
             "#fff",
             0.32
@@ -105,8 +139,8 @@ export default function SkillsShowcase({
 }) {
   return (
     <Box sx={{ width: "100%", textAlign: "center" }}>
-      <Typography sx={{ fontWeight: 950, letterSpacing: -0.4 }}>{title}</Typography>
-      <Typography sx={{ mt: 0.6, opacity: 0.82, fontSize: 14 }}>{subtitle}</Typography>
+      <Typography sx={glassTitleSx}>{title}</Typography>
+      <Typography sx={glassSubtitleSx}>{subtitle}</Typography>
 
       <Box
         sx={{

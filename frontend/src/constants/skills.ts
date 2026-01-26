@@ -1,3 +1,5 @@
+//src/constants/skill.ts
+
 export type Skill = { 
   name: string; 
   color: string; 
@@ -7,12 +9,12 @@ export type Skill = {
 
 export const SKILLS: Skill[] = [
   { name: "React", color: "#61DAFB" },
-  { name: "NextJS", color: "#111111", textColor: "#0B0B10" },
+  { name: "NextJS", color: "#FFFFFF", textColor: "#0B0B10" },
   { name: "TypeScript", color: "#3178C6" },
   { name: "JavaScript", color: "#F7DF1E" },
-  { name: "Flutter", color: "#02569B", textColor: "#0B0B10" },
+  { name: "Flutter", color: "#02569B" },
   { name: "Dart", color: "#0175C2" },
-  { name: "Django", color: "#092E20", textColor: "#0B0B10" },
+  { name: "Django", color: "#092E20" },
   { name: "DRF", color: "#A30000" },
   { name: "Laravel", color: "#FF2D20" },
   { name: "Node.js", color: "#3C873A" },
@@ -27,7 +29,7 @@ export const SKILLS: Skill[] = [
   { name: "Figma", color: "#A259FF" },
   { name: "Photoshop", color: "#31A8FF" },
   { name: "Illustrator", color: "#FF9A00" },
-  { name: "Unity", color: "#222222", textColor: "#0B0B10" },
+  { name: "Unity", color: "#FFFFFF", textColor: "#0B0B10" },
   { name: "Power BI", color: "#F2C811" },
   { name: "Firebase", color: "#FFCA28" },
 ];
