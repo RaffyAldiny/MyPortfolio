@@ -41,7 +41,7 @@ export default function Home() {
           <Stack alignItems="center" spacing={4}>
             <ProfileIntro {...profile} />
 
-            <Divider ssss 
+            <Divider
               sx={{
                 width: "40%",
                 borderColor: alpha("#000", 0.08),
