@@ -1,13 +1,12 @@
-// frontend/app/page.tsx
 "use client";
 
 import * as React from "react";
-import { Box, Container, Divider, Stack } from "@mui/material";
-import { alpha } from "@mui/material/styles";
+import { Box, Container, Stack } from "@mui/material";
 
 import LandingBackground from "@/components/landing/LandingBackground";
 import ProfileIntro from "@/components/landing/ProfileIntro";
 import SkillsShowcase from "@/components/landing/SkillsShowcase";
+import PrismDivider from "@/components/ui/PrismDivider";
 
 export default function Home() {
   return (
@@ -31,13 +30,8 @@ export default function Home() {
           <Stack alignItems="center" spacing={4}>
             <ProfileIntro />
 
-            <Divider
-              sx={{
-                width: "40%",
-                borderColor: alpha("#000", 0.08),
-                my: 1,
-              }}
-            />
+            {/* 🌈 Prism Divider */}
+            <PrismDivider width="70%" />
 
             <SkillsShowcase />
           </Stack>

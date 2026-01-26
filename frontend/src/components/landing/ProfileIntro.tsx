@@ -175,8 +175,8 @@ export default function ProfileIntro() {
               fontWeight: 500,
             }}
           >
-            I engineer custom <Highlight>management systems</Highlight> and <Highlight>academic capstone projects</Highlight>, tailoring software to streamline your specific workflow. 
-            Passionate about <Highlight>AI</Highlight> and modern tech, I transform complex requirements into powerful, intelligent solutions.
+            I engineer <Highlight>custom management systems</Highlight> and <Highlight>academic capstone projects</Highlight>, tailoring software to streamline your specific workflow. 
+            Passionate about <Highlight>AI and modern tech stacks</Highlight>, I transform complex requirements into powerful, <Highlight>intelligent solutions</Highlight>.
           </Typography>
         </Box>
       </Box>

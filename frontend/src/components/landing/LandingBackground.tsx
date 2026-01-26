@@ -38,10 +38,12 @@ function mulberry32(seed: number) {
     return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
   };
 }
-const rr = (rng: () => number, min: number, max: number) => rng() * (max - min) + min;
+const rr = (rng: () => number, min: number, max: number) =>
+  rng() * (max - min) + min;
 
 const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
-const easeInOut = (v: number) => (v < 0.5 ? 2 * v * v : 1 - Math.pow(-2 * v + 2, 2) / 2);
+const easeInOut = (v: number) =>
+  v < 0.5 ? 2 * v * v : 1 - Math.pow(-2 * v + 2, 2) / 2;
 
 const TAU = Math.PI * 2;
 
@@ -54,12 +56,10 @@ const SIN_LUT = (() => {
   return t;
 })();
 const sinLUT = (rad: number) => {
-  // rad can be any float, map to [0..SIN_LUT_SIZE)
   const idx = Math.floor((rad * SIN_LUT_SIZE) / TAU) & SIN_LUT_MASK;
   return SIN_LUT[idx];
 };
 const wrapTau = (v: number) => {
-  // keep in [0, TAU)
   if (v >= TAU) v -= TAU * Math.floor(v / TAU);
   else if (v < 0) v += TAU * (1 + Math.floor(-v / TAU));
   return v;
@@ -81,7 +81,12 @@ function shapePoints(type: ShapeType, n: number, seed: number) {
     switch (type) {
       case "heart":
         x = 16 * Math.pow(Math.sin(t), 3);
-        y = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+        y = -(
+          13 * Math.cos(t) -
+          5 * Math.cos(2 * t) -
+          2 * Math.cos(3 * t) -
+          Math.cos(4 * t)
+        );
         break;
 
       case "star": {
@@ -95,7 +100,9 @@ function shapePoints(type: ShapeType, n: number, seed: number) {
 
       case "butterfly": {
         const rB =
-          Math.exp(Math.sin(t)) - 2 * Math.cos(4 * t) + Math.pow(Math.sin((2 * t - Math.PI) / 24), 5);
+          Math.exp(Math.sin(t)) -
+          2 * Math.cos(4 * t) +
+          Math.pow(Math.sin((2 * t - Math.PI) / 24), 5);
         x = rB * Math.sin(t) * 10;
         y = -rB * Math.cos(t) * 10;
         break;
@@ -270,7 +277,7 @@ export default function LandingBackground() {
 
       const isMobile = w < 640;
 
-      // ✅ SAME SETTINGS you pasted
+      // SAME SETTINGS
       FLOW = isMobile ? 150 : 850;
       SHP = isMobile ? 100 : 250;
       pad = isMobile ? 24 : 26;
@@ -406,7 +413,6 @@ export default function LandingBackground() {
       const A = set[SHAPES[cluster.i]];
       const B = set[SHAPES[cluster.n]];
 
-      // drift is not per-particle, so normal Math.sin/cos is fine
       const driftX = Math.sin(now * 0.00055) * 28 + Math.sin(now * 0.0011) * 10;
       const driftY = Math.cos(now * 0.00048) * 18;
 
@@ -415,18 +421,15 @@ export default function LandingBackground() {
 
       const hueShift = (Math.floor(now / 260) + hueBias) % H;
 
-      // 1) precompute blended morph positions once
       for (let i = 0; i < SHP; i++) {
         mx[i] = A.xs[i] * inv + B.xs[i] * t;
         my[i] = A.ys[i] * inv + B.ys[i] * t;
       }
 
-      // 2) draw loop uses mx/my
       for (let i = 0; i < SHP; i++) {
         const x = baseX + mx[i];
         const y = baseY + my[i];
 
-        // twinkle via LUT
         const tw = 0.68 + 0.32 * sinLUT(shPhase[i]);
         ctx.globalAlpha = 0.36 + tw * 0.64;
 
@@ -439,7 +442,11 @@ export default function LandingBackground() {
 
         if (shBloomMask[i]) {
           ctx.globalAlpha *= 0.28;
-          ctx.drawImage(sprBloom[hi][si], x - bloomHalfW[hi][si], y - bloomHalfH[hi][si]);
+          ctx.drawImage(
+            sprBloom[hi][si],
+            x - bloomHalfW[hi][si],
+            y - bloomHalfH[hi][si]
+          );
         }
       }
     };
@@ -448,10 +455,8 @@ export default function LandingBackground() {
       const dt = Math.min(0.033, Math.max(0.001, (now - last) / 1000));
       last = now;
 
-      // clear
       ctx.clearRect(0, 0, w, h);
 
-      // phase updates once per frame + wrap to keep LUT indexing stable
       for (let i = 0; i < FLOW; i++) {
         phase[i] = wrapTau(phase[i] + omega[i] * dt);
       }
@@ -479,7 +484,7 @@ export default function LandingBackground() {
         fx[i] = x;
         fy[i] = y;
 
-        const tw = 0.70 + 0.30 * sinLUT(phase[i]);
+        const tw = 0.7 + 0.3 * sinLUT(phase[i]);
         ctx.globalAlpha = alp[i] * tw;
 
         let hi = hueBase[i] + timeHue;
@@ -498,7 +503,7 @@ export default function LandingBackground() {
       for (let i = 0; i < FLOW; i++) {
         if (!flowBloomMask[i]) continue;
 
-        const tw = 0.70 + 0.30 * sinLUT(phase[i]);
+        const tw = 0.7 + 0.3 * sinLUT(phase[i]);
         ctx.globalAlpha = alp[i] * tw * 0.34;
 
         let hi = hueBase[i] + timeHue + 3;
@@ -508,15 +513,19 @@ export default function LandingBackground() {
         const si = sizeIdx[i];
         const x = fx[i];
         const y = fy[i];
-        ctx.drawImage(sprBloom[hi][si], x - bloomHalfW[hi][si], y - bloomHalfH[hi][si]);
+        ctx.drawImage(
+          sprBloom[hi][si],
+          x - bloomHalfW[hi][si],
+          y - bloomHalfH[hi][si]
+        );
       }
 
       // clusters
       const isMobile = w < 640;
       const lx = isMobile ? w * 0.14 : w * 0.22;
       const ly = isMobile ? h * 0.26 : h * 0.36;
-      const rx = isMobile ? w * 0.86 : w * 0.80;
-      const ry = isMobile ? h * 0.70 : h * 0.60;
+      const rx = isMobile ? w * 0.86 : w * 0.8;
+      const ry = isMobile ? h * 0.7 : h * 0.6;
 
       drawCluster(now, left, leftSet, lx, ly, 8);
       drawCluster(now, right, rightSet, rx, ry, 26);
@@ -583,26 +592,9 @@ export default function LandingBackground() {
         inset: 0,
         overflow: "hidden",
         zIndex: 0,
-        background: `
-          radial-gradient(1000px 560px at 18% 18%, ${alpha("#7DD3FF", 0.65)}, transparent 62%),
-          radial-gradient(980px 560px at 84% 18%, ${alpha("#E7B7FF", 0.62)}, transparent 62%),
-          radial-gradient(980px 620px at 56% 90%, ${alpha("#A7FFD6", 0.58)}, transparent 64%),
-          radial-gradient(900px 600px at 40% 54%, ${alpha("#FFD3A5", 0.30)}, transparent 62%),
-          linear-gradient(120deg, #FFFFFF, #FFFFFF)
-        `,
-        backgroundSize: "260% 260%",
-        animation: `${shimmer} 14s ease-in-out infinite`,
-        "&::before": {
-          content: '""',
-          position: "absolute",
-          inset: 0,
-          background: `radial-gradient(1200px 700px at 50% 50%,
-            ${alpha("#000", 0.00)} 0%,
-            ${alpha("#000", 0.06)} 76%,
-            ${alpha("#000", 0.10)} 100%
-          )`,
-          pointerEvents: "none",
-        },
+
+        // PURE WHITE BACKGROUND ONLY
+        background: "#FFFFFF",
       }}
     >
       {/* mist layers */}
@@ -639,20 +631,7 @@ export default function LandingBackground() {
         }}
       />
 
-      {/* subtle grain */}
-      <Box
-        sx={{
-          position: "absolute",
-          inset: 0,
-          pointerEvents: "none",
-          opacity: 0.1,
-          backgroundImage: "radial-gradient(circle, rgba(0,0,0,0.18) 0 1px, transparent 1.8px)",
-          backgroundSize: "150px 150px",
-          animation: `${shimmer} 22s ease-in-out infinite`,
-          mixBlendMode: "multiply",
-        }}
-      />
-
+      {/* canvas particles */}
       <Box
         component="canvas"
         ref={canvasRef}
@@ -665,6 +644,7 @@ export default function LandingBackground() {
         }}
       />
 
+      {/* reduce motion support */}
       <Box
         sx={{
           "@media (prefers-reduced-motion: reduce)": {

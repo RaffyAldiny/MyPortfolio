@@ -159,8 +159,8 @@ export default function SkillsShowcase({
           )`,
           backgroundSize: "200% auto",
 
-          // 2. Subtle Text Shimmer
-          animation: `${textShimmer} 8s linear infinite`,
+          // 2. FASTER ANIMATION (3s instead of 8s)
+          animation: `${textShimmer} 3s linear infinite`,
 
           // 3. Clipping
           backgroundClip: "text",
@@ -182,7 +182,8 @@ export default function SkillsShowcase({
           zIndex: 1,
           display: "flex",
           flexWrap: "wrap",
-          gap: 0.5,
+          // INCREASED GAP (1.5 = 12px, vs 0.5 = 4px)
+          gap: 1.5,
           justifyContent: "center",
           maxWidth: { xs: "92vw", sm: 820 },
           mx: "auto",
