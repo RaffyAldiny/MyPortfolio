@@ -71,7 +71,9 @@ function shapePoints(type: ShapeType, n: number, seed: number) {
 
       case "butterfly": {
         const rB =
-          Math.exp(Math.sin(t)) - 2 * Math.cos(4 * t) + Math.pow(Math.sin((2 * t - Math.PI) / 24), 5);
+          Math.exp(Math.sin(t)) -
+          2 * Math.cos(4 * t) +
+          Math.pow(Math.sin((2 * t - Math.PI) / 24), 5);
         x = rB * Math.sin(t) * 10;
         y = -rB * Math.cos(t) * 10;
         break;
@@ -114,7 +116,6 @@ function makePrismSprite(hue: number, size: number, core: number) {
   const h2 = (hue + 32) % 360;
   const h3 = (hue + 72) % 360;
 
-  // Bloom (colored, strong)
   const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, rOuter);
   g.addColorStop(0.0, `hsla(${h1}, 100%, 90%, 0.95)`);
   g.addColorStop(0.18, `hsla(${h2}, 100%, 74%, 0.65)`);
@@ -126,7 +127,6 @@ function makePrismSprite(hue: number, size: number, core: number) {
   ctx.arc(cx, cy, rOuter, 0, Math.PI * 2);
   ctx.fill();
 
-  // Fine rays
   ctx.save();
   ctx.translate(cx, cy);
   ctx.strokeStyle = `hsla(${h1}, 100%, 92%, 0.22)`;
@@ -139,7 +139,6 @@ function makePrismSprite(hue: number, size: number, core: number) {
   ctx.stroke();
   ctx.restore();
 
-  // Crisp core
   ctx.fillStyle = `hsla(${h1}, 100%, 94%, 1)`;
   ctx.beginPath();
   ctx.arc(cx, cy, Math.max(1, core), 0, Math.PI * 2);
@@ -167,6 +166,9 @@ export default function LandingBackground() {
     const ctx = canvas.getContext("2d", { alpha: true });
     if (!ctx) return;
 
+    // Small speed wins for canvas sprites
+    ctx.imageSmoothingEnabled = false;
+
     let raf = 0;
     let last = performance.now();
 
@@ -174,9 +176,9 @@ export default function LandingBackground() {
     let h = 0;
     let dpr = 1;
 
-    // Keep background particle sizes the same as your original.
+    // Background particles (flow)
     let FLOW = 320;
-    // Increase object (cluster) particles a lot for detail.
+    // Object particles (clusters)
     let SHP = 720;
 
     // Flow arrays
@@ -186,23 +188,29 @@ export default function LandingBackground() {
     let vy = new Float32Array(0);
     let a = new Float32Array(0);
     let phase = new Float32Array(0);
-    let spd = new Float32Array(0);
+    let omega = new Float32Array(0); // phase velocity, removes per-frame "now * k" math
     let hueBase = new Uint16Array(0);
     let sizeIdx = new Uint8Array(0);
 
-    // Shape point attributes (shared across shapes)
+    // Shape arrays
     let shHue = new Uint16Array(0);
     let shSize = new Uint8Array(0);
     let shPhase = new Float32Array(0);
+    let shMod7 = new Uint8Array(0); // replaces (i % 7) in hot loop
 
-    const H = 48; // richer rainbow steps
-    let sprites: HTMLCanvasElement[][] = []; // [hueIndex][sizeIdx]
+    const H = 48;
+    let sprites: HTMLCanvasElement[][] = [];
 
     const leftSet: Record<ShapeType, { xs: Float32Array; ys: Float32Array }> = {} as any;
     const rightSet: Record<ShapeType, { xs: Float32Array; ys: Float32Array }> = {} as any;
 
     const left = { i: 0, n: 1, t0: performance.now(), every: 7000, dur: 2200, seed: 9001 };
     const right = { i: 1, n: 2, t0: performance.now(), every: 9500, dur: 2400, seed: 4242 };
+
+    let pad = 26;
+
+    let inView = true;
+    let io: IntersectionObserver | null = null;
 
     const build = () => {
       const rect = root.getBoundingClientRect();
@@ -218,12 +226,14 @@ export default function LandingBackground() {
 
       const isMobile = w < 640;
 
-      FLOW = isMobile ? 240 : 360;
+      FLOW = isMobile ? 150 : 850;
 
-      // ✅ Increase object particles only
-      SHP = isMobile ? 520 : 820;
+      // You can push this higher if your machine is fine, but this is already heavy.
+      SHP = isMobile ? 100 : 250;
 
-      // ✅ Keep background particle sizes exactly like original
+      pad = isMobile ? 24 : 26;
+
+      // Keep background particle sizes exactly like your original
       const sizes = isMobile ? [9, 14, 22] : [8, 13, 20];
       const cores = isMobile ? [1.0, 1.25, 1.55] : [1.0, 1.2, 1.5];
 
@@ -245,13 +255,15 @@ export default function LandingBackground() {
       vy = new Float32Array(FLOW);
       a = new Float32Array(FLOW);
       phase = new Float32Array(FLOW);
-      spd = new Float32Array(FLOW);
+      omega = new Float32Array(FLOW);
       hueBase = new Uint16Array(FLOW);
       sizeIdx = new Uint8Array(FLOW);
 
       const baseVx = isMobile ? 14 : 18;
       const baseVy = isMobile ? -10 : -14;
 
+      // Original used: sin(phase + now * 0.0016 * spd)
+      // now is ms, so angular velocity in rad/sec is 0.0016 * 1000 * spd = 1.6 * spd
       for (let i = 0; i < FLOW; i++) {
         fx[i] = rr(rng, 0, w);
         fy[i] = rr(rng, 0, h);
@@ -259,45 +271,37 @@ export default function LandingBackground() {
         vx[i] = baseVx + rr(rng, -14, 22);
         vy[i] = baseVy + rr(rng, -18, 14);
 
-        // strong enough for white background
         a[i] = isMobile ? rr(rng, 0.58, 1.0) : rr(rng, 0.48, 0.98);
 
         phase[i] = rr(rng, 0, Math.PI * 2);
-        spd[i] = rr(rng, 0.95, 2.2);
+
+        const spd = rr(rng, 0.95, 2.2);
+        omega[i] = 1.6 * spd;
 
         hueBase[i] = Math.floor(rr(rng, 0, H));
-        // bias to small, but keep a lot of bright ones
         const pick = rr(rng, 0, 1);
         sizeIdx[i] = pick < 0.55 ? 0 : pick < 0.85 ? 1 : 2;
       }
 
-      // Shape attributes (same sprite sizes, just more points)
+      // Shape attributes (more points, same sprite sizes)
       const rngS = mulberry32(246813579);
       shHue = new Uint16Array(SHP);
       shSize = new Uint8Array(SHP);
       shPhase = new Float32Array(SHP);
+      shMod7 = new Uint8Array(SHP);
+
       for (let i = 0; i < SHP; i++) {
         shHue[i] = Math.floor(rr(rngS, 0, H));
         const pick = rr(rngS, 0, 1);
         shSize[i] = pick < 0.40 ? 0 : pick < 0.80 ? 1 : 2;
         shPhase[i] = rr(rngS, 0, Math.PI * 2);
+        shMod7[i] = (i % 7) as any;
       }
 
       for (const s of SHAPES) {
         leftSet[s] = shapePoints(s, SHP, left.seed + s.length * 101);
         rightSet[s] = shapePoints(s, SHP, right.seed + s.length * 131);
       }
-    };
-
-    const wrap = (x: number, y: number) => {
-      const pad = 26;
-      let nx = x;
-      let ny = y;
-      if (nx < -pad) nx = w + pad;
-      if (nx > w + pad) nx = -pad;
-      if (ny < -pad) ny = h + pad;
-      if (ny > h + pad) ny = -pad;
-      return [nx, ny] as const;
     };
 
     const drawCluster = (
@@ -315,31 +319,39 @@ export default function LandingBackground() {
         cluster.t0 = now;
       }
 
-      const t = easeInOut(clamp01((now - cluster.t0) / cluster.dur));
+      const t01 = clamp01((now - cluster.t0) / cluster.dur);
+      const t = easeInOut(t01);
+      const inv = 1 - t;
+
       const A = set[SHAPES[cluster.i]];
       const B = set[SHAPES[cluster.n]];
 
-      // Drift left/right more
       const driftX = Math.sin(now * 0.00055) * 28 + Math.sin(now * 0.0011) * 10;
       const driftY = Math.cos(now * 0.00048) * 18;
 
-      const hueShift = (Math.floor(now / 260) + hueBias) % H;
+      let hueShift = Math.floor(now / 260) + hueBias;
+      hueShift %= H;
 
-      // Main cluster (more particles = more detail)
+      // Original used: sin(shPhase + now * 0.0026), so angular velocity is 2.6 rad/sec
+      // We update shPhase once per frame in the main frame loop.
+
       for (let i = 0; i < SHP; i++) {
-        const x = ax + driftX + (A.xs[i] * (1 - t) + B.xs[i] * t);
-        const y = ay + driftY + (A.ys[i] * (1 - t) + B.ys[i] * t);
+        const x = ax + driftX + (A.xs[i] * inv + B.xs[i] * t);
+        const y = ay + driftY + (A.ys[i] * inv + B.ys[i] * t);
 
-        const tw = 0.68 + 0.32 * Math.sin(shPhase[i] + now * 0.0026);
+        const tw = 0.68 + 0.32 * Math.sin(shPhase[i]);
         ctx.globalAlpha = 0.36 + tw * 0.64;
 
-        const hi = (shHue[i] + hueShift + (i % 7)) % H;
+        let hi = shHue[i] + hueShift + shMod7[i];
+        if (hi >= H) hi -= H;
+        if (hi >= H) hi -= H;
+
         const spr = sprites[hi][shSize[i]];
         ctx.drawImage(spr, x - spr.width / 2, y - spr.height / 2);
 
-        // keep bloom but slightly sparser because SHP is much higher now
-        if ((i % 5) === 0) {
-          ctx.globalAlpha *= 0.30;
+        // Bloom sparser (big SHP)
+        if ((i % 7) === 0) {
+          ctx.globalAlpha *= 0.28;
           const bloom = sprites[hi][2];
           ctx.drawImage(bloom, x - bloom.width / 2, y - bloom.height / 2);
         }
@@ -352,42 +364,60 @@ export default function LandingBackground() {
 
       ctx.clearRect(0, 0, w, h);
 
-      // Paint pass 1: source-over (keeps colors)
+      // Update phases without using "now * k" inside loops
+      for (let i = 0; i < FLOW; i++) phase[i] += omega[i] * dt;
+      const shAdv = 2.6 * dt;
+      for (let i = 0; i < SHP; i++) shPhase[i] += shAdv;
+
+      // Paint pass 1: source-over
       ctx.save();
       ctx.globalCompositeOperation = "source-over";
 
       const timeHue = Math.floor(now / 220) % H;
 
       for (let i = 0; i < FLOW; i++) {
-        fx[i] += vx[i] * dt;
-        fy[i] += vy[i] * dt;
+        let x = fx[i] + vx[i] * dt;
+        let y = fy[i] + vy[i] * dt;
 
-        const [nx, ny] = wrap(fx[i], fy[i]);
-        fx[i] = nx;
-        fy[i] = ny;
+        // Inline wrap to avoid per-particle allocations
+        if (x < -pad) x = w + pad;
+        else if (x > w + pad) x = -pad;
+        if (y < -pad) y = h + pad;
+        else if (y > h + pad) y = -pad;
 
-        const tw = 0.70 + 0.30 * Math.sin(phase[i] + now * 0.0016 * spd[i]);
+        fx[i] = x;
+        fy[i] = y;
+
+        const tw = 0.70 + 0.30 * Math.sin(phase[i]);
         ctx.globalAlpha = a[i] * tw;
 
-        const hi = (hueBase[i] + timeHue) % H;
+        let hi = hueBase[i] + timeHue;
+        if (hi >= H) hi -= H;
+
         const spr = sprites[hi][sizeIdx[i]];
-        ctx.drawImage(spr, fx[i] - spr.width / 2, fy[i] - spr.height / 2);
+        ctx.drawImage(spr, x - spr.width / 2, y - spr.height / 2);
       }
 
       ctx.restore();
 
-      // Paint pass 2: screen bloom (spreads light)
+      // Paint pass 2: screen bloom
       ctx.save();
       ctx.globalCompositeOperation = "screen";
 
       for (let i = 0; i < FLOW; i++) {
-        if ((i % 6) !== 0) continue; // bloom subset for speed
-        const tw = 0.70 + 0.30 * Math.sin(phase[i] + now * 0.0016 * spd[i]);
+        if ((i % 6) !== 0) continue;
+
+        const tw = 0.70 + 0.30 * Math.sin(phase[i]);
         ctx.globalAlpha = (a[i] * tw) * 0.34;
 
-        const hi = (hueBase[i] + timeHue + 3) % H;
+        let hi = hueBase[i] + timeHue + 3;
+        if (hi >= H) hi -= H;
+        if (hi >= H) hi -= H;
+
         const bloom = sprites[hi][2];
-        ctx.drawImage(bloom, fx[i] - bloom.width / 2, fy[i] - bloom.height / 2);
+        const x = fx[i];
+        const y = fy[i];
+        ctx.drawImage(bloom, x - bloom.width / 2, y - bloom.height / 2);
       }
 
       // clusters
@@ -405,25 +435,54 @@ export default function LandingBackground() {
       raf = requestAnimationFrame(frame);
     };
 
-    const onVis = () => {
-      if (document.hidden) cancelAnimationFrame(raf);
-      else {
-        last = performance.now();
-        raf = requestAnimationFrame(frame);
-      }
+    const start = () => {
+      cancelAnimationFrame(raf);
+      last = performance.now();
+      raf = requestAnimationFrame(frame);
     };
 
+    const stop = () => cancelAnimationFrame(raf);
+
+    const onVis = () => {
+      if (document.hidden) stop();
+      else if (!reduceMotion && inView) start();
+    };
+
+    const onResize = () => {
+      build();
+      last = performance.now();
+      if (!reduceMotion && inView) start();
+      else frame(performance.now());
+    };
+
+    // Build once
     build();
-    window.addEventListener("resize", build, { passive: true });
+
+    // Pause when offscreen (helps if you scroll past this section)
+    if ("IntersectionObserver" in window) {
+      io = new IntersectionObserver(
+        (entries) => {
+          const v = entries.some((e) => e.isIntersecting);
+          inView = v;
+          if (!inView) stop();
+          else if (!reduceMotion && !document.hidden) start();
+        },
+        { root: null, threshold: 0.01 }
+      );
+      io.observe(root);
+    }
+
+    window.addEventListener("resize", onResize, { passive: true });
     document.addEventListener("visibilitychange", onVis);
 
-    if (!reduceMotion) raf = requestAnimationFrame(frame);
+    if (!reduceMotion) start();
     else frame(performance.now());
 
     return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener("resize", build as any);
+      stop();
+      window.removeEventListener("resize", onResize as any);
       document.removeEventListener("visibilitychange", onVis);
+      if (io) io.disconnect();
       startedRef.current = false;
     };
   }, []);
@@ -438,7 +497,6 @@ export default function LandingBackground() {
         overflow: "hidden",
         zIndex: 0,
 
-        // white base with prism tint fields
         background: `
           radial-gradient(1000px 560px at 18% 18%, ${alpha("#7DD3FF", 0.65)}, transparent 62%),
           radial-gradient(980px 560px at 84% 18%, ${alpha("#E7B7FF", 0.62)}, transparent 62%),
@@ -449,7 +507,6 @@ export default function LandingBackground() {
         backgroundSize: "260% 260%",
         animation: `${shimmer} 14s ease-in-out infinite`,
 
-        // tiny contrast so colors read on white
         "&::before": {
           content: '""',
           position: "absolute",
