@@ -1,3 +1,4 @@
+// src/components/SiteHeader.tsx
 "use client";
 
 import * as React from "react";
@@ -17,46 +18,90 @@ import {
   Toolbar,
   Typography,
   useMediaQuery,
+  Chip,
 } from "@mui/material";
-import { alpha, useTheme } from "@mui/material/styles";
+import { alpha, useTheme, keyframes } from "@mui/material/styles";
 import MenuIcon from "@mui/icons-material/Menu";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
+import FacebookIcon from "@mui/icons-material/Facebook";
 
-const navItems = [
+// --- CONFIGURATION ---
+const PRISM_GRADIENT = "linear-gradient(135deg, #FF9A9E 0%, #FECFEF 25%, #E0C3FC 50%, #8EC5FC 75%, #D4FFEC 100%)";
+const DARK_TEXT = "#2D2D3A"; 
+
+const GLASS_BG = "rgba(255, 255, 255, 0.65)";
+const GLASS_BLUR = "blur(10px)";
+
+const NAV_ITEMS = [
   { label: "About", href: "/#about" },
   { label: "Projects", href: "/#projects" },
   { label: "Skills", href: "/#skills" },
   { label: "Contact", href: "/#contact" },
 ];
 
+const SOCIALS = [
+  { Icon: GitHubIcon, href: "https://github.com/" },
+  { Icon: LinkedInIcon, href: "https://linkedin.com/" },
+  { Icon: FacebookIcon, href: "https://facebook.com/" },
+];
+
+// --- ANIMATIONS ---
+const shimmer = keyframes`
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+`;
+
+// Flow animation for the "My Works" badge
+const flow = keyframes`
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+`;
+
+const spinSlow = keyframes`
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+`;
+
 export default function SiteHeader() {
   const theme = useTheme();
   const isMdUp = useMediaQuery(theme.breakpoints.up("md"));
   const [open, setOpen] = React.useState(false);
 
-  const bg = alpha(theme.palette.background.paper, theme.palette.mode === "dark" ? 0.55 : 0.72);
-
   return (
     <>
+      {/* Global SVG Gradient for Icons */}
+      <svg width={0} height={0} style={{ position: "absolute" }}>
+        <linearGradient id="prism-gradient-id" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#FF9A9E" />
+          <stop offset="25%" stopColor="#FECFEF" />
+          <stop offset="50%" stopColor="#E0C3FC" />
+          <stop offset="75%" stopColor="#8EC5FC" />
+          <stop offset="100%" stopColor="#D4FFEC" />
+        </linearGradient>
+      </svg>
+
       <AppBar
         position="sticky"
         elevation={0}
         sx={{
-          backgroundColor: bg,
-          backdropFilter: "blur(12px)",
-          borderBottom: "1px solid",
-          borderColor: "divider",
+          backgroundColor: GLASS_BG,
+          backdropFilter: GLASS_BLUR,
+          borderBottom: "1px solid transparent",
+          borderImage: `${PRISM_GRADIENT} 1`,
+          transition: "all 0.3s ease",
         }}
       >
-        <Toolbar disableGutters>
+        <Toolbar disableGutters sx={{ height: { xs: 64, md: 72 } }}>
           <Container maxWidth="lg" sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            
+            {/* --- IDENTITY SECTION --- */}
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
               {!isMdUp && (
                 <IconButton
-                  aria-label="Open menu"
                   onClick={() => setOpen(true)}
-                  sx={{ mr: 0.5 }}
+                  sx={{ mr: -1, color: "text.primary" }}
                 >
                   <MenuIcon />
                 </IconButton>
@@ -69,60 +114,127 @@ export default function SiteHeader() {
                 sx={{
                   display: "inline-flex",
                   alignItems: "center",
-                  gap: 1,
-                  fontWeight: 800,
-                  letterSpacing: -0.3,
-                  color: "text.primary",
+                  gap: 1.5,
+                  // On hover, we specifically target the Badge to speed up its animation
+                  "&:hover .work-badge": {
+                     animationDuration: "1.5s", 
+                  }
                 }}
               >
+                {/* Logo Dot */}
                 <Box
                   sx={{
-                    width: 10,
-                    height: 10,
-                    borderRadius: 999,
-                    background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-                    boxShadow: `0 0 0 6px ${alpha(theme.palette.primary.main, 0.12)}`,
+                    width: 12,
+                    height: 12,
+                    borderRadius: "50%",
+                    background: PRISM_GRADIENT,
+                    boxShadow: "0 0 10px rgba(224, 195, 252, 0.6)",
+                    transition: "transform 0.3s ease",
+                    ".MuiLink-root:hover &": { transform: "scale(1.2)" }
                   }}
                 />
+                
+                {/* Name - NOW SOLID DARK (Matching Nav) */}
                 <Typography
                   component="span"
                   sx={{
-                    fontSize: 16,
+                    fontSize: 20,
                     fontWeight: 800,
-                    background: `linear-gradient(90deg, ${theme.palette.text.primary}, ${alpha(
-                      theme.palette.text.primary,
-                      0.6
-                    )})`,
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
+                    letterSpacing: -0.5,
+                    color: DARK_TEXT, // Explicitly Dark
+                    transition: "color 0.3s ease",
                   }}
                 >
-                  Rafael
+                  Rafael Alden Agoncillo
                 </Typography>
+
+                {/* Badge - NOW THE GLOWING ELEMENT */}
+                {isMdUp && (
+                  <Chip 
+                    label="My Works" 
+                    size="small"
+                    className="work-badge"
+                    sx={{
+                      height: 24,
+                      fontWeight: 700,
+                      fontSize: "0.75rem",
+                      color: "#fff", // White text on gradient
+                      border: "none",
+                      cursor: "pointer",
+                      
+                      // Prism Background
+                      background: PRISM_GRADIENT,
+                      backgroundSize: "200% 200%",
+                      animation: `${flow} 3s linear infinite`, // Alive/Flowing
+                      
+                      // Glowing Shadow
+                      boxShadow: "0 2px 10px rgba(224, 195, 252, 0.4)",
+                      
+                      transition: "all 0.3s ease",
+                      "&:hover": {
+                        transform: "translateY(-1px) scale(1.05)",
+                        boxShadow: "0 4px 15px rgba(224, 195, 252, 0.6)",
+                      }
+                    }}
+                  />
+                )}
               </MuiLink>
             </Box>
 
             <Box sx={{ flex: 1 }} />
 
+            {/* --- DESKTOP NAV (Dark Text + Clickable Pill) --- */}
             {isMdUp && (
-              <Stack direction="row" spacing={0.5} sx={{ alignItems: "center" }}>
-                {navItems.map((item) => (
+              <Stack direction="row" spacing={1} sx={{ alignItems: "center", mr: 2 }}>
+                {NAV_ITEMS.map((item) => (
                   <MuiLink
                     key={item.href}
                     component={NextLink}
                     href={item.href}
                     underline="none"
                     sx={{
-                      px: 1.25,
-                      py: 0.75,
-                      borderRadius: 999,
-                      color: "text.primary",
-                      fontSize: 14,
-                      opacity: 0.9,
-                      "&:hover": {
-                        opacity: 1,
-                        backgroundColor: alpha(theme.palette.text.primary, 0.06),
+                      position: "relative",
+                      px: 2,
+                      py: 0.8,
+                      fontWeight: 600,
+                      fontSize: 15,
+                      color: DARK_TEXT, 
+                      transition: "all 0.2s ease",
+                      zIndex: 1,
+
+                      // 1. The "Clickable" Pill Background (Ghost Button style)
+                      "&::before": {
+                        content: '""',
+                        position: "absolute",
+                        inset: 0,
+                        borderRadius: "99px",
+                        // White background + Prism Border
+                        background: "rgba(255,255,255,0.8)",
+                        border: "1px solid transparent",
+                        borderColor: "rgba(224, 195, 252, 0)", // Invisible initially
+                        
+                        transform: "scale(0.85)",
+                        opacity: 0,
+                        transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                        zIndex: -1,
                       },
+
+                      // Hover State (Make it look clickable)
+                      "&:hover": {
+                        color: "#000", // Darkest black on hover
+                        transform: "scale(1.05)", // Slight pop
+                        "&::before": {
+                          opacity: 1,
+                          transform: "scale(1)",
+                          borderColor: "#E0C3FC", // Visible Prism Border
+                          boxShadow: "0 2px 8px rgba(0,0,0,0.05)", // Tactile shadow
+                        },
+                      },
+                      
+                      // Active/Click effect
+                      "&:active": {
+                        transform: "scale(0.95)",
+                      }
                     }}
                   >
                     {item.label}
@@ -131,28 +243,57 @@ export default function SiteHeader() {
               </Stack>
             )}
 
+            {/* --- ICONS & ACTION --- */}
             <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
-              <IconButton
-                aria-label="GitHub"
-                component="a"
-                href="https://github.com/"
-                target="_blank"
-                rel="noreferrer"
-                sx={{ opacity: 0.85, "&:hover": { opacity: 1 } }}
-              >
-                <GitHubIcon fontSize="small" />
-              </IconButton>
+              {SOCIALS.map(({ Icon, href }, i) => (
+                <IconButton
+                  key={i}
+                  component="a"
+                  href={href}
+                  target="_blank"
+                  sx={{
+                    position: "relative",
+                    overflow: "visible", 
+                    transition: "transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                    
+                    // Icons use Prism Gradient Fill by default
+                    "& svg": { 
+                      fill: "url(#prism-gradient-id)",
+                      transition: "filter 0.3s ease",
+                      zIndex: 2, 
+                    },
 
-              <IconButton
-                aria-label="LinkedIn"
-                component="a"
-                href="https://linkedin.com/"
-                target="_blank"
-                rel="noreferrer"
-                sx={{ opacity: 0.85, "&:hover": { opacity: 1 } }}
-              >
-                <LinkedInIcon fontSize="small" />
-              </IconButton>
+                    // Magical Aura (Hidden by default)
+                    "&::before": {
+                      content: '""',
+                      position: "absolute",
+                      inset: -4,
+                      borderRadius: "50%",
+                      background: PRISM_GRADIENT,
+                      opacity: 0,
+                      filter: "blur(6px)",
+                      transform: "scale(0.8)",
+                      transition: "all 0.4s ease",
+                      zIndex: 0,
+                    },
+
+                    // Hover State
+                    "&:hover": { 
+                      transform: "translateY(-3px)", 
+                      "& svg": {
+                         filter: "drop-shadow(0 0 4px rgba(255,255,255,0.8))",
+                      },
+                      "&::before": {
+                        opacity: 0.6,
+                        transform: "scale(1)",
+                        animation: `${spinSlow} 4s linear infinite`,
+                      }
+                    },
+                  }}
+                >
+                  <Icon fontSize="small" />
+                </IconButton>
+              ))}
 
               <Button
                 component={NextLink}
@@ -160,10 +301,21 @@ export default function SiteHeader() {
                 variant="contained"
                 disableElevation
                 sx={{
-                  borderRadius: 999,
+                  borderRadius: "20px",
                   textTransform: "none",
                   fontWeight: 700,
-                  px: 2,
+                  px: 3,
+                  py: 1,
+                  background: `linear-gradient(270deg, #FF9A9E, #E0C3FC, #8EC5FC)`,
+                  backgroundSize: "200% 200%",
+                  animation: `${shimmer} 6s ease infinite`,
+                  color: "#fff",
+                  boxShadow: "0 4px 14px 0 rgba(142, 197, 252, 0.4)",
+                  transition: "all 0.3s ease",
+                  "&:hover": {
+                    transform: "translateY(-2px) scale(1.02)",
+                    boxShadow: "0 6px 20px 0 rgba(224, 195, 252, 0.6)",
+                  },
                 }}
               >
                 View Projects
@@ -173,19 +325,58 @@ export default function SiteHeader() {
         </Toolbar>
       </AppBar>
 
-      <Drawer anchor="left" open={open} onClose={() => setOpen(false)}>
-        <Box sx={{ width: 280, p: 2 }}>
-          <Typography sx={{ fontWeight: 800, mb: 1 }}>Menu</Typography>
+      {/* --- MOBILE DRAWER --- */}
+      <Drawer
+        anchor="left"
+        open={open}
+        onClose={() => setOpen(false)}
+        PaperProps={{
+          sx: {
+            width: 280,
+            background: "rgba(255, 255, 255, 0.9)",
+            backdropFilter: "blur(20px)",
+            borderRight: "1px solid rgba(255,255,255,0.5)",
+          },
+        }}
+      >
+        <Box sx={{ p: 3 }}>
+          <Typography
+            sx={{
+              fontWeight: 800,
+              mb: 3,
+              fontSize: "1.25rem",
+              background: PRISM_GRADIENT,
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
+          >
+            Menu
+          </Typography>
           <List>
-            {navItems.map((item) => (
+            {NAV_ITEMS.map((item) => (
               <ListItemButton
                 key={item.href}
                 component={NextLink}
                 href={item.href}
                 onClick={() => setOpen(false)}
-                sx={{ borderRadius: 2 }}
+                sx={{
+                  borderRadius: 3,
+                  mb: 1,
+                  "&:hover": {
+                    background: alpha("#E0C3FC", 0.1),
+                    "& .MuiListItemText-primary": { color: "#5B4B75", fontWeight: 600 },
+                  },
+                }}
               >
-                <ListItemText primary={item.label} />
+                <ListItemText 
+                  primary={item.label} 
+                  primaryTypographyProps={{ 
+                    sx: {
+                        color: DARK_TEXT,
+                        fontWeight: 600
+                    }
+                  }}
+                />
               </ListItemButton>
             ))}
           </List>

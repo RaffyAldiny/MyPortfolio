@@ -50,9 +50,8 @@ export const SKILLS: Skill[] = [
     icon: "https://cdn.simpleicons.org/django/092E20",
   },
   {
-    name: "DRF",
+    name: "Django Rest",
     color: "#A30000",
-    // USING LOCAL ICON from your screenshots
     icon: "/icons/django-rest-framework.png",
   },
   {
@@ -103,13 +102,11 @@ export const SKILLS: Skill[] = [
   {
     name: "Amazon Redshift",
     color: "#8C4FFF",
-    // USING LOCAL ICON from your screenshots
     icon: "/icons/aws-redshift.png",
   },
   {
     name: "AWS Glue",
     color: "#232F3E",
-    // USING LOCAL ICON from your screenshots
     icon: "/icons/aws-glue.png",
   },
   {
@@ -136,13 +133,11 @@ export const SKILLS: Skill[] = [
   {
     name: "Power BI",
     color: "#F2C811",
-    // USING LOCAL ICON from your screenshots
     icon: "/icons/power-bi.png",
   },
   {
     name: "Firebase",
     color: "#FFCA28",
-    // USING LOCAL ICON from your screenshots
     icon: "/icons/firebase.png",
   },
 ];
