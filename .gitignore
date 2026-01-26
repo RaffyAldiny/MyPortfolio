@@ -1,0 +1,111 @@
+############################################
+# OS junk
+############################################
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+############################################
+# Editor / IDE
+############################################
+.idea/
+*.swp
+*.swo
+
+# VS Code (ignore workspace noise, keep shared config if you want)
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/tasks.json
+
+############################################
+# Secrets / environment files
+############################################
+.env
+.env.*
+!.env.example
+!**/.env.example
+!**/.env.sample
+!**/.env.template
+
+############################################
+# Logs
+############################################
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+############################################
+# Node / Next.js
+############################################
+node_modules/
+**/node_modules/
+
+.next/
+**/.next/
+
+out/
+dist/
+
+.turbo/
+.vercel/
+
+coverage/
+.eslintcache
+*.tsbuildinfo
+
+############################################
+# Python general
+############################################
+__pycache__/
+*.py[cod]
+*$py.class
+
+.venv/
+venv/
+env/
+ENV/
+
+build/
+dist/
+*.egg-info/
+.eggs/
+
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
+.pyre/
+
+.coverage
+coverage.xml
+htmlcov/
+
+############################################
+# Django specific
+############################################
+# Local database (common for dev)
+db.sqlite3
+*.sqlite3
+
+# Local-only settings
+local_settings.py
+settings_local.py
+
+# Collected static output (do not commit)
+staticfiles/
+
+# User uploads (do not commit)
+media/
+
+# If you create runtime pid files
+*.pid
+
+# Celery beat schedule files (if you use celery)
+celerybeat-schedule
+celerybeat.pid
