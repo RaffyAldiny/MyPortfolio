@@ -27,18 +27,11 @@ const prismShimmer = keyframes`
 `;
 
 /**
- * UTILITIES
- */
-const bf = (blur: number, sat: number, con: number, bri: number) =>
-  `blur(${blur}px) saturate(${sat}%) contrast(${con}) brightness(${bri})`;
-
-const PILL_BF = bf(4, 340, 1.6, 1.02);
-
-/**
  * SUB-COMPONENT: SkillPill
  */
 function SkillPill({ name, color, textColor, icon }: Skill) {
-  const fg = textColor ?? "#0B0B10";
+  // Use a softer slate color (matches the Profile Bio) instead of harsh black
+  const fg = textColor ?? "#2D2D3A";
 
   return (
     <Box
@@ -47,20 +40,24 @@ function SkillPill({ name, color, textColor, icon }: Skill) {
         display: "inline-flex",
         alignItems: "center",
         gap: 1,
+        // RETAINED SHAPE:
         px: 1.35,
         py: 0.9,
         borderRadius: 2.2,
 
-        // Glassmorphism base
-        backgroundColor: "rgba(10, 12, 18, 0.025)",
-        backdropFilter: PILL_BF,
-        WebkitBackdropFilter: PILL_BF,
+        // --- NEW FROST EFFECT (Matching ProfileIntro) ---
+        // 1. Light translucent background
+        backgroundColor: "rgba(255, 255, 255, 0.2)",
+        
+        // 2. The Blur (Frost)
+        backdropFilter: "blur(4px)",
+        WebkitBackdropFilter: "blur(4px)",
 
-        // Standard shadow
-        boxShadow: `0 12px 26px ${alpha("#000", 0.1)}, inset 0 1px 0 ${alpha(
-          "#fff",
-          0.28
-        )}`,
+        // 3. The White Border
+        border: "1px solid rgba(255, 255, 255, 0.4)",
+
+        // 4. The Pink/Blue Glow Shadow (Scaled down from ProfileIntro)
+        boxShadow: "0 4px 16px rgba(253, 113, 255, 0.15)",
 
         transition: "transform 200ms ease, box-shadow 200ms ease",
 
@@ -86,14 +83,13 @@ function SkillPill({ name, color, textColor, icon }: Skill) {
           maskComposite: "exclude",
 
           pointerEvents: "none",
+          opacity: 0.7, // Slightly softer opacity for the light theme
         },
 
         "&:hover": {
           transform: "translateY(-2px)",
-          boxShadow: `0 16px 34px ${alpha(color, 0.25)}, 0 12px 24px ${alpha(
-            "#000",
-            0.08
-          )}, inset 0 1px 0 ${alpha("#fff", 0.32)}`,
+          // Intensified Pink Glow on hover
+          boxShadow: `0 8px 24px rgba(253, 113, 255, 0.3), inset 0 1px 0 rgba(255,255,255,0.6)`,
         },
       }}
     >
@@ -109,15 +105,10 @@ function SkillPill({ name, color, textColor, icon }: Skill) {
           width: 22,
           height: 22,
           borderRadius: 1.2,
-          // No font settings needed since we removed the text
-          backgroundColor: "rgba(255,255,255,0.10)",
-          border: `1px solid ${alpha("#fff", 0.3)}`,
-          backdropFilter: PILL_BF,
-          WebkitBackdropFilter: PILL_BF,
-          boxShadow: `0 10px 18px ${alpha(color, 0.1)}, inset 0 1px 0 ${alpha(
-            "#fff",
-            0.22
-          )}`,
+          // Lighter background for the icon container
+          backgroundColor: "rgba(255,255,255,0.4)",
+          border: `1px solid rgba(255,255,255,0.5)`,
+          boxShadow: `0 2px 8px ${alpha(color, 0.15)}`,
         }}
       />
 

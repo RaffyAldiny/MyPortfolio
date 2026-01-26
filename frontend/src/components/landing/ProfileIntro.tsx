@@ -18,12 +18,32 @@ const reverseSpin = keyframes`
 const PROFILE = {
   name: "Rafael Alden Goncillo",
   title: "Computer Science Graduate • Full-Stack Developer",
-  bio: "I build clean interfaces with strong APIs, and I like turning complex systems into experiences that feel simple and polished.",
   imageSrc: "/me.jpg",
 };
 
+// Helper component for the highlighted text style
+const Highlight = ({ children }: { children: React.ReactNode }) => (
+  <Box
+    component="span"
+    sx={{
+      fontWeight: 700,
+      color: "#2D2D3A",
+      position: "relative",
+      whiteSpace: "nowrap",
+      // The "Marker Pen" gradient effect
+      backgroundImage: "linear-gradient(120deg, transparent 0%, transparent 10%, #FFC7EA 10%, #B8F2FF 100%)",
+      backgroundRepeat: "no-repeat",
+      backgroundSize: "100% 45%", // Height of the highlight line
+      backgroundPosition: "0 90%", // Position at the bottom of text
+      px: 0.5,
+    }}
+  >
+    {children}
+  </Box>
+);
+
 export default function ProfileIntro() {
-  const { name, title, bio, imageSrc } = PROFILE;
+  const { name, title, imageSrc } = PROFILE;
 
   return (
     <Stack
@@ -93,23 +113,21 @@ export default function ProfileIntro() {
       {/* --- TEXT CONTENT --- */}
       <Box sx={{ width: "100%", px: 2 }}>
         
-        {/* NAME: Updated for better Design Coherence */}
+        {/* NAME: Deep Violet-Slate Gradient */}
         <Typography
           variant="h3"
           sx={{
             fontWeight: 800,
-            letterSpacing: "-0.03em", // Slightly tighter for a polished modern look
+            letterSpacing: "-0.03em", 
             mb: 1,
             fontSize: { xs: "2rem", md: "2.5rem" },
             
-            // THE FIX: Deep Violet-Slate Gradient
-            // This replaces the "industrial grey" with a tone that matches the 
-            // purple/blue/pink aesthetic of the rest of the site while keeping it dark and readable.
+            // Gradient Logic
             background: "linear-gradient(135deg, #2A2A3C 0%, #5B4B75 100%)",
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
             
-            // Adds a very subtle lift so it doesn't look flat against the particles
+            // Subtle Shadow
             filter: "drop-shadow(0px 2px 2px rgba(91, 75, 117, 0.15))",
 
             // Fallback
@@ -132,7 +150,7 @@ export default function ProfileIntro() {
           {title}
         </Typography>
 
-        {/* GLASSY BIO CONTAINER (Tweaked for readability) */}
+        {/* GLASSY BIO CONTAINER */}
         <Box
           sx={{
             maxWidth: "640px",
@@ -142,21 +160,23 @@ export default function ProfileIntro() {
             borderRadius: "40px",
             
             // Glassmorphism
-            backgroundColor: "rgba(255, 255, 255, 0.2)", // Slightly more opaque for better text contrast
-            backdropFilter: "blur(2px)", // Stronger blur
+            backgroundColor: "rgba(255, 255, 255, 0.2)",
+            backdropFilter: "blur(2px)",
             border: "1px solid rgba(255, 255, 255, 0.4)",
-            boxShadow: "0 8px 32px rgba(253, 113, 255, 0.5)", // Shifted shadow to cool blue, less muddy
+            boxShadow: "0 8px 32px rgba(253, 113, 255, 0.5)",
           }}
         >
           <Typography
             sx={{
-              fontSize: { xs: "0.95rem", md: "1.05rem" },
-              lineHeight: 1.7,
-              color: "#4A5568", // Slate gray is softer than black
+              // SMALL FONT SIZE
+              fontSize: { xs: "0.75rem", md: "0.875rem" }, 
+              lineHeight: 1.8,
+              color: "#4A5568",
               fontWeight: 500,
             }}
           >
-            {bio}
+            I engineer custom <Highlight>management systems</Highlight> and <Highlight>academic capstone projects</Highlight>, tailoring software to streamline your specific workflow. 
+            Passionate about <Highlight>AI</Highlight> and modern tech, I transform complex requirements into powerful, intelligent solutions.
           </Typography>
         </Box>
       </Box>

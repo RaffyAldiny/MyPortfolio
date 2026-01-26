@@ -1,3 +1,4 @@
+// src/components/landing/LandingBackground.tsx
 "use client";
 
 import * as React from "react";
@@ -38,8 +39,31 @@ function mulberry32(seed: number) {
   };
 }
 const rr = (rng: () => number, min: number, max: number) => rng() * (max - min) + min;
+
 const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
 const easeInOut = (v: number) => (v < 0.5 ? 2 * v * v : 1 - Math.pow(-2 * v + 2, 2) / 2);
+
+const TAU = Math.PI * 2;
+
+// Sine LUT (fast twinkle)
+const SIN_LUT_SIZE = 4096; // power of 2
+const SIN_LUT_MASK = SIN_LUT_SIZE - 1;
+const SIN_LUT = (() => {
+  const t = new Float32Array(SIN_LUT_SIZE);
+  for (let i = 0; i < SIN_LUT_SIZE; i++) t[i] = Math.sin((i / SIN_LUT_SIZE) * TAU);
+  return t;
+})();
+const sinLUT = (rad: number) => {
+  // rad can be any float, map to [0..SIN_LUT_SIZE)
+  const idx = Math.floor((rad * SIN_LUT_SIZE) / TAU) & SIN_LUT_MASK;
+  return SIN_LUT[idx];
+};
+const wrapTau = (v: number) => {
+  // keep in [0, TAU)
+  if (v >= TAU) v -= TAU * Math.floor(v / TAU);
+  else if (v < 0) v += TAU * (1 + Math.floor(-v / TAU));
+  return v;
+};
 
 function shapePoints(type: ShapeType, n: number, seed: number) {
   const rng = mulberry32(seed);
@@ -50,7 +74,7 @@ function shapePoints(type: ShapeType, n: number, seed: number) {
   const jitter = () => rr(rng, -6.8, 6.8);
 
   for (let i = 0; i < n; i++) {
-    const t = (i / n) * 2 * Math.PI;
+    const t = (i / n) * TAU;
     let x = 0;
     let y = 0;
 
@@ -62,8 +86,8 @@ function shapePoints(type: ShapeType, n: number, seed: number) {
 
       case "star": {
         const seg = Math.PI / 5;
-        const k = Math.floor(t / seg) % 2;
-        const radius = k === 0 ? 22 : 11;
+        const k = Math.floor(t / seg);
+        const radius = k % 2 === 0 ? 22 : 11;
         x = radius * Math.cos(t);
         y = radius * Math.sin(t);
         break;
@@ -71,9 +95,7 @@ function shapePoints(type: ShapeType, n: number, seed: number) {
 
       case "butterfly": {
         const rB =
-          Math.exp(Math.sin(t)) -
-          2 * Math.cos(4 * t) +
-          Math.pow(Math.sin((2 * t - Math.PI) / 24), 5);
+          Math.exp(Math.sin(t)) - 2 * Math.cos(4 * t) + Math.pow(Math.sin((2 * t - Math.PI) / 24), 5);
         x = rB * Math.sin(t) * 10;
         y = -rB * Math.cos(t) * 10;
         break;
@@ -97,10 +119,7 @@ function shapePoints(type: ShapeType, n: number, seed: number) {
   return { xs, ys };
 }
 
-/**
- * True colored prism sprite (the particle itself has color).
- * Uses multi-stop radial gradient with hue shifts to feel like Siri prism glass.
- */
+/** True colored prism sprite. */
 function makePrismSprite(hue: number, size: number, core: number) {
   const c = document.createElement("canvas");
   c.width = size;
@@ -124,7 +143,7 @@ function makePrismSprite(hue: number, size: number, core: number) {
   g.addColorStop(1.0, `rgba(255,255,255,0)`);
   ctx.fillStyle = g;
   ctx.beginPath();
-  ctx.arc(cx, cy, rOuter, 0, Math.PI * 2);
+  ctx.arc(cx, cy, rOuter, 0, TAU);
   ctx.fill();
 
   ctx.save();
@@ -141,9 +160,23 @@ function makePrismSprite(hue: number, size: number, core: number) {
 
   ctx.fillStyle = `hsla(${h1}, 100%, 94%, 1)`;
   ctx.beginPath();
-  ctx.arc(cx, cy, Math.max(1, core), 0, Math.PI * 2);
+  ctx.arc(cx, cy, Math.max(1, core), 0, TAU);
   ctx.fill();
 
+  return c;
+}
+
+/** Pre-upscaled bloom sprite. */
+function makeBloomSprite(src: HTMLCanvasElement, scale: number) {
+  const w = Math.max(1, Math.round(src.width * scale));
+  const h = Math.max(1, Math.round(src.height * scale));
+  const c = document.createElement("canvas");
+  c.width = w;
+  c.height = h;
+  const ctx = c.getContext("2d");
+  if (!ctx) return c;
+  ctx.imageSmoothingEnabled = true;
+  ctx.drawImage(src, 0, 0, w, h);
   return c;
 }
 
@@ -166,7 +199,7 @@ export default function LandingBackground() {
     const ctx = canvas.getContext("2d", { alpha: true });
     if (!ctx) return;
 
-    // Small speed wins for canvas sprites
+    // Crisp small sprites
     ctx.imageSmoothingEnabled = false;
 
     let raf = 0;
@@ -176,38 +209,49 @@ export default function LandingBackground() {
     let h = 0;
     let dpr = 1;
 
-    // Background particles (flow)
+    // overwritten in build() (same behavior)
     let FLOW = 320;
-    // Object particles (clusters)
     let SHP = 720;
+    let pad = 26;
 
     // Flow arrays
     let fx = new Float32Array(0);
     let fy = new Float32Array(0);
     let vx = new Float32Array(0);
     let vy = new Float32Array(0);
-    let a = new Float32Array(0);
+    let alp = new Float32Array(0);
     let phase = new Float32Array(0);
-    let omega = new Float32Array(0); // phase velocity, removes per-frame "now * k" math
+    let omega = new Float32Array(0);
     let hueBase = new Uint16Array(0);
     let sizeIdx = new Uint8Array(0);
+    let flowBloomMask = new Uint8Array(0); // 1 if bloom, 0 else
 
     // Shape arrays
     let shHue = new Uint16Array(0);
     let shSize = new Uint8Array(0);
     let shPhase = new Float32Array(0);
-    let shMod7 = new Uint8Array(0); // replaces (i % 7) in hot loop
+    let shMod7 = new Uint8Array(0);
+    let shBloomMask = new Uint8Array(0); // 1 if bloom, 0 else
+
+    // Cluster morph temp arrays
+    let mx = new Float32Array(0);
+    let my = new Float32Array(0);
 
     const H = 48;
-    let sprites: HTMLCanvasElement[][] = [];
+
+    // sprites + precomputed halves
+    let sprBase: HTMLCanvasElement[][] = [];
+    let sprBloom: HTMLCanvasElement[][] = [];
+    let sprHalfW: number[][] = [];
+    let sprHalfH: number[][] = [];
+    let bloomHalfW: number[][] = [];
+    let bloomHalfH: number[][] = [];
 
     const leftSet: Record<ShapeType, { xs: Float32Array; ys: Float32Array }> = {} as any;
     const rightSet: Record<ShapeType, { xs: Float32Array; ys: Float32Array }> = {} as any;
 
     const left = { i: 0, n: 1, t0: performance.now(), every: 7000, dur: 2200, seed: 9001 };
     const right = { i: 1, n: 2, t0: performance.now(), every: 9500, dur: 2400, seed: 4242 };
-
-    let pad = 26;
 
     let inView = true;
     let io: IntersectionObserver | null = null;
@@ -226,18 +270,16 @@ export default function LandingBackground() {
 
       const isMobile = w < 640;
 
+      // ✅ SAME SETTINGS you pasted
       FLOW = isMobile ? 150 : 850;
-
-      // You can push this higher if your machine is fine, but this is already heavy.
       SHP = isMobile ? 100 : 250;
-
       pad = isMobile ? 24 : 26;
 
-      // Keep background particle sizes exactly like your original
+      // SAME sprite sizes/cores
       const sizes = isMobile ? [9, 14, 22] : [8, 13, 20];
       const cores = isMobile ? [1.0, 1.25, 1.55] : [1.0, 1.2, 1.5];
 
-      sprites = Array.from({ length: H }, (_, k) => {
+      sprBase = Array.from({ length: H }, (_, k) => {
         const hue = Math.round((k * 360) / H);
         return [
           makePrismSprite(hue, sizes[0], cores[0]),
@@ -246,24 +288,52 @@ export default function LandingBackground() {
         ];
       });
 
-      // Deterministic particles
+      // Pre-baked bloom
+      sprBloom = Array.from({ length: H }, (_, hi) => [
+        makeBloomSprite(sprBase[hi][0], 2.1),
+        makeBloomSprite(sprBase[hi][1], 2.0),
+        makeBloomSprite(sprBase[hi][2], 1.8),
+      ]);
+
+      sprHalfW = Array.from({ length: H }, (_, hi) => [
+        sprBase[hi][0].width * 0.5,
+        sprBase[hi][1].width * 0.5,
+        sprBase[hi][2].width * 0.5,
+      ]);
+      sprHalfH = Array.from({ length: H }, (_, hi) => [
+        sprBase[hi][0].height * 0.5,
+        sprBase[hi][1].height * 0.5,
+        sprBase[hi][2].height * 0.5,
+      ]);
+
+      bloomHalfW = Array.from({ length: H }, (_, hi) => [
+        sprBloom[hi][0].width * 0.5,
+        sprBloom[hi][1].width * 0.5,
+        sprBloom[hi][2].width * 0.5,
+      ]);
+      bloomHalfH = Array.from({ length: H }, (_, hi) => [
+        sprBloom[hi][0].height * 0.5,
+        sprBloom[hi][1].height * 0.5,
+        sprBloom[hi][2].height * 0.5,
+      ]);
+
+      // deterministic particles
       const rng = mulberry32(123456789);
 
       fx = new Float32Array(FLOW);
       fy = new Float32Array(FLOW);
       vx = new Float32Array(FLOW);
       vy = new Float32Array(FLOW);
-      a = new Float32Array(FLOW);
+      alp = new Float32Array(FLOW);
       phase = new Float32Array(FLOW);
       omega = new Float32Array(FLOW);
       hueBase = new Uint16Array(FLOW);
       sizeIdx = new Uint8Array(FLOW);
+      flowBloomMask = new Uint8Array(FLOW);
 
       const baseVx = isMobile ? 14 : 18;
       const baseVy = isMobile ? -10 : -14;
 
-      // Original used: sin(phase + now * 0.0016 * spd)
-      // now is ms, so angular velocity in rad/sec is 0.0016 * 1000 * spd = 1.6 * spd
       for (let i = 0; i < FLOW; i++) {
         fx[i] = rr(rng, 0, w);
         fy[i] = rr(rng, 0, h);
@@ -271,32 +341,43 @@ export default function LandingBackground() {
         vx[i] = baseVx + rr(rng, -14, 22);
         vy[i] = baseVy + rr(rng, -18, 14);
 
-        a[i] = isMobile ? rr(rng, 0.58, 1.0) : rr(rng, 0.48, 0.98);
+        alp[i] = isMobile ? rr(rng, 0.58, 1.0) : rr(rng, 0.48, 0.98);
 
-        phase[i] = rr(rng, 0, Math.PI * 2);
+        phase[i] = rr(rng, 0, TAU);
 
         const spd = rr(rng, 0.95, 2.2);
         omega[i] = 1.6 * spd;
 
         hueBase[i] = Math.floor(rr(rng, 0, H));
+
         const pick = rr(rng, 0, 1);
         sizeIdx[i] = pick < 0.55 ? 0 : pick < 0.85 ? 1 : 2;
+
+        // replaces (i % 6) in hot loop
+        flowBloomMask[i] = i % 6 === 0 ? 1 : 0;
       }
 
-      // Shape attributes (more points, same sprite sizes)
       const rngS = mulberry32(246813579);
       shHue = new Uint16Array(SHP);
       shSize = new Uint8Array(SHP);
       shPhase = new Float32Array(SHP);
       shMod7 = new Uint8Array(SHP);
+      shBloomMask = new Uint8Array(SHP);
 
       for (let i = 0; i < SHP; i++) {
         shHue[i] = Math.floor(rr(rngS, 0, H));
         const pick = rr(rngS, 0, 1);
-        shSize[i] = pick < 0.40 ? 0 : pick < 0.80 ? 1 : 2;
-        shPhase[i] = rr(rngS, 0, Math.PI * 2);
-        shMod7[i] = (i % 7) as any;
+        shSize[i] = pick < 0.4 ? 0 : pick < 0.8 ? 1 : 2;
+        shPhase[i] = rr(rngS, 0, TAU);
+        shMod7[i] = i % 7;
+
+        // replaces (i % 7) in hot loop
+        shBloomMask[i] = i % 7 === 0 ? 1 : 0;
       }
+
+      // cluster morph temp buffers
+      mx = new Float32Array(SHP);
+      my = new Float32Array(SHP);
 
       for (const s of SHAPES) {
         leftSet[s] = shapePoints(s, SHP, left.seed + s.length * 101);
@@ -319,41 +400,46 @@ export default function LandingBackground() {
         cluster.t0 = now;
       }
 
-      const t01 = clamp01((now - cluster.t0) / cluster.dur);
-      const t = easeInOut(t01);
+      const t = easeInOut(clamp01((now - cluster.t0) / cluster.dur));
       const inv = 1 - t;
 
       const A = set[SHAPES[cluster.i]];
       const B = set[SHAPES[cluster.n]];
 
+      // drift is not per-particle, so normal Math.sin/cos is fine
       const driftX = Math.sin(now * 0.00055) * 28 + Math.sin(now * 0.0011) * 10;
       const driftY = Math.cos(now * 0.00048) * 18;
 
-      let hueShift = Math.floor(now / 260) + hueBias;
-      hueShift %= H;
+      const baseX = ax + driftX;
+      const baseY = ay + driftY;
 
-      // Original used: sin(shPhase + now * 0.0026), so angular velocity is 2.6 rad/sec
-      // We update shPhase once per frame in the main frame loop.
+      const hueShift = (Math.floor(now / 260) + hueBias) % H;
 
+      // 1) precompute blended morph positions once
       for (let i = 0; i < SHP; i++) {
-        const x = ax + driftX + (A.xs[i] * inv + B.xs[i] * t);
-        const y = ay + driftY + (A.ys[i] * inv + B.ys[i] * t);
+        mx[i] = A.xs[i] * inv + B.xs[i] * t;
+        my[i] = A.ys[i] * inv + B.ys[i] * t;
+      }
 
-        const tw = 0.68 + 0.32 * Math.sin(shPhase[i]);
+      // 2) draw loop uses mx/my
+      for (let i = 0; i < SHP; i++) {
+        const x = baseX + mx[i];
+        const y = baseY + my[i];
+
+        // twinkle via LUT
+        const tw = 0.68 + 0.32 * sinLUT(shPhase[i]);
         ctx.globalAlpha = 0.36 + tw * 0.64;
 
         let hi = shHue[i] + hueShift + shMod7[i];
         if (hi >= H) hi -= H;
         if (hi >= H) hi -= H;
 
-        const spr = sprites[hi][shSize[i]];
-        ctx.drawImage(spr, x - spr.width / 2, y - spr.height / 2);
+        const si = shSize[i];
+        ctx.drawImage(sprBase[hi][si], x - sprHalfW[hi][si], y - sprHalfH[hi][si]);
 
-        // Bloom sparser (big SHP)
-        if ((i % 7) === 0) {
+        if (shBloomMask[i]) {
           ctx.globalAlpha *= 0.28;
-          const bloom = sprites[hi][2];
-          ctx.drawImage(bloom, x - bloom.width / 2, y - bloom.height / 2);
+          ctx.drawImage(sprBloom[hi][si], x - bloomHalfW[hi][si], y - bloomHalfH[hi][si]);
         }
       }
     };
@@ -362,62 +448,67 @@ export default function LandingBackground() {
       const dt = Math.min(0.033, Math.max(0.001, (now - last) / 1000));
       last = now;
 
+      // clear
       ctx.clearRect(0, 0, w, h);
 
-      // Update phases without using "now * k" inside loops
-      for (let i = 0; i < FLOW; i++) phase[i] += omega[i] * dt;
+      // phase updates once per frame + wrap to keep LUT indexing stable
+      for (let i = 0; i < FLOW; i++) {
+        phase[i] = wrapTau(phase[i] + omega[i] * dt);
+      }
       const shAdv = 2.6 * dt;
-      for (let i = 0; i < SHP; i++) shPhase[i] += shAdv;
-
-      // Paint pass 1: source-over
-      ctx.save();
-      ctx.globalCompositeOperation = "source-over";
+      for (let i = 0; i < SHP; i++) {
+        shPhase[i] = wrapTau(shPhase[i] + shAdv);
+      }
 
       const timeHue = Math.floor(now / 220) % H;
+
+      // pass 1
+      ctx.save();
+      ctx.globalCompositeOperation = "source-over";
 
       for (let i = 0; i < FLOW; i++) {
         let x = fx[i] + vx[i] * dt;
         let y = fy[i] + vy[i] * dt;
 
-        // Inline wrap to avoid per-particle allocations
         if (x < -pad) x = w + pad;
         else if (x > w + pad) x = -pad;
+
         if (y < -pad) y = h + pad;
         else if (y > h + pad) y = -pad;
 
         fx[i] = x;
         fy[i] = y;
 
-        const tw = 0.70 + 0.30 * Math.sin(phase[i]);
-        ctx.globalAlpha = a[i] * tw;
+        const tw = 0.70 + 0.30 * sinLUT(phase[i]);
+        ctx.globalAlpha = alp[i] * tw;
 
         let hi = hueBase[i] + timeHue;
         if (hi >= H) hi -= H;
 
-        const spr = sprites[hi][sizeIdx[i]];
-        ctx.drawImage(spr, x - spr.width / 2, y - spr.height / 2);
+        const si = sizeIdx[i];
+        ctx.drawImage(sprBase[hi][si], x - sprHalfW[hi][si], y - sprHalfH[hi][si]);
       }
 
       ctx.restore();
 
-      // Paint pass 2: screen bloom
+      // pass 2 bloom
       ctx.save();
       ctx.globalCompositeOperation = "screen";
 
       for (let i = 0; i < FLOW; i++) {
-        if ((i % 6) !== 0) continue;
+        if (!flowBloomMask[i]) continue;
 
-        const tw = 0.70 + 0.30 * Math.sin(phase[i]);
-        ctx.globalAlpha = (a[i] * tw) * 0.34;
+        const tw = 0.70 + 0.30 * sinLUT(phase[i]);
+        ctx.globalAlpha = alp[i] * tw * 0.34;
 
         let hi = hueBase[i] + timeHue + 3;
         if (hi >= H) hi -= H;
         if (hi >= H) hi -= H;
 
-        const bloom = sprites[hi][2];
+        const si = sizeIdx[i];
         const x = fx[i];
         const y = fy[i];
-        ctx.drawImage(bloom, x - bloom.width / 2, y - bloom.height / 2);
+        ctx.drawImage(sprBloom[hi][si], x - bloomHalfW[hi][si], y - bloomHalfH[hi][si]);
       }
 
       // clusters
@@ -440,7 +531,6 @@ export default function LandingBackground() {
       last = performance.now();
       raf = requestAnimationFrame(frame);
     };
-
     const stop = () => cancelAnimationFrame(raf);
 
     const onVis = () => {
@@ -455,15 +545,12 @@ export default function LandingBackground() {
       else frame(performance.now());
     };
 
-    // Build once
     build();
 
-    // Pause when offscreen (helps if you scroll past this section)
     if ("IntersectionObserver" in window) {
       io = new IntersectionObserver(
         (entries) => {
-          const v = entries.some((e) => e.isIntersecting);
-          inView = v;
+          inView = entries.some((e) => e.isIntersecting);
           if (!inView) stop();
           else if (!reduceMotion && !document.hidden) start();
         },
@@ -496,7 +583,6 @@ export default function LandingBackground() {
         inset: 0,
         overflow: "hidden",
         zIndex: 0,
-
         background: `
           radial-gradient(1000px 560px at 18% 18%, ${alpha("#7DD3FF", 0.65)}, transparent 62%),
           radial-gradient(980px 560px at 84% 18%, ${alpha("#E7B7FF", 0.62)}, transparent 62%),
@@ -506,7 +592,6 @@ export default function LandingBackground() {
         `,
         backgroundSize: "260% 260%",
         animation: `${shimmer} 14s ease-in-out infinite`,
-
         "&::before": {
           content: '""',
           position: "absolute",
@@ -560,9 +645,8 @@ export default function LandingBackground() {
           position: "absolute",
           inset: 0,
           pointerEvents: "none",
-          opacity: 0.10,
-          backgroundImage:
-            "radial-gradient(circle, rgba(0,0,0,0.18) 0 1px, transparent 1.8px)",
+          opacity: 0.1,
+          backgroundImage: "radial-gradient(circle, rgba(0,0,0,0.18) 0 1px, transparent 1.8px)",
           backgroundSize: "150px 150px",
           animation: `${shimmer} 22s ease-in-out infinite`,
           mixBlendMode: "multiply",
