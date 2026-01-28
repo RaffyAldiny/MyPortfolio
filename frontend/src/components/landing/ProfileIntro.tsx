@@ -65,7 +65,8 @@ const SX = {
     animation: `${float} 3.5s ease-in-out infinite`,
     mb: 0,
 
-    background: "linear-gradient(135deg, #FF9A9E 0%, #E0C3FC 50%, #8EC5FC 100%)",
+    background:
+      "linear-gradient(135deg, #FF9A9E 0%, #E0C3FC 50%, #8EC5FC 100%)",
     WebkitBackgroundClip: "text",
     WebkitTextFillColor: "transparent",
     filter: "drop-shadow(0px 4px 12px rgba(224, 195, 252, 0.5))",
@@ -179,7 +180,7 @@ const SX = {
     backgroundColor: "rgba(255, 255, 255, 0.45)",
     backdropFilter: "blur(8px)",
     border: "1px solid rgba(255, 255, 255, 0.4)",
-    boxShadow: "0 8px 32px rgba(253, 113, 255, 0.5)",
+    boxShadow: "0 8px 32px rgba(255, 113, 113, 0.5)",
   },
 
   bio: {
@@ -231,7 +232,7 @@ function ProfileIntroInner() {
       </Typography>
 
       {/* --- ANIMATED AVATAR CONTAINER --- */}
-      <Box sx={SX.avatarWrap}>
+      <Box sx={{ ...SX.avatarWrap, mt: 5 }}>
         <Box sx={SX.ringOuter} />
         <Box sx={SX.ringInner} />
         <Box sx={SX.prismOverlay} />
@@ -241,7 +242,7 @@ function ProfileIntroInner() {
 
       {/* --- TEXT CONTENT --- */}
       <Box sx={SX.textWrap}>
-        <Stack spacing={0} alignItems="center" sx={{ mb: 1 }}>
+        <Stack spacing={0} alignItems="center" sx={{ mb: 1, mt: 3 }}>
           <Typography variant="subtitle1" sx={SX.nameIntro}>
             I am
           </Typography>
@@ -259,12 +260,12 @@ function ProfileIntroInner() {
         <Box sx={SX.glass}>
           <Typography sx={SX.bio}>
             I develop custom <Highlight>management systems</Highlight> and{" "}
-            <Highlight>academic capstone projects</Highlight>, tailoring software
-            to streamline your specific workflow. I am also passionate about{" "}
-            <Highlight>AI</Highlight> and <Highlight>modern tech stacks</Highlight>,
-            building reliable and intelligent solutions that turn complex
-            requirements into systems that are simple, efficient, and easy to
-            manage ( ˶ˆ꒳ˆ˵ )
+            <Highlight>academic capstone projects</Highlight>, tailoring
+            software to streamline your specific workflow. I am also passionate
+            about <Highlight>AI</Highlight> and{" "}
+            <Highlight>modern tech stacks</Highlight>, building reliable and
+            intelligent solutions that turn complex requirements into systems
+            that are simple, efficient, and easy to manage ( ˶ˆ꒳ˆ˵ )
           </Typography>
         </Box>
       </Box>

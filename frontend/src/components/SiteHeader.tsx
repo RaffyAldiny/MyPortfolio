@@ -1,4 +1,3 @@
-// src/components/SiteHeader.tsx
 "use client";
 
 import * as React from "react";
@@ -25,11 +24,11 @@ import MenuIcon from "@mui/icons-material/Menu";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import FacebookIcon from "@mui/icons-material/Facebook";
+import { useHeaderTheme } from "@/context/HeaderTheme"; // Import hook
 
 // --- CONFIGURATION ---
 const PRISM_GRADIENT = "linear-gradient(135deg, #FF9A9E 0%, #FECFEF 25%, #E0C3FC 50%, #8EC5FC 75%, #D4FFEC 100%)";
 const DARK_TEXT = "#2D2D3A"; 
-
 const GLASS_BG = "rgba(255, 255, 255, 0.65)";
 const GLASS_BLUR = "blur(10px)";
 
@@ -46,14 +45,12 @@ const SOCIALS = [
   { Icon: FacebookIcon, href: "https://facebook.com/" },
 ];
 
-// --- ANIMATIONS ---
 const shimmer = keyframes`
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 `;
 
-// Flow animation for the "My Works" badge
 const flow = keyframes`
   0% { background-position: 0% 50%; }
   100% { background-position: 200% 50%; }
@@ -69,9 +66,11 @@ export default function SiteHeader() {
   const isMdUp = useMediaQuery(theme.breakpoints.up("md"));
   const [open, setOpen] = React.useState(false);
 
+  // 1. Consume Context
+  const { headerVisible } = useHeaderTheme();
+
   return (
     <>
-      {/* Global SVG Gradient for Icons */}
       <svg width={0} height={0} style={{ position: "absolute" }}>
         <linearGradient id="prism-gradient-id" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stopColor="#FF9A9E" />
@@ -90,19 +89,20 @@ export default function SiteHeader() {
           backdropFilter: GLASS_BLUR,
           borderBottom: "1px solid transparent",
           borderImage: `${PRISM_GRADIENT} 1`,
-          transition: "all 0.3s ease",
+          
+          // 2. THE HIDING LOGIC
+          // If headerVisible is false, slide UP (-100%)
+          transform: headerVisible ? "translateY(0)" : "translateY(-100%)",
+          transition: "transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)", 
         }}
       >
         <Toolbar disableGutters sx={{ height: { xs: 64, md: 72 } }}>
           <Container maxWidth="lg" sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             
-            {/* --- IDENTITY SECTION --- */}
+            {/* Identity */}
             <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
               {!isMdUp && (
-                <IconButton
-                  onClick={() => setOpen(true)}
-                  sx={{ mr: -1, color: "text.primary" }}
-                >
+                <IconButton onClick={() => setOpen(true)} sx={{ mr: -1, color: "text.primary" }}>
                   <MenuIcon />
                 </IconButton>
               )}
@@ -115,13 +115,9 @@ export default function SiteHeader() {
                   display: "inline-flex",
                   alignItems: "center",
                   gap: 1.5,
-                  // On hover, we specifically target the Badge to speed up its animation
-                  "&:hover .work-badge": {
-                     animationDuration: "1.5s", 
-                  }
+                  "&:hover .work-badge": { animationDuration: "1.5s" }
                 }}
               >
-                {/* Logo Dot */}
                 <Box
                   sx={{
                     width: 12,
@@ -133,22 +129,9 @@ export default function SiteHeader() {
                     ".MuiLink-root:hover &": { transform: "scale(1.2)" }
                   }}
                 />
-                
-                {/* Name - NOW SOLID DARK (Matching Nav) */}
-                <Typography
-                  component="span"
-                  sx={{
-                    fontSize: 20,
-                    fontWeight: 800,
-                    letterSpacing: -0.5,
-                    color: DARK_TEXT, // Explicitly Dark
-                    transition: "color 0.3s ease",
-                  }}
-                >
+                <Typography component="span" sx={{ fontSize: 20, fontWeight: 800, letterSpacing: -0.5, color: DARK_TEXT }}>
                   Rafael Alden Agoncillo
                 </Typography>
-
-                {/* Badge - NOW THE GLOWING ELEMENT */}
                 {isMdUp && (
                   <Chip 
                     label="My Works" 
@@ -158,18 +141,13 @@ export default function SiteHeader() {
                       height: 24,
                       fontWeight: 700,
                       fontSize: "0.75rem",
-                      color: "#fff", // White text on gradient
+                      color: "#fff",
                       border: "none",
                       cursor: "pointer",
-                      
-                      // Prism Background
                       background: PRISM_GRADIENT,
                       backgroundSize: "200% 200%",
-                      animation: `${flow} 3s linear infinite`, // Alive/Flowing
-                      
-                      // Glowing Shadow
+                      animation: `${flow} 3s linear infinite`,
                       boxShadow: "0 2px 10px rgba(224, 195, 252, 0.4)",
-                      
                       transition: "all 0.3s ease",
                       "&:hover": {
                         transform: "translateY(-1px) scale(1.05)",
@@ -183,7 +161,7 @@ export default function SiteHeader() {
 
             <Box sx={{ flex: 1 }} />
 
-            {/* --- DESKTOP NAV (Dark Text + Clickable Pill) --- */}
+            {/* Desktop Nav */}
             {isMdUp && (
               <Stack direction="row" spacing={1} sx={{ alignItems: "center", mr: 2 }}>
                 {NAV_ITEMS.map((item) => (
@@ -201,40 +179,30 @@ export default function SiteHeader() {
                       color: DARK_TEXT, 
                       transition: "all 0.2s ease",
                       zIndex: 1,
-
-                      // 1. The "Clickable" Pill Background (Ghost Button style)
                       "&::before": {
                         content: '""',
                         position: "absolute",
                         inset: 0,
                         borderRadius: "99px",
-                        // White background + Prism Border
                         background: "rgba(255,255,255,0.8)",
                         border: "1px solid transparent",
-                        borderColor: "rgba(224, 195, 252, 0)", // Invisible initially
-                        
+                        borderColor: "rgba(224, 195, 252, 0)",
                         transform: "scale(0.85)",
                         opacity: 0,
                         transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
                         zIndex: -1,
                       },
-
-                      // Hover State (Make it look clickable)
                       "&:hover": {
-                        color: "#000", // Darkest black on hover
-                        transform: "scale(1.05)", // Slight pop
+                        color: "#000",
+                        transform: "scale(1.05)",
                         "&::before": {
                           opacity: 1,
                           transform: "scale(1)",
-                          borderColor: "#E0C3FC", // Visible Prism Border
-                          boxShadow: "0 2px 8px rgba(0,0,0,0.05)", // Tactile shadow
+                          borderColor: "#E0C3FC",
+                          boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
                         },
                       },
-                      
-                      // Active/Click effect
-                      "&:active": {
-                        transform: "scale(0.95)",
-                      }
+                      "&:active": { transform: "scale(0.95)" }
                     }}
                   >
                     {item.label}
@@ -243,7 +211,7 @@ export default function SiteHeader() {
               </Stack>
             )}
 
-            {/* --- ICONS & ACTION --- */}
+            {/* Socials & CTA */}
             <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
               {SOCIALS.map(({ Icon, href }, i) => (
                 <IconButton
@@ -255,15 +223,11 @@ export default function SiteHeader() {
                     position: "relative",
                     overflow: "visible", 
                     transition: "transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
-                    
-                    // Icons use Prism Gradient Fill by default
                     "& svg": { 
                       fill: "url(#prism-gradient-id)",
                       transition: "filter 0.3s ease",
                       zIndex: 2, 
                     },
-
-                    // Magical Aura (Hidden by default)
                     "&::before": {
                       content: '""',
                       position: "absolute",
@@ -276,13 +240,9 @@ export default function SiteHeader() {
                       transition: "all 0.4s ease",
                       zIndex: 0,
                     },
-
-                    // Hover State
                     "&:hover": { 
                       transform: "translateY(-3px)", 
-                      "& svg": {
-                         filter: "drop-shadow(0 0 4px rgba(255,255,255,0.8))",
-                      },
+                      "& svg": { filter: "drop-shadow(0 0 4px rgba(255,255,255,0.8))" },
                       "&::before": {
                         opacity: 0.6,
                         transform: "scale(1)",
@@ -325,7 +285,6 @@ export default function SiteHeader() {
         </Toolbar>
       </AppBar>
 
-      {/* --- MOBILE DRAWER --- */}
       <Drawer
         anchor="left"
         open={open}
@@ -370,12 +329,7 @@ export default function SiteHeader() {
               >
                 <ListItemText 
                   primary={item.label} 
-                  primaryTypographyProps={{ 
-                    sx: {
-                        color: DARK_TEXT,
-                        fontWeight: 600
-                    }
-                  }}
+                  primaryTypographyProps={{ sx: { color: DARK_TEXT, fontWeight: 600 } }}
                 />
               </ListItemButton>
             ))}
