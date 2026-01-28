@@ -263,7 +263,7 @@ function ProfileIntroInner() {
             to streamline your specific workflow. I am also passionate about{" "}
             <Highlight>AI</Highlight> and <Highlight>modern tech stacks</Highlight>,
             building reliable and intelligent solutions that turn complex
-            requirements into systems that are simple, efficient, and easy to ds
+            requirements into systems that are simple, efficient, and easy to 
             manage ( ˶ˆ꒳ˆ˵ )
           </Typography>
         </Box>
