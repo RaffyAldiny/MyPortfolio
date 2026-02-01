@@ -26,6 +26,44 @@ type Props = {
 const PRISM_GRADIENT =
   "linear-gradient(135deg,#FF9A9E 0%,#FECFEF 25%,#E0C3FC 50%,#8EC5FC 75%,#D4FFEC 100%)";
 
+function Dot({
+  active,
+  dark,
+  sizePx,
+}: {
+  active: boolean;
+  dark: boolean;
+  sizePx: number;
+}) {
+  const s = `${sizePx}px`;
+  return (
+    <Box
+      sx={{
+        width: s,
+        height: s,
+        minWidth: s,
+        minHeight: s,
+        borderRadius: "999px",
+        display: "inline-block",
+        flexShrink: 0,
+        overflow: "hidden",
+        boxSizing: "border-box",
+        background: active ? PRISM_GRADIENT : "transparent",
+        border: `1px solid ${
+          active ? "transparent" : dark ? "rgba(255,255,255,0.32)" : "rgba(0,0,0,0.22)"
+        }`,
+        boxShadow: active
+          ? dark
+            ? "0 0 0 4px rgba(224,195,252,0.16)"
+            : "0 0 0 4px rgba(91,75,117,0.12)"
+          : "none",
+        transform: "translateZ(0)",
+        transition: "all 140ms ease",
+      }}
+    />
+  );
+}
+
 export default function LeftTimelineNav({
   sections,
   scrollOffsetPx = 0,
@@ -38,8 +76,8 @@ export default function LeftTimelineNav({
   const [activeId, setActiveId] = React.useState(sections[0]?.id ?? "");
 
   const activeIndex = React.useMemo(() => {
-    const idx = sections.findIndex((s) => s.id === activeId);
-    return idx >= 0 ? idx : 0;
+    const i = sections.findIndex((s) => s.id === activeId);
+    return i >= 0 ? i : 0;
   }, [activeId, sections]);
 
   const isDarkOverlay = React.useMemo(() => {
@@ -49,23 +87,11 @@ export default function LeftTimelineNav({
 
   const text = isDarkOverlay ? "rgba(255,255,255,0.92)" : "rgba(25,25,35,0.88)";
   const textMuted = isDarkOverlay ? "rgba(255,255,255,0.6)" : "rgba(25,25,35,0.6)";
-  const bg = isDarkOverlay ? "rgba(30,30,40,0.85)" : "rgba(255,255,255,0.85)";
+  const bg = isDarkOverlay ? "rgba(30,30,40,0.82)" : "rgba(255,255,255,0.85)";
   const border = isDarkOverlay ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.12)";
   const shadow = isDarkOverlay
     ? "drop-shadow(0 2px 12px rgba(0,0,0,0.58))"
     : "drop-shadow(0 2px 12px rgba(255,255,255,0.72))";
-
-  const btnSx = React.useMemo(
-    () => ({
-      color: text,
-      bgcolor: bg,
-      backdropFilter: "blur(10px)",
-      border: "1px solid",
-      borderColor: border,
-      "&:hover": { bgcolor: isDarkOverlay ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.07)" },
-    }),
-    [bg, border, isDarkOverlay, text]
-  );
 
   const scrollToId = React.useCallback(
     (id: string) => {
@@ -80,8 +106,8 @@ export default function LeftTimelineNav({
   const jump = React.useCallback(
     (dir: -1 | 1) => {
       if (!sections.length) return;
-      let idx = activeIndex + dir;
 
+      let idx = activeIndex + dir;
       if (idx < 0) idx = wrapAround ? sections.length - 1 : 0;
       if (idx > sections.length - 1) idx = wrapAround ? 0 : sections.length - 1;
 
@@ -90,13 +116,14 @@ export default function LeftTimelineNav({
     [activeIndex, scrollToId, sections, wrapAround]
   );
 
-  /* Cache section elements for faster scroll handler */
+  // Cache elements for faster scroll detection
   const elsRef = React.useRef<Array<{ id: string; el: HTMLElement | null }>>([]);
 
   React.useEffect(() => {
     elsRef.current = sections.map((s) => ({ id: s.id, el: document.getElementById(s.id) }));
     if (!activeId && sections[0]?.id) setActiveId(sections[0].id);
-  }, [sections]); // intentionally not depending on activeId
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sections]);
 
   React.useEffect(() => {
     if (!sections.length) return;
@@ -107,12 +134,12 @@ export default function LeftTimelineNav({
       const activationY = scrollOffsetPx + 6;
       let chosen = sections[0].id;
 
-      // refresh nulls lazily in case DOM mounted later
       for (const item of elsRef.current) {
         if (!item.el) item.el = document.getElementById(item.id);
-        if (!item.el) continue;
+        const el = item.el;
+        if (!el) continue;
 
-        if (item.el.getBoundingClientRect().top <= activationY) chosen = item.id;
+        if (el.getBoundingClientRect().top <= activationY) chosen = item.id;
       }
 
       setActiveId(chosen);
@@ -134,17 +161,47 @@ export default function LeftTimelineNav({
     };
   }, [sections, scrollOffsetPx]);
 
-  /* ======================= MOBILE UI ======================= */
+  // HARD-LOCK IconButton into a perfect circle
+  const circleBtnBase = {
+    width: 40,
+    height: 40,
+    minWidth: 40,
+    minHeight: 40,
+    p: 0,
+    borderRadius: "50%",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  } as const;
+
+  const btnSx = {
+    ...circleBtnBase,
+    color: text,
+    bgcolor: bg,
+    backdropFilter: "blur(10px)",
+    border: "1px solid",
+    borderColor: border,
+    "&:hover": { bgcolor: isDarkOverlay ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.07)" },
+  } as const;
+
+  /* ======================= MOBILE UI (collision-safe) ======================= */
   if (isMobile) {
+    // While in Projects (dark section), move it up and dock right to avoid CTA collisions.
+    const dockRight = isDarkOverlay;
+
     return (
       <Box
         sx={{
           position: "fixed",
-          bottom: 20,
-          left: "50%",
-          transform: "translateX(-50%)",
           zIndex: 9999,
           filter: shadow,
+
+          bottom: dockRight ? 92 : 18, // ✅ lifts above "View Project" button area
+          left: dockRight ? "auto" : "50%",
+          right: dockRight ? 14 : "auto",
+          transform: dockRight ? "none" : "translateX(-50%)",
+          transition: "bottom 220ms ease, right 220ms ease, left 220ms ease, transform 220ms ease",
         }}
       >
         <Stack
@@ -152,7 +209,7 @@ export default function LeftTimelineNav({
           alignItems="center"
           spacing={1}
           sx={{
-            px: 2,
+            px: 1.25,
             py: 1,
             borderRadius: 999,
             bgcolor: bg,
@@ -166,6 +223,7 @@ export default function LeftTimelineNav({
             <KeyboardArrowUpRoundedIcon sx={{ transform: "rotate(-90deg)" }} />
           </IconButton>
 
+          {/* keep indicators minimal on mobile */}
           {sections.map((s) => {
             const isActive = s.id === activeId;
             return (
@@ -173,7 +231,7 @@ export default function LeftTimelineNav({
                 key={s.id}
                 onClick={() => scrollToId(s.id)}
                 sx={{
-                  width: isActive ? 24 : 8,
+                  width: isActive ? 22 : 8,
                   height: 8,
                   borderRadius: 4,
                   background: isActive ? PRISM_GRADIENT : alpha(text, 0.25),
@@ -184,19 +242,22 @@ export default function LeftTimelineNav({
             );
           })}
 
-          <Typography
-            sx={{
-              minWidth: 72,
-              fontSize: 10,
-              fontWeight: 900,
-              letterSpacing: 1,
-              textTransform: "uppercase",
-              textAlign: "center",
-              color: text,
-            }}
-          >
-            {sections[activeIndex]?.label}
-          </Typography>
+          {/* Hide label while docked right to keep it compact and avoid covering content */}
+          {!dockRight && (
+            <Typography
+              sx={{
+                minWidth: 78,
+                fontSize: 10,
+                fontWeight: 900,
+                letterSpacing: 1,
+                textTransform: "uppercase",
+                textAlign: "center",
+                color: text,
+              }}
+            >
+              {sections[activeIndex]?.label}
+            </Typography>
+          )}
 
           <IconButton size="small" onClick={() => jump(1)} sx={{ color: text }}>
             <KeyboardArrowDownRoundedIcon sx={{ transform: "rotate(-90deg)" }} />
@@ -220,7 +281,7 @@ export default function LeftTimelineNav({
     >
       <Stack spacing={1.1} sx={{ pointerEvents: "auto", filter: shadow, userSelect: "none" }}>
         <Tooltip title="Previous section" placement="right">
-          <IconButton size="small" onClick={() => jump(-1)} sx={btnSx}>
+          <IconButton onClick={() => jump(-1)} sx={btnSx}>
             <KeyboardArrowUpRoundedIcon />
           </IconButton>
         </Tooltip>
@@ -247,29 +308,7 @@ export default function LeftTimelineNav({
                   "&:hover .label": { opacity: 1, transform: "translateX(2px)" },
                 }}
               >
-                {/* Dot (locked to perfect circle) */}
-                <Box
-                  sx={{
-                    width: isActive ? 10 : 7,
-                    height: isActive ? 10 : 7,
-                    minWidth: isActive ? 10 : 7,
-                    minHeight: isActive ? 10 : 7,
-                    aspectRatio: "1 / 1",
-                    borderRadius: "50%",
-                    flex: "0 0 auto",
-                    boxSizing: "border-box",
-                    background: isActive ? PRISM_GRADIENT : "transparent",
-                    border: `1px solid ${
-                      isActive ? "transparent" : isDarkOverlay ? "rgba(255,255,255,0.32)" : "rgba(0,0,0,0.22)"
-                    }`,
-                    boxShadow: isActive
-                      ? isDarkOverlay
-                        ? "0 0 0 4px rgba(224,195,252,0.16)"
-                        : "0 0 0 4px rgba(91,75,117,0.12)"
-                      : "none",
-                    transition: "all 140ms ease",
-                  }}
-                />
+                <Dot active={isActive} dark={isDarkOverlay} sizePx={isActive ? 10 : 7} />
 
                 <Typography
                   className="label"
@@ -296,7 +335,7 @@ export default function LeftTimelineNav({
         </Stack>
 
         <Tooltip title="Next section" placement="right">
-          <IconButton size="small" onClick={() => jump(1)} sx={btnSx}>
+          <IconButton onClick={() => jump(1)} sx={btnSx}>
             <KeyboardArrowDownRoundedIcon />
           </IconButton>
         </Tooltip>

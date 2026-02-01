@@ -1,4 +1,3 @@
-// src/components/landing/ProfileIntro.tsx
 "use client";
 
 import * as React from "react";
@@ -44,7 +43,7 @@ const PRISM_GRADIENT =
 
 const AVATAR_SIZE = { xs: 130, md: 160 } as const;
 
-/* ================== Hoisted sx (less allocations per render) ================== */
+/* ================== Hoisted sx ================== */
 const SX = {
   root: {
     alignItems: "center",
@@ -60,13 +59,13 @@ const SX = {
     fontWeight: 900,
     letterSpacing: "0.02em",
     textTransform: "uppercase",
-    fontSize: { xs: "1.8rem", sm: "2.5rem", md: "3.2rem" },
+    // Original: 1.8rem / 3.2rem. Added ~3px mobile (~0.2rem) and ~2px desktop (~0.15rem)
+    fontSize: { xs: "2.0rem", sm: "2.7rem", md: "3.35rem" },
     lineHeight: 1.1,
     animation: `${float} 3.5s ease-in-out infinite`,
     mb: 0,
 
-    background:
-      "linear-gradient(135deg, #FF9A9E 0%, #E0C3FC 50%, #8EC5FC 100%)",
+    background: "linear-gradient(135deg, #FF9A9E 0%, #E0C3FC 50%, #8EC5FC 100%)",
     WebkitBackgroundClip: "text",
     WebkitTextFillColor: "transparent",
     filter: "drop-shadow(0px 4px 12px rgba(224, 195, 252, 0.5))",
@@ -147,14 +146,16 @@ const SX = {
     color: "text.secondary",
     textTransform: "uppercase",
     letterSpacing: "0.15em",
-    fontSize: "0.85rem",
+    // Original: 0.85rem. Added 3px
+    fontSize: "1.05rem",
     mb: -0.5,
   },
 
   name: {
     fontWeight: 800,
     letterSpacing: "-0.03em",
-    fontSize: { xs: "2rem", md: "3rem" },
+    // Original: 2rem / 3rem. Added +3px / +2px
+    fontSize: { xs: "2.2rem", md: "3.15rem" },
     background: "linear-gradient(135deg, #2A2A3C 30%, #5B4B75 100%)",
     WebkitBackgroundClip: "text",
     WebkitTextFillColor: "transparent",
@@ -169,10 +170,12 @@ const SX = {
     letterSpacing: -0.5,
     mb: 3,
     opacity: 0.8,
+    // Original default. Added +3px / +2px
+    fontSize: { xs: "1.2rem", md: "1.4rem" },
   },
 
   glass: {
-    maxWidth: "640px",
+    maxWidth: "680px",
     mx: "auto",
     px: { xs: 3, md: 5 },
     py: { xs: 2, md: 3 },
@@ -180,11 +183,12 @@ const SX = {
     backgroundColor: "rgba(255, 255, 255, 0.45)",
     backdropFilter: "blur(8px)",
     border: "1px solid rgba(255, 255, 255, 0.4)",
-    boxShadow: "0 8px 32px rgba(255, 113, 113, 0.5)",
+    boxShadow: "0 8px 32px rgba(224, 195, 252, 0.2)",
   },
 
   bio: {
-    fontSize: { xs: "0.75rem", md: "0.875rem" },
+    // Original: 0.75rem / 0.875rem. Added 3px / 2px
+    fontSize: { xs: "0.95rem", md: "1.0rem" },
     lineHeight: 1.8,
     color: "#4A5568",
     fontWeight: 500,
@@ -204,7 +208,6 @@ const SX = {
   },
 } as const;
 
-/* ================== Helper ================== */
 const Highlight = React.memo(function Highlight({
   children,
 }: {
@@ -217,13 +220,11 @@ const Highlight = React.memo(function Highlight({
   );
 });
 
-/* ================== Component ================== */
 function ProfileIntroInner() {
   const { name, title, imageSrc } = PROFILE;
 
   return (
     <Stack sx={SX.root}>
-      {/* --- CATCHY HOOK --- */}
       <Typography variant="h1" sx={SX.hook}>
         HELLO THERE!
         <Box component="span" sx={SX.waveEmoji}>
@@ -231,22 +232,18 @@ function ProfileIntroInner() {
         </Box>
       </Typography>
 
-      {/* --- ANIMATED AVATAR CONTAINER --- */}
       <Box sx={{ ...SX.avatarWrap, mt: 5 }}>
         <Box sx={SX.ringOuter} />
         <Box sx={SX.ringInner} />
         <Box sx={SX.prismOverlay} />
-
         <Avatar src={imageSrc} alt={name} sx={SX.avatar} />
       </Box>
 
-      {/* --- TEXT CONTENT --- */}
       <Box sx={SX.textWrap}>
         <Stack spacing={0} alignItems="center" sx={{ mb: 1, mt: 3 }}>
           <Typography variant="subtitle1" sx={SX.nameIntro}>
             I am
           </Typography>
-
           <Typography variant="h3" sx={SX.name}>
             {name}
           </Typography>
@@ -256,10 +253,9 @@ function ProfileIntroInner() {
           {title}
         </Typography>
 
-        {/* --- GLASSY BIO CONTAINER --- */}
         <Box sx={SX.glass}>
           <Typography sx={SX.bio}>
-            I develop <Highlight> custom management systems</Highlight> and{" "}
+            I develop <Highlight>custom management systems</Highlight> and{" "}
             <Highlight>academic capstone projects</Highlight>, tailoring
             software to streamline your specific workflow. I am also passionate
             about <Highlight>AI</Highlight> and{" "}
