@@ -43,20 +43,12 @@ function usePrefersReducedMotion() {
 /* ================== Grouping Logic ================== */
 type GroupKey = "all" | "frontend" | "backend" | "data" | "tools";
 
-const GROUPS: Record<GroupKey, readonly string[]> = {
-  all: [],
-  frontend: ["React", "NextJS", "TypeScript", "JavaScript", "Vue.js", "Flutter", "Dart", "HTML5", "CSS3", "Sass", "Tailwind CSS", "Material UI"],
-  backend: ["Django", "Django Rest", "Laravel", "Node.js", "Python", "PHP", "Java", "C++", "Roblox Luau", "Shopee API"],
-  data: ["MySQL", "PostgreSQL", "MongoDB", "SQLite", "Amazon Redshift", "AWS Glue", "Power BI"],
-  tools: ["Git", "Linux", "Figma", "Firebase", "Vercel", "Hostinger", "Unity", "Digital Ocean"],
-} as const;
-
 const GROUP_SET: Record<GroupKey, Set<string>> = {
   all: new Set(),
-  frontend: new Set(GROUPS.frontend),
-  backend: new Set(GROUPS.backend),
-  data: new Set(GROUPS.data),
-  tools: new Set(GROUPS.tools),
+  frontend: new Set(["React", "NextJS", "TypeScript", "JavaScript", "Vue.js", "Flutter", "Dart", "HTML5", "CSS3", "Sass", "Tailwind CSS", "Material UI"]),
+  backend: new Set(["Django", "Django Rest", "Laravel", "Node.js", "Python", "PHP", "Java", "C++", "Roblox Luau", "Shopee API"]),
+  data: new Set(["MySQL", "PostgreSQL", "MongoDB", "SQLite", "Amazon Redshift", "AWS Glue", "Power BI"]),
+  tools: new Set(["Git", "Linux", "Figma", "Firebase", "Vercel", "Hostinger", "Unity", "Digital Ocean"]),
 };
 
 /* ================== Prism tokens ================== */
@@ -86,22 +78,18 @@ function SkillPill({
       sx={{
         display: "inline-flex",
         alignItems: "center",
-        // Squeezed gap and padding for mobile
         gap: { xs: 0.8, sm: 1.35 },
         px: { xs: 1.2, sm: 2 },
         py: { xs: 0.7, sm: 1.15 },
         borderRadius: { xs: 2.2, sm: 3 },
         position: "relative",
-        animation: show && !reducedMotion
-            ? `${flyIn} 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards`
-            : "none",
+        animation: show && !reducedMotion ? `${flyIn} 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards` : "none",
         animationDelay: `${index * 0.03}s`,
         opacity: show || reducedMotion ? 1 : 0,
         backgroundColor: "rgba(255, 255, 255, 0.22)",
         backdropFilter: "blur(6px)",
         border: "1px solid rgba(255, 255, 255, 0.45)",
         boxShadow: baseShadow,
-        transition: "none",
         "&::before": {
           content: '""',
           position: "absolute",
@@ -123,7 +111,6 @@ function SkillPill({
         alt={name}
         variant="rounded"
         sx={{
-          // Smaller avatar for mobile
           width: { xs: 18, sm: 26 },
           height: { xs: 18, sm: 26 },
           bgcolor: "rgba(255,255,255,0.6)",
@@ -132,16 +119,7 @@ function SkillPill({
         }}
         imgProps={{ style: { objectFit: "contain" } }}
       />
-      <Typography
-        sx={{
-          // Compact text for mobile
-          fontSize: { xs: 10, sm: 13 },
-          fontWeight: 900,
-          letterSpacing: 0.4,
-          textTransform: "uppercase",
-          color: fg,
-        }}
-      >
+      <Typography sx={{ fontSize: { xs: 10, sm: 13 }, fontWeight: 900, letterSpacing: 0.4, textTransform: "uppercase", color: fg }}>
         {name}
       </Typography>
     </Box>
@@ -185,7 +163,7 @@ export default function SkillsShowcase() {
   return (
     <Box
       ref={containerRef}
-      id="skills"
+      id="techstacks"
       sx={{
         width: "100%",
         minHeight: "100vh",
@@ -194,7 +172,7 @@ export default function SkillsShowcase() {
         alignItems: "center",
         justifyContent: "center",
         py: { xs: 6, md: 12 },
-        px: { xs: 1.5, sm: 3 },
+        px: { xs: 0, sm: 3 }, // Remove padding-x on mobile for edge-to-edge scroll
         position: "relative",
         overflow: "hidden",
       }}
@@ -217,13 +195,13 @@ export default function SkillsShowcase() {
         }}
       />
 
-      <Box sx={{ width: "100%", maxWidth: 1100, zIndex: 1 }}>
+      <Box sx={{ width: "100%", maxWidth: 1100, zIndex: 1, px: { xs: 2, sm: 0 } }}>
         <Typography
           variant="h2"
           sx={{
             fontWeight: 900,
-            fontSize: { xs: "2.2rem", sm: "3.5rem", md: "5rem" },
-            mb: 1.5,
+            fontSize: { xs: "2.8rem", sm: "3.5rem", md: "5rem" },
+            mb: { xs: 2, md: 1.5 },
             textTransform: "uppercase",
             textAlign: "center",
             backgroundImage: TITLE_GRADIENT,
@@ -247,7 +225,7 @@ export default function SkillsShowcase() {
             fontWeight: 700,
             color: alpha(INK, 0.7),
             letterSpacing: 0.1,
-            mb: { xs: 3, md: 5 },
+            mb: { xs: 4, md: 5 },
             fontSize: { xs: 12, md: 14.5 },
             lineHeight: 1.5,
             maxWidth: 680,
@@ -259,7 +237,21 @@ export default function SkillsShowcase() {
           Modern tools I use to craft clean user interfaces, reliable backends, and scalable production-ready systems.
         </Typography>
 
-        <Box sx={{ display: "flex", justifyContent: "center", mb: { xs: 4, md: 6 } }}>
+        {/* Filter Controls - Horizontal Scroll on Mobile */}
+        <Box 
+          sx={{ 
+            display: "flex", 
+            justifyContent: { xs: "flex-start", sm: "center" }, 
+            mb: { xs: 4, md: 6 },
+            overflowX: "auto",
+            width: "100%",
+            pb: 2, // Space for scrollbar
+            px: { xs: 2, sm: 0 },
+            "&::-webkit-scrollbar": { display: "none" }, // Hide scrollbar
+            msOverflowStyle: "none",
+            scrollbarWidth: "none",
+          }}
+        >
           <ToggleButtonGroup
             exclusive
             value={active}
@@ -267,35 +259,34 @@ export default function SkillsShowcase() {
             sx={{
               position: "relative",
               borderRadius: { xs: 3, sm: 999 },
-              p: 0.4,
-              backgroundColor: "rgba(255,255,255,0.26)",
-              border: "1px solid rgba(255,255,255,0.55)",
+              p: 0.5,
+              backgroundColor: "rgba(255,255,255,0.4)",
+              border: "1px solid rgba(255,255,255,0.6)",
               backdropFilter: "blur(10px)",
               display: "flex",
-              flexWrap: { xs: "wrap", sm: "nowrap" },
-              justifyContent: "center",
-              gap: 0.4,
-              width: { xs: "100%", sm: "auto" },
+              flexWrap: "nowrap", // Force horizontal
+              gap: 0.5,
+              minWidth: "max-content", // Ensure buttons don't shrink
 
               "& .MuiToggleButton-root": {
                 border: 0,
-                borderRadius: { xs: 2, sm: 999 },
+                borderRadius: { xs: 2.5, sm: 999 },
                 textTransform: "uppercase",
                 fontWeight: 900,
-                letterSpacing: 0.5,
-                fontSize: { xs: 9, sm: 11.5 },
-                px: { xs: 1.2, sm: 1.75 },
-                py: { xs: 0.7, sm: 0.95 },
-                flex: { xs: "1 0 30%", sm: "unset" },
-                minWidth: { xs: "60px", sm: "auto" },
+                letterSpacing: 0.8,
+                fontSize: { xs: 10, sm: 11.5 },
+                px: { xs: 2, sm: 2.5 }, // Wider padding for tap target
+                py: { xs: 1, sm: 0.95 },
                 color: alpha(INK, 0.6),
-                transition: "0.2s",
+                transition: "all 0.2s ease",
+                whiteSpace: "nowrap",
+                "&:active": { transform: "scale(0.96)" }, // Clickable feedback
               },
 
               "& .MuiToggleButton-root.Mui-selected": {
-                backgroundColor: "rgba(255,255,255,0.85)",
+                backgroundColor: "rgba(255,255,255,0.9)",
                 color: INK,
-                boxShadow: "0 4px 12px rgba(0,0,0,0.06)",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
                 position: "relative",
               },
 
@@ -328,11 +319,11 @@ export default function SkillsShowcase() {
             display: "flex",
             flexWrap: "wrap",
             justifyContent: "center",
-            // Compacter gap for mobile grid
             gap: { xs: 1, sm: 2 },
             maxWidth: 1000,
             width: "100%",
             mx: "auto",
+            px: { xs: 1, sm: 0 },
           }}
         >
           {filtered.map((skill, i) => (
