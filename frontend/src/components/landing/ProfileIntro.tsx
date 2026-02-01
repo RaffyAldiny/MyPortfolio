@@ -259,7 +259,7 @@ function ProfileIntroInner() {
         {/* --- GLASSY BIO CONTAINER --- */}
         <Box sx={SX.glass}>
           <Typography sx={SX.bio}>
-            I develop custom <Highlight>management systems</Highlight> and{" "}
+            I develop <Highlight> custom management systems</Highlight> and{" "}
             <Highlight>academic capstone projects</Highlight>, tailoring
             software to streamline your specific workflow. I am also passionate
             about <Highlight>AI</Highlight> and{" "}

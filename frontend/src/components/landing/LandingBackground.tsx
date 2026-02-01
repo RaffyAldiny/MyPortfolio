@@ -588,7 +588,7 @@ export default function LandingBackground() {
       ref={rootRef}
       aria-hidden
       sx={{
-        position: "absolute",
+        position: "fixed",
         inset: 0,
         overflow: "hidden",
         zIndex: 0,

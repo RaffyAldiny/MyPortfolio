@@ -2,9 +2,9 @@
 
 export type Skill = {
   name: string;
-  color: string;
-  textColor?: string;
-  icon: string;
+  color: string; // used for prism border + shadow accent
+  textColor?: string; // optional override for text
+  icon: string; // icon url or /icons/*.webp
 };
 
 export const SKILLS: Skill[] = [
@@ -13,12 +13,15 @@ export const SKILLS: Skill[] = [
     color: "#61DAFB",
     icon: "https://cdn.simpleicons.org/react/61DAFB",
   },
+
+  // FIX: was #FFFFFF so border looked invisible
   {
     name: "NextJS",
-    color: "#FFFFFF",
+    color: "#111827", // visible accent for the prism border
     textColor: "#0B0B10",
     icon: "https://cdn.simpleicons.org/nextdotjs/000000",
   },
+
   {
     name: "TypeScript",
     color: "#3178C6",
@@ -39,21 +42,26 @@ export const SKILLS: Skill[] = [
     color: "#0175C2",
     icon: "https://cdn.simpleicons.org/dart/0175C2",
   },
+
   {
     name: "Roblox Luau",
     color: "#00A2FF",
     icon: "https://cdn.simpleicons.org/roblox/000000",
   },
+
   {
     name: "Django",
     color: "#092E20",
     icon: "https://cdn.simpleicons.org/django/092E20",
   },
+
+  // use your local .webp
   {
     name: "Django Rest",
     color: "#A30000",
-    icon: "/icons/django-rest-framework.png",
+    icon: "/icons/django-rest-framework.webp",
   },
+
   {
     name: "Laravel",
     color: "#FF2D20",
@@ -84,11 +92,19 @@ export const SKILLS: Skill[] = [
     color: "#00599C",
     icon: "https://cdn.simpleicons.org/cplusplus/00599C",
   },
+
+  // requested: MySQL + PostgreSQL using .webp from your /public/icons
   {
     name: "MySQL",
     color: "#4479A1",
-    icon: "https://cdn.simpleicons.org/mysql/4479A1",
+    icon: "/icons/mysql.webp",
   },
+  {
+    name: "PostgreSQL",
+    color: "#4169E1",
+    icon: "/icons/postgresql.webp",
+  },
+
   {
     name: "MongoDB",
     color: "#47A248",
@@ -99,16 +115,32 @@ export const SKILLS: Skill[] = [
     color: "#003B57",
     icon: "https://cdn.simpleicons.org/sqlite/003B57",
   },
+
+  {
+    name: "Shopee API",
+    color: "#FF5722",
+    icon: "/icons/shopee-api.webp",
+    textColor: "#000000",
+  },
+  // use your local .webp
   {
     name: "Amazon Redshift",
     color: "#8C4FFF",
-    icon: "/icons/aws-redshift.png",
+    icon: "/icons/aws-redshift.webp",
   },
   {
     name: "AWS Glue",
     color: "#232F3E",
-    icon: "/icons/aws-glue.png",
+    icon: "/icons/aws-glue.webp",
   },
+
+  // optional, but you have it in your folder
+  {
+    name: "Hostinger",
+    color: "#673DE6",
+    icon: "/icons/hostinger_logo.webp",
+  },
+
   {
     name: "Git",
     color: "#F05032",
@@ -124,20 +156,62 @@ export const SKILLS: Skill[] = [
     color: "#A259FF",
     icon: "https://cdn.simpleicons.org/figma/A259FF",
   },
+
+  // FIX: was #FFFFFF so border looked invisible
   {
     name: "Unity",
-    color: "#FFFFFF",
+    color: "#111827", // visible accent for prism border
     textColor: "#0B0B10",
     icon: "https://cdn.simpleicons.org/unity/000000",
   },
+
+  // use your local .webp
   {
     name: "Power BI",
     color: "#F2C811",
-    icon: "/icons/power-bi.png",
+    icon: "/icons/power-bi.webp",
   },
+
+  // use your local .webp
   {
     name: "Firebase",
     color: "#FFCA28",
-    icon: "/icons/firebase.png",
+    icon: "/icons/firebase.webp",
   },
+
+  // requested: Vue.js using .webp
+  {
+    name: "Vue.js",
+    color: "#42B883",
+    icon: "/icons/vue.webp",
+  },
+
+  // requested: Vercel using .webp
+  {
+    name: "Vercel",
+    color: "#111827",
+    textColor: "#0B0B10",
+    icon: "/icons/vercel.webp",
+  },
+
+  {
+    name: "Digital Ocean",
+    color: "#0080FF",
+    icon: "/icons/digital-ocean.webp",
+    textColor: "#000000",
+  },
+
+  {
+    name: "Tailwind CSS",
+    color: "#38BDF8",
+    icon: "/icons/tailwindcss.webp",  
+    textColor: "#000000",
+  },
+
+  {
+    name: "Material UI",
+    color: "#007FFF",
+    icon: "/icons/material-ui.webp",
+    textColor: "#000000",
+  }
 ];
