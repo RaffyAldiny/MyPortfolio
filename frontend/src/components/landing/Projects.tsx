@@ -64,13 +64,13 @@ const SX = {
     top: 0,
     overflow: "hidden",
     scrollSnapAlign: "start",
-    scrollSnapStop: "always", 
+    scrollSnapStop: "always",
     display: "flex",
     alignItems: "flex-end",
     willChange: "transform",
   },
 
-  // INTRO SLIDE
+  // INTRO SLIDE (now DARK)
   introSlide: {
     height: "100vh",
     width: "100%",
@@ -83,8 +83,8 @@ const SX = {
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    bgcolor: "#fff",
-    zIndex: 1, 
+    bgcolor: "#050505",
+    zIndex: 1,
   },
 
   introTitle: {
@@ -96,6 +96,25 @@ const SX = {
     WebkitBackgroundClip: "text",
     WebkitTextFillColor: "transparent",
     textAlign: "center",
+    textShadow: "0 10px 30px rgba(0,0,0,0.45)",
+  },
+
+  introSub: {
+    mt: 4,
+    fontWeight: 700,
+    color: "rgba(255,255,255,0.68)",
+    letterSpacing: 2,
+    textTransform: "uppercase",
+  },
+
+  // subtle vignette to make center pop (optional but nice)
+  introVignette: {
+    position: "absolute",
+    inset: 0,
+    background:
+      "radial-gradient(ellipse at center, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0) 55%), radial-gradient(ellipse at center, rgba(0,0,0,0) 0%, rgba(0,0,0,0.65) 80%)",
+    pointerEvents: "none",
+    zIndex: 0,
   },
 
   projectImage: {
@@ -109,7 +128,8 @@ const SX = {
   gradientOverlay: {
     position: "absolute",
     inset: 0,
-    background: "linear-gradient(to top, #000 0%, rgba(0,0,0,0.8) 40%, rgba(0,0,0,0) 100%)",
+    background:
+      "linear-gradient(to top, #000 0%, rgba(0,0,0,0.82) 40%, rgba(0,0,0,0) 100%)",
     zIndex: 2,
   },
 
@@ -134,6 +154,7 @@ const SX = {
     alignItems: "center",
     gap: 2,
   },
+
   projectTitle: {
     color: "#fff",
     fontWeight: 900,
@@ -142,6 +163,7 @@ const SX = {
     mb: 3,
     textShadow: "0 10px 30px rgba(0,0,0,0.5)",
   },
+
   projectDesc: {
     color: "rgba(255,255,255,0.8)",
     fontSize: { xs: "1rem", md: "1.25rem" },
@@ -149,13 +171,14 @@ const SX = {
     lineHeight: 1.6,
     mb: 4,
   },
+
   btn: {
     borderRadius: "50px",
     py: 1.5,
     px: 4,
     fontSize: "1rem",
     textTransform: "none",
-    fontWeight: 700,
+    fontWeight: 800,
     backdropFilter: "blur(10px)",
   },
 
@@ -172,12 +195,13 @@ const SX = {
     overflow: "hidden",
     transition: "opacity 0.3s ease",
   },
+
   progressBarFill: {
     width: "100%",
     background: "linear-gradient(to bottom, #FF9A9E, #A18CD1)",
     borderRadius: "4px",
-    transition: "height 0.2s linear", 
-  }
+    transition: "height 0.2s linear",
+  },
 } as const;
 
 /* ================== Component ================== */
@@ -189,15 +213,13 @@ function ProjectsSection() {
   React.useEffect(() => {
     const handleScroll = () => {
       if (!containerRef.current) return;
-      
+
       const { top, height } = containerRef.current.getBoundingClientRect();
       const viewportHeight = window.innerHeight;
-      
-      const start = top; 
-      const totalDistance = height - viewportHeight;
-      let p = -start / totalDistance;
 
-      // Header Visibility
+      const totalDistance = height - viewportHeight;
+      let p = -top / totalDistance;
+
       const isInside = top <= 50 && top > -(height - viewportHeight - 50);
       setHeaderVisible(!isInside);
 
@@ -207,125 +229,151 @@ function ProjectsSection() {
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll(); 
+    handleScroll();
     return () => {
       window.removeEventListener("scroll", handleScroll);
       setHeaderVisible(true);
     };
   }, [setHeaderVisible]);
 
-  const introFade = Math.min(1, progress * 3); 
-  const introScale = 1 - (introFade * 0.1);    
+  const introFade = Math.min(1, progress * 3);
+  const introScale = 1 - introFade * 0.1;
 
   return (
     <>
-      <GlobalStyles styles={{
-        html: { 
-          scrollSnapType: "y mandatory", 
-          scrollPaddingTop: "0px"
-        } 
-      }} />
+      <GlobalStyles
+        styles={{
+          html: {
+            scrollSnapType: "y mandatory",
+            scrollPaddingTop: "0px",
+          },
+        }}
+      />
 
       <Box ref={containerRef} sx={SX.container} id="projects">
-        
         {/* Progress Bar */}
-        <Box sx={{ 
-            ...SX.progressBarContainer, 
-            opacity: progress > 0 && progress < 1 ? 1 : 0 
-        }}>
-            <Box sx={{ ...SX.progressBarFill, height: `${progress * 100}%` }} />
+        <Box
+          sx={{
+            ...SX.progressBarContainer,
+            opacity: progress > 0 && progress < 1 ? 1 : 0,
+          }}
+        >
+          <Box sx={{ ...SX.progressBarFill, height: `${progress * 100}%` }} />
         </Box>
 
-        {/* --- SLIDE 1: INTRO --- */}
+        {/* --- SLIDE 1: INTRO (DARK) --- */}
         <Box sx={SX.introSlide}>
-           <Box sx={{ 
+          <Box sx={SX.introVignette} />
+
+          <Box
+            sx={{
+              position: "relative",
+              zIndex: 1,
               transition: "transform 0.1s linear, opacity 0.1s linear",
               transform: `scale(${introScale})`,
               opacity: 1 - introFade,
-              textAlign: "center"
-           }}>
-              <Typography sx={SX.introTitle}>
-                  WORK<br/>ARCHIVES
-              </Typography>
-              <Typography sx={{ mt: 4, fontWeight: 600, color: "#888", letterSpacing: 2 }}>
-                  SCROLL TO EXPLORE
-              </Typography>
-           </Box>
+              textAlign: "center",
+            }}
+          >
+            <Typography sx={SX.introTitle}>
+              WORK
+              <br />
+              ARCHIVES
+            </Typography>
+
+            <Typography sx={SX.introSub}>SCROLL TO EXPLORE</Typography>
+          </Box>
         </Box>
 
         {/* --- PROJECT SLIDES --- */}
         {PROJECTS.map((project, index) => {
-            const zIndex = 2 + index;
-            return (
-                <Box
-                    key={project.id}
-                    sx={{
-                        ...SX.stickySlide,
-                        zIndex: zIndex,
-                        bgcolor: "#000", 
-                        boxShadow: "0 -20px 50px rgba(0,0,0,0.5)"
-                    }}
-                >
-                    <Box 
-                        sx={{ 
-                            ...SX.projectImage, 
-                            backgroundImage: `url(${project.image})`,
-                            transform: "scale(1.1)" 
-                        }} 
+          const zIndex = 2 + index;
+          return (
+            <Box
+              key={project.id}
+              sx={{
+                ...SX.stickySlide,
+                zIndex,
+                bgcolor: "#000",
+                boxShadow: "0 -20px 50px rgba(0,0,0,0.5)",
+              }}
+            >
+              <Box
+                sx={{
+                  ...SX.projectImage,
+                  backgroundImage: `url(${project.image})`,
+                  transform: "scale(1.1)",
+                }}
+              />
+              <Box sx={SX.gradientOverlay} />
+
+              <Box sx={SX.contentBox}>
+                <Typography sx={{ ...SX.projectSubtitle, color: project.accent }}>
+                  <Box component="span" sx={{ width: 40, height: 2, bgcolor: project.accent }} />
+                  {project.subtitle}
+                </Typography>
+
+                <Typography variant="h1" sx={SX.projectTitle}>
+                  {project.title}
+                </Typography>
+
+                <Typography variant="body1" sx={SX.projectDesc}>
+                  {project.desc}
+                </Typography>
+
+                <Stack direction="row" spacing={1} sx={{ mb: 4, flexWrap: "wrap" }}>
+                  {project.tags.map((tag) => (
+                    <Chip
+                      key={tag}
+                      label={tag}
+                      sx={{
+                        bgcolor: "rgba(255,255,255,0.1)",
+                        color: "#fff",
+                        backdropFilter: "blur(5px)",
+                        border: "1px solid rgba(255,255,255,0.2)",
+                        mb: 1,
+                      }}
                     />
-                    <Box sx={SX.gradientOverlay} />
-                    
-                    <Box sx={SX.contentBox}>
-                        <Typography sx={{ ...SX.projectSubtitle, color: project.accent }}>
-                            <Box component="span" sx={{ width: 40, height: 2, bgcolor: project.accent }} />
-                            {project.subtitle}
-                        </Typography>
-                        <Typography variant="h1" sx={SX.projectTitle}>
-                            {project.title}
-                        </Typography>
-                        <Typography variant="body1" sx={SX.projectDesc}>
-                            {project.desc}
-                        </Typography>
-                        <Stack direction="row" spacing={1} sx={{ mb: 4 }}>
-                            {project.tags.map(tag => (
-                                <Chip 
-                                    key={tag} 
-                                    label={tag} 
-                                    sx={{ 
-                                        bgcolor: "rgba(255,255,255,0.1)", 
-                                        color: "#fff", 
-                                        backdropFilter: "blur(5px)",
-                                        border: "1px solid rgba(255,255,255,0.2)"
-                                    }} 
-                                />
-                            ))}
-                        </Stack>
-                        <Stack direction="row" spacing={2}>
-                            <Button 
-                                variant="contained" 
-                                endIcon={<ArrowOutwardIcon />}
-                                sx={{ ...SX.btn, bgcolor: "#fff", color: "#000", "&:hover": { bgcolor: "#e0e0e0" } }}
-                                href={project.link}
-                                target="_blank"
-                            >
-                                View Project
-                            </Button>
-                            {project.repo !== "#" && (
-                                <Button 
-                                    variant="outlined" 
-                                    startIcon={<GitHubIcon />}
-                                    sx={{ ...SX.btn, borderColor: "#fff", color: "#fff", "&:hover": { borderColor: "#fff", bgcolor: "rgba(255,255,255,0.1)" } }}
-                                    href={project.repo}
-                                >
-                                    Source
-                                </Button>
-                            )}
-                        </Stack>
-                    </Box>
-                </Box>
-            );
+                  ))}
+                </Stack>
+
+                <Stack direction="row" spacing={2}>
+                  <Button
+                    variant="contained"
+                    endIcon={<ArrowOutwardIcon />}
+                    sx={{
+                      ...SX.btn,
+                      bgcolor: "#fff",
+                      color: "#000",
+                      "&:hover": { bgcolor: "#e0e0e0" },
+                    }}
+                    href={project.link}
+                    target="_blank"
+                  >
+                    View Project
+                  </Button>
+
+                  {project.repo !== "#" && (
+                    <Button
+                      variant="outlined"
+                      startIcon={<GitHubIcon />}
+                      sx={{
+                        ...SX.btn,
+                        borderColor: "#fff",
+                        color: "#fff",
+                        "&:hover": { borderColor: "#fff", bgcolor: "rgba(255,255,255,0.1)" },
+                      }}
+                      href={project.repo}
+                      target="_blank"
+                    >
+                      Source
+                    </Button>
+                  )}
+                </Stack>
+              </Box>
+            </Box>
+          );
         })}
-        {/* Spacer Removed - Handled by Footer in page.tsx */}
       </Box>
     </>
   );

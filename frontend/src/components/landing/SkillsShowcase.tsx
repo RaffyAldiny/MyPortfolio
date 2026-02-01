@@ -33,7 +33,6 @@ function usePrefersReducedMotion() {
   React.useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
     const sync = () => setReduced(mq.matches);
-
     sync();
     mq.addEventListener?.("change", sync);
     return () => mq.removeEventListener?.("change", sync);
@@ -73,19 +72,10 @@ const GROUPS: Record<GroupKey, readonly string[]> = {
     "Roblox Luau",
     "Shopee API",
   ],
-  data: [
-    "MySQL",
-    "PostgreSQL",
-    "MongoDB",
-    "SQLite",
-    "Amazon Redshift",
-    "AWS Glue",
-    "Power BI",
-  ],
+  data: ["MySQL", "PostgreSQL", "MongoDB", "SQLite", "Amazon Redshift", "AWS Glue", "Power BI"],
   tools: ["Git", "Linux", "Figma", "Firebase", "Vercel", "Hostinger", "Unity", "Digital Ocean"],
 } as const;
 
-// Precompute sets once (faster + cleaner than new Set() per filter)
 const GROUP_SET: Record<GroupKey, Set<string>> = {
   all: new Set(),
   frontend: new Set(GROUPS.frontend),
@@ -99,11 +89,10 @@ const PRISM_GRADIENT =
   "linear-gradient(135deg, rgba(255,138,216,0.75), rgba(129,236,255,0.70), rgba(197,152,255,0.70), rgba(125,255,203,0.70))";
 const PRISM_GRADIENT_SOFT =
   "linear-gradient(135deg, rgba(255,138,216,0.35), rgba(129,236,255,0.30), rgba(197,152,255,0.30), rgba(125,255,203,0.30))";
-
 const TITLE_GRADIENT = "linear-gradient(90deg, #ff8ad8, #81ecff, #c598ff, #7dffcb)";
 const INK = "#0B0B10";
 
-/* ================== Pill ================== */
+/* ================== Pill (no hover) ================== */
 function SkillPill({
   skill,
   index,
@@ -119,7 +108,6 @@ function SkillPill({
   const fg = textColor ?? "#2D2D3A";
 
   const baseShadow = `0 4px 18px ${alpha(color, 0.14)}`;
-  const hoverShadow = `0 12px 30px ${alpha(color, 0.26)}`;
 
   return (
     <Box
@@ -132,7 +120,10 @@ function SkillPill({
         borderRadius: 3,
         position: "relative",
 
-        animation: show && !reducedMotion ? `${flyIn} 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards` : "none",
+        animation:
+          show && !reducedMotion
+            ? `${flyIn} 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards`
+            : "none",
         animationDelay: `${index * 0.035}s`,
         opacity: show || reducedMotion ? 1 : 0,
 
@@ -140,7 +131,9 @@ function SkillPill({
         backdropFilter: "blur(6px)",
         border: "1px solid rgba(255, 255, 255, 0.45)",
         boxShadow: baseShadow,
-        transition: reducedMotion ? "none" : "transform 0.2s ease, box-shadow 0.2s ease",
+
+        // no hover transition
+        transition: "none",
 
         "&::before": {
           content: '""',
@@ -160,17 +153,8 @@ function SkillPill({
           pointerEvents: "none",
         },
 
-        "&:hover": reducedMotion
-          ? undefined
-          : {
-              transform: "translateY(-3px) scale(1.03)",
-              boxShadow: hoverShadow,
-              zIndex: 10,
-            },
-
         "@media (prefers-reduced-motion: reduce)": {
           transition: "none",
-          "&:hover": { transform: "none", boxShadow: baseShadow },
         },
       }}
     >
@@ -423,13 +407,7 @@ export default function SkillsShowcase() {
           }}
         >
           {filtered.map((skill, i) => (
-            <SkillPill
-              key={skill.name}
-              skill={skill}
-              index={i}
-              show={isVisible}
-              reducedMotion={reducedMotion}
-            />
+            <SkillPill key={skill.name} skill={skill} index={i} show={isVisible} reducedMotion={reducedMotion} />
           ))}
         </Box>
       </Box>
