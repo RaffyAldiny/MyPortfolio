@@ -9,7 +9,7 @@ import { alpha } from "@mui/material/styles";
 import { keyframes } from "@emotion/react";
 import { SKILLS, type Skill } from "@/constants/skills";
 
-/* --- ANIMATIONS --- */
+/* ================== Animations ================== */
 const textShimmer = keyframes`
   0% { background-position: 0% 50%; }
   100% { background-position: 100% 50%; }
@@ -22,37 +22,30 @@ const prismRotate = keyframes`
 `;
 
 const flyIn = keyframes`
-  0% {
-    opacity: 0;
-    transform: scale(1.12) translateY(18px);
-    filter: blur(10px);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-    filter: blur(0px);
-  }
+  0% { opacity: 0; transform: scale(1.12) translateY(18px); filter: blur(10px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0px); }
 `;
 
-/* --- Reduced motion helper --- */
+/* ================== Reduced motion ================== */
 function usePrefersReducedMotion() {
   const [reduced, setReduced] = React.useState(false);
 
   React.useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const onChange = () => setReduced(mq.matches);
-    onChange();
-    mq.addEventListener?.("change", onChange);
-    return () => mq.removeEventListener?.("change", onChange);
+    const sync = () => setReduced(mq.matches);
+
+    sync();
+    mq.addEventListener?.("change", sync);
+    return () => mq.removeEventListener?.("change", sync);
   }, []);
 
   return reduced;
 }
 
-/* --- Clean grouping for filtering only --- */
+/* ================== Grouping ================== */
 type GroupKey = "all" | "frontend" | "backend" | "data" | "tools";
 
-const GROUPS: Record<GroupKey, string[]> = {
+const GROUPS: Record<GroupKey, readonly string[]> = {
   all: [],
   frontend: [
     "React",
@@ -89,50 +82,41 @@ const GROUPS: Record<GroupKey, string[]> = {
     "AWS Glue",
     "Power BI",
   ],
-  tools: [
-    "Git",
-    "Linux",
-    "Figma",
-    "Firebase",
-    "Vercel",
-    "Hostinger",
-    "Unity",
-    "Digital Ocean",
-  ],
-};
-
-function filterSkills(active: GroupKey) {
-  if (active === "all") return SKILLS;
-  const allowed = new Set(GROUPS[active]);
-  return SKILLS.filter((s) => allowed.has(s.name));
-}
-
-/* ================== Prism Toggle Styles ================== */
-/**
- * Goal:
- * - Keep the same clean ToggleButtonGroup layout
- * - Add a subtle prism “imbued” border and glow so it matches the skill pills
- * - Not too loud: only stronger on selected + hover
- */
-const PRISM = {
-  gradient:
-    "linear-gradient(135deg, rgba(255,138,216,0.75), rgba(129,236,255,0.70), rgba(197,152,255,0.70), rgba(125,255,203,0.70))",
-  gradientSoft:
-    "linear-gradient(135deg, rgba(255,138,216,0.35), rgba(129,236,255,0.30), rgba(197,152,255,0.30), rgba(125,255,203,0.30))",
+  tools: ["Git", "Linux", "Figma", "Firebase", "Vercel", "Hostinger", "Unity", "Digital Ocean"],
 } as const;
 
-/* --- SUB-COMPONENT --- */
+// Precompute sets once (faster + cleaner than new Set() per filter)
+const GROUP_SET: Record<GroupKey, Set<string>> = {
+  all: new Set(),
+  frontend: new Set(GROUPS.frontend),
+  backend: new Set(GROUPS.backend),
+  data: new Set(GROUPS.data),
+  tools: new Set(GROUPS.tools),
+};
+
+/* ================== Prism tokens ================== */
+const PRISM_GRADIENT =
+  "linear-gradient(135deg, rgba(255,138,216,0.75), rgba(129,236,255,0.70), rgba(197,152,255,0.70), rgba(125,255,203,0.70))";
+const PRISM_GRADIENT_SOFT =
+  "linear-gradient(135deg, rgba(255,138,216,0.35), rgba(129,236,255,0.30), rgba(197,152,255,0.30), rgba(125,255,203,0.30))";
+
+const TITLE_GRADIENT = "linear-gradient(90deg, #ff8ad8, #81ecff, #c598ff, #7dffcb)";
+const INK = "#0B0B10";
+
+/* ================== Pill ================== */
 function SkillPill({
-  name,
-  color,
-  textColor,
-  icon,
+  skill,
   index,
   show,
   reducedMotion,
-}: Skill & { index: number; show: boolean; reducedMotion: boolean }) {
+}: {
+  skill: Skill;
+  index: number;
+  show: boolean;
+  reducedMotion: boolean;
+}) {
+  const { name, color, textColor, icon } = skill;
   const fg = textColor ?? "#2D2D3A";
-  const delay = `${index * 0.035}s`;
 
   const baseShadow = `0 4px 18px ${alpha(color, 0.14)}`;
   const hoverShadow = `0 12px 30px ${alpha(color, 0.26)}`;
@@ -148,11 +132,8 @@ function SkillPill({
         borderRadius: 3,
         position: "relative",
 
-        animation:
-          show && !reducedMotion
-            ? `${flyIn} 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards`
-            : "none",
-        animationDelay: delay,
+        animation: show && !reducedMotion ? `${flyIn} 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards` : "none",
+        animationDelay: `${index * 0.035}s`,
         opacity: show || reducedMotion ? 1 : 0,
 
         backgroundColor: "rgba(255, 255, 255, 0.22)",
@@ -167,10 +148,10 @@ function SkillPill({
           inset: 0,
           borderRadius: "inherit",
           padding: "2px",
-          background: `linear-gradient(135deg,
-            ${alpha(color, 0.22)},
-            ${alpha(color, 0.85)},
-            ${alpha(color, 0.22)})`,
+          background: `linear-gradient(135deg, ${alpha(color, 0.22)}, ${alpha(color, 0.85)}, ${alpha(
+            color,
+            0.22
+          )})`,
           backgroundSize: "200% 200%",
           animation: reducedMotion ? "none" : `${prismRotate} 4s linear infinite`,
           WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
@@ -221,7 +202,7 @@ function SkillPill({
   );
 }
 
-/* --- MAIN --- */
+/* ================== Main ================== */
 export default function SkillsShowcase() {
   const reducedMotion = usePrefersReducedMotion();
 
@@ -229,13 +210,21 @@ export default function SkillsShowcase() {
   const containerRef = React.useRef<HTMLDivElement>(null);
 
   const [active, setActive] = React.useState<GroupKey>("all");
-  const filtered = React.useMemo(() => filterSkills(active), [active]);
+
+  const filtered = React.useMemo(() => {
+    if (active === "all") return SKILLS;
+    const allowed = GROUP_SET[active];
+    return SKILLS.filter((s) => allowed.has(s.name));
+  }, [active]);
 
   React.useEffect(() => {
     if (reducedMotion) {
       setIsVisible(true);
       return;
     }
+
+    const el = containerRef.current;
+    if (!el) return;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -247,7 +236,7 @@ export default function SkillsShowcase() {
       { threshold: 0.2 }
     );
 
-    if (containerRef.current) observer.observe(containerRef.current);
+    observer.observe(el);
     return () => observer.disconnect();
   }, [reducedMotion]);
 
@@ -261,17 +250,15 @@ export default function SkillsShowcase() {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-
         scrollSnapAlign: "start",
         scrollSnapStop: "always",
-
         py: { xs: 10, md: 12 },
         px: 2,
         position: "relative",
         overflow: "hidden",
       }}
     >
-      {/* Subtle background texture */}
+      {/* background texture */}
       <Box
         aria-hidden
         sx={{
@@ -290,9 +277,7 @@ export default function SkillsShowcase() {
         }}
       />
 
-      {/* Content */}
       <Box sx={{ width: "100%", maxWidth: 1100, zIndex: 1 }}>
-        {/* Title */}
         <Typography
           variant="h1"
           sx={{
@@ -301,34 +286,27 @@ export default function SkillsShowcase() {
             mb: 2,
             textTransform: "uppercase",
             textAlign: "center",
-
-            backgroundImage: "linear-gradient(90deg, #ff8ad8, #81ecff, #c598ff, #7dffcb)",
+            backgroundImage: TITLE_GRADIENT,
             backgroundSize: "200% auto",
             animation: reducedMotion ? "none" : `${textShimmer} 3s linear infinite`,
             backgroundClip: "text",
             WebkitBackgroundClip: "text",
             color: "transparent",
             filter: "drop-shadow(0 0 15px rgba(212, 179, 255, 0.35))",
-
             opacity: isVisible ? 1 : 0,
             transform: isVisible ? "translateY(0)" : "translateY(-20px)",
             transition: "opacity 0.8s ease, transform 0.8s ease",
-
-            "@media (prefers-reduced-motion: reduce)": {
-              opacity: 1,
-              transform: "none",
-            },
+            "@media (prefers-reduced-motion: reduce)": { opacity: 1, transform: "none" },
           }}
         >
           My Tech Stack
         </Typography>
 
-        {/* Keep your phrasing */}
         <Typography
           sx={{
             textAlign: "center",
             fontWeight: 700,
-            color: alpha("#0B0B10", 0.75),
+            color: alpha(INK, 0.75),
             letterSpacing: 0.25,
             mb: 3.5,
             fontSize: { xs: 13.5, md: 14.5 },
@@ -339,11 +317,10 @@ export default function SkillsShowcase() {
             transition: "opacity 0.8s ease",
           }}
         >
-          These tools are my bestfriends to build modern websites and systems, covering everything from
-          clean user interfaces to reliable backends, databases, and production-ready deployments.
+          These tools are my bestfriends to build modern websites and systems, covering everything from clean user
+          interfaces to reliable backends, databases, and production-ready deployments.
         </Typography>
 
-        {/* Prism-imbued filter row */}
         <Box sx={{ display: "flex", justifyContent: "center", mb: 4 }}>
           <ToggleButtonGroup
             exclusive
@@ -353,20 +330,18 @@ export default function SkillsShowcase() {
               position: "relative",
               borderRadius: 999,
               p: 0.6,
-
               backgroundColor: "rgba(255,255,255,0.26)",
               border: "1px solid rgba(255,255,255,0.55)",
               backdropFilter: "blur(10px)",
               boxShadow: "0 10px 30px rgba(0,0,0,0.06)",
 
-              // Prism border shell
               "&::before": {
                 content: '""',
                 position: "absolute",
                 inset: 0,
                 borderRadius: "inherit",
                 padding: "2px",
-                background: PRISM.gradientSoft,
+                background: PRISM_GRADIENT_SOFT,
                 backgroundSize: "200% 200%",
                 animation: reducedMotion ? "none" : `${prismRotate} 6.5s linear infinite`,
                 WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
@@ -376,10 +351,7 @@ export default function SkillsShowcase() {
                 opacity: 0.75,
               },
 
-              "& .MuiToggleButtonGroup-grouped": {
-                border: 0,
-                margin: 0,
-              },
+              "& .MuiToggleButtonGroup-grouped": { border: 0, margin: 0 },
 
               "& .MuiToggleButton-root": {
                 border: 0,
@@ -390,7 +362,7 @@ export default function SkillsShowcase() {
                 fontSize: 11.5,
                 px: { xs: 1.2, sm: 1.75 },
                 py: 0.95,
-                color: alpha("#0B0B10", 0.62),
+                color: alpha(INK, 0.62),
                 backgroundColor: "rgba(255,255,255,0.25)",
                 backdropFilter: "blur(8px)",
                 transition: reducedMotion
@@ -403,10 +375,9 @@ export default function SkillsShowcase() {
                 transform: reducedMotion ? "none" : "translateY(-1px)",
               },
 
-              // Selected: stronger prism + slight glow, but still clean
               "& .MuiToggleButton-root.Mui-selected": {
                 backgroundColor: "rgba(255,255,255,0.82)",
-                color: "#0B0B10",
+                color: INK,
                 boxShadow: "0 10px 24px rgba(0,0,0,0.08)",
                 position: "relative",
               },
@@ -417,7 +388,7 @@ export default function SkillsShowcase() {
                 inset: 0,
                 borderRadius: 999,
                 padding: "2px",
-                background: PRISM.gradient,
+                background: PRISM_GRADIENT,
                 backgroundSize: "200% 200%",
                 animation: reducedMotion ? "none" : `${prismRotate} 4.5s linear infinite`,
                 WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
@@ -440,7 +411,6 @@ export default function SkillsShowcase() {
           </ToggleButtonGroup>
         </Box>
 
-        {/* Pills */}
         <Box
           sx={{
             display: "flex",
@@ -455,7 +425,7 @@ export default function SkillsShowcase() {
           {filtered.map((skill, i) => (
             <SkillPill
               key={skill.name}
-              {...skill}
+              skill={skill}
               index={i}
               show={isVisible}
               reducedMotion={reducedMotion}
