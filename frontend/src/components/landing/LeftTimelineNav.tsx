@@ -161,7 +161,7 @@ export default function LeftTimelineNav({
     };
   }, [sections, scrollOffsetPx]);
 
-  // HARD-LOCK IconButton into a perfect circle
+  // Hard-lock IconButton into a perfect circle
   const circleBtnBase = {
     width: 40,
     height: 40,
@@ -185,10 +185,80 @@ export default function LeftTimelineNav({
     "&:hover": { bgcolor: isDarkOverlay ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.07)" },
   } as const;
 
-  /* ======================= MOBILE UI (collision-safe) ======================= */
+  /* ======================= MOBILE: align with View Project CTA ======================= */
+  const [ctaBottomPx, setCtaBottomPx] = React.useState<number | null>(null);
+
+  React.useEffect(() => {
+    if (!isMobile) return;
+
+    let raf = 0;
+
+    const findVisibleCtaBottom = () => {
+      const nodes = Array.from(
+        document.querySelectorAll<HTMLElement>('[data-project-cta="1"]')
+      );
+
+      if (!nodes.length) {
+        setCtaBottomPx(null);
+        return;
+      }
+
+      const vh = window.innerHeight;
+
+      // pick CTA whose bottom is closest to viewport bottom (most "bottom-aligned" CTA)
+      let best: HTMLElement | null = null;
+      let bestBottom = -Infinity;
+
+      for (const el of nodes) {
+        const r = el.getBoundingClientRect();
+
+        // visible enough
+        const visible = r.bottom > 0 && r.top < vh;
+        if (!visible) continue;
+
+        if (r.bottom > bestBottom) {
+          bestBottom = r.bottom;
+          best = el;
+        }
+      }
+
+      if (!best) {
+        setCtaBottomPx(null);
+        return;
+      }
+
+      const rect = best.getBoundingClientRect();
+      const distanceFromBottom = Math.max(0, Math.round(vh - rect.bottom));
+
+      // tiny clamp so it doesn’t get glued to the edge on very small screens
+      const clamped = Math.min(Math.max(distanceFromBottom, 12), 140);
+      setCtaBottomPx(clamped);
+    };
+
+    const onScrollOrResize = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(findVisibleCtaBottom);
+    };
+
+    window.addEventListener("scroll", onScrollOrResize, { passive: true });
+    window.addEventListener("resize", onScrollOrResize, { passive: true });
+
+    // initial
+    findVisibleCtaBottom();
+
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", onScrollOrResize);
+      window.removeEventListener("resize", onScrollOrResize);
+    };
+  }, [isMobile]);
+
   if (isMobile) {
-    // While in Projects (dark section), move it up and dock right to avoid CTA collisions.
-    const dockRight = isDarkOverlay;
+    const inProjects = isDarkOverlay; // your projects zone is dark now
+    const bottom = inProjects ? (ctaBottomPx ?? 18) : 18;
+
+    // Keep it on the right in projects so it’s paired with the left CTA visually.
+    const dockRight = inProjects;
 
     return (
       <Box
@@ -196,8 +266,7 @@ export default function LeftTimelineNav({
           position: "fixed",
           zIndex: 9999,
           filter: shadow,
-
-          bottom: dockRight ? 92 : 18, // ✅ lifts above "View Project" button area
+          bottom: `calc(${bottom}px + env(safe-area-inset-bottom))`,
           left: dockRight ? "auto" : "50%",
           right: dockRight ? 14 : "auto",
           transform: dockRight ? "none" : "translateX(-50%)",
@@ -223,7 +292,6 @@ export default function LeftTimelineNav({
             <KeyboardArrowUpRoundedIcon sx={{ transform: "rotate(-90deg)" }} />
           </IconButton>
 
-          {/* keep indicators minimal on mobile */}
           {sections.map((s) => {
             const isActive = s.id === activeId;
             return (
@@ -242,7 +310,7 @@ export default function LeftTimelineNav({
             );
           })}
 
-          {/* Hide label while docked right to keep it compact and avoid covering content */}
+          {/* show label only when centered mode (outside projects) */}
           {!dockRight && (
             <Typography
               sx={{

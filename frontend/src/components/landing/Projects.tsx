@@ -11,6 +11,7 @@ import ArrowOutwardIcon from "@mui/icons-material/ArrowOutward";
 import GlobalStyles from "@mui/material/GlobalStyles";
 import { keyframes } from "@emotion/react";
 import { useHeaderTheme } from "@/context/HeaderTheme";
+import ProjectProgressRail from "@/components/landing/ProjectProgressRail";
 
 /* ================== Data ================== */
 const PROJECTS = [
@@ -47,25 +48,21 @@ const PROJECTS = [
     link: "#",
     repo: "#",
   },
-];
+] as const;
 
 /* ================== Animations ================== */
 const textShimmer = keyframes`
   0% { background-position: 0% 50%; }
   100% { background-position: 100% 50%; }
 `;
-
-/* Optional: slow prism drift for subtle depth */
 const prismDrift = keyframes`
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 `;
 
-/* ================== Reduced motion ================== */
 function usePrefersReducedMotion() {
   const [reduced, setReduced] = React.useState(false);
-
   React.useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
     const sync = () => setReduced(mq.matches);
@@ -73,22 +70,23 @@ function usePrefersReducedMotion() {
     mq.addEventListener?.("change", sync);
     return () => mq.removeEventListener?.("change", sync);
   }, []);
-
   return reduced;
 }
 
-/* ================== Tokens ================== */
-const TITLE_GRADIENT = "linear-gradient(90deg, #ff8ad8, #81ecff, #c598ff, #7dffcb)";
+const TITLE_GRADIENT =
+  "linear-gradient(90deg, #ff8ad8, #81ecff, #c598ff, #7dffcb)";
+
+function clamp(n: number, a: number, b: number) {
+  return Math.max(a, Math.min(b, n));
+}
+function clamp01(v: number) {
+  return clamp(v, 0, 1);
+}
 
 /* ================== Styles ================== */
 const SX = {
-  container: {
-    width: "100%",
-    position: "relative",
-    bgcolor: "#050505",
-  },
+  container: { width: "100%", position: "relative", bgcolor: "#050505" },
 
-  // STICKY SLIDE
   stickySlide: {
     height: "100vh",
     width: "100%",
@@ -102,7 +100,6 @@ const SX = {
     willChange: "transform",
   },
 
-  // INTRO SLIDE (dark)
   introSlide: {
     height: "100vh",
     width: "100%",
@@ -128,34 +125,6 @@ const SX = {
     zIndex: 0,
   },
 
-  introTitle: {
-    fontWeight: 900,
-    fontSize: { xs: "4rem", md: "10rem" },
-    lineHeight: 0.8,
-    textTransform: "uppercase",
-    textAlign: "center",
-
-    // shimmer text like TechStack
-    backgroundImage: TITLE_GRADIENT,
-    backgroundSize: "200% auto",
-    backgroundClip: "text",
-    WebkitBackgroundClip: "text",
-    color: "transparent",
-    WebkitTextFillColor: "transparent",
-
-    // glow
-    filter: "drop-shadow(0 0 18px rgba(212, 179, 255, 0.30)) drop-shadow(0 10px 30px rgba(0,0,0,0.45))",
-  },
-
-  introSub: {
-    mt: 4,
-    fontWeight: 800,
-    color: "rgba(255,255,255,0.72)",
-    letterSpacing: 2,
-    textTransform: "uppercase",
-  },
-
-  // subtle moving top sheen (optional)
   introSheen: {
     position: "absolute",
     inset: 0,
@@ -164,6 +133,28 @@ const SX = {
     backgroundImage:
       "radial-gradient(circle at 35% 35%, rgba(129,236,255,0.25) 0%, transparent 45%), radial-gradient(circle at 70% 55%, rgba(255,138,216,0.22) 0%, transparent 55%)",
     pointerEvents: "none",
+  },
+
+  introTitle: {
+    fontWeight: 900,
+    fontSize: { xs: "4rem", md: "10rem" },
+    lineHeight: 0.8,
+    textTransform: "uppercase",
+    textAlign: "center",
+    backgroundImage: TITLE_GRADIENT,
+    backgroundSize: "200% auto",
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
+    filter:
+      "drop-shadow(0 0 18px rgba(212, 179, 255, 0.30)) drop-shadow(0 10px 30px rgba(0,0,0,0.45))",
+  },
+
+  introSub: {
+    mt: 4,
+    fontWeight: 800,
+    color: "rgba(255,255,255,0.72)",
+    letterSpacing: 2,
+    textTransform: "uppercase",
   },
 
   projectImage: {
@@ -177,7 +168,8 @@ const SX = {
   gradientOverlay: {
     position: "absolute",
     inset: 0,
-    background: "linear-gradient(to top, #000 0%, rgba(0,0,0,0.82) 40%, rgba(0,0,0,0) 100%)",
+    background:
+      "linear-gradient(to top, #000 0%, rgba(0,0,0,0.82) 40%, rgba(0,0,0,0) 100%)",
     zIndex: 2,
   },
 
@@ -229,63 +221,175 @@ const SX = {
     fontWeight: 800,
     backdropFilter: "blur(10px)",
   },
-
-  progressBarContainer: {
-    position: "fixed",
-    right: { xs: 20, md: 40 },
-    top: "50%",
-    transform: "translateY(-50%)",
-    height: "200px",
-    width: "4px",
-    background: "rgba(255,255,255,0.1)",
-    borderRadius: "4px",
-    zIndex: 100,
-    overflow: "hidden",
-    transition: "opacity 0.3s ease",
-  },
-
-  progressBarFill: {
-    width: "100%",
-    background: "linear-gradient(to bottom, #FF9A9E, #A18CD1)",
-    borderRadius: "4px",
-    transition: "height 0.2s linear",
-  },
 } as const;
 
-/* ================== Component ================== */
+function ProjectSlide({ project, zIndex }: { project: (typeof PROJECTS)[number]; zIndex: number }) {
+  return (
+    <Box sx={{ ...SX.stickySlide, zIndex, bgcolor: "#000", boxShadow: "0 -20px 50px rgba(0,0,0,0.5)" }}>
+      <Box sx={{ ...SX.projectImage, backgroundImage: `url(${project.image})`, transform: "scale(1.1)" }} />
+      <Box sx={SX.gradientOverlay} />
+
+      <Box sx={SX.contentBox}>
+        <Typography sx={{ ...SX.projectSubtitle, color: project.accent }}>
+          <Box component="span" sx={{ width: 40, height: 2, bgcolor: project.accent }} />
+          {project.subtitle}
+        </Typography>
+
+        <Typography variant="h1" sx={SX.projectTitle}>
+          {project.title}
+        </Typography>
+
+        <Typography variant="body1" sx={SX.projectDesc}>
+          {project.desc}
+        </Typography>
+
+        <Stack direction="row" spacing={1} sx={{ mb: 4, flexWrap: "wrap" }}>
+          {project.tags.map((tag) => (
+            <Chip
+              key={tag}
+              label={tag}
+              sx={{
+                bgcolor: "rgba(255,255,255,0.1)",
+                color: "#fff",
+                backdropFilter: "blur(5px)",
+                border: "1px solid rgba(255,255,255,0.2)",
+                mb: 1,
+              }}
+            />
+          ))}
+        </Stack>
+
+        <Stack direction="row" spacing={2}>
+          <Button
+            data-project-cta="1"
+            variant="contained"
+            endIcon={<ArrowOutwardIcon />}
+            sx={{ ...SX.btn, bgcolor: "#fff", color: "#000", "&:hover": { bgcolor: "#e0e0e0" } }}
+            href={project.link}
+            target="_blank"
+          >
+            View Project
+          </Button>
+
+          {project.repo !== "#" && (
+            <Button
+              variant="outlined"
+              startIcon={<GitHubIcon />}
+              sx={{
+                ...SX.btn,
+                borderColor: "#fff",
+                color: "#fff",
+                "&:hover": { borderColor: "#fff", bgcolor: "rgba(255,255,255,0.1)" },
+              }}
+              href={project.repo}
+              target="_blank"
+            >
+              Source
+            </Button>
+          )}
+        </Stack>
+      </Box>
+    </Box>
+  );
+}
+
 function ProjectsSection() {
   const reducedMotion = usePrefersReducedMotion();
-
   const containerRef = React.useRef<HTMLDivElement>(null);
-  const [progress, setProgress] = React.useState(0);
   const { setHeaderVisible } = useHeaderTheme();
 
+  const totalSlides = PROJECTS.length + 1; // intro + projects
+
+  const [progress, setProgress] = React.useState(0);
+  const [activeIndex, setActiveIndex] = React.useState(0);
+  const [isInsideProjects, setIsInsideProjects] = React.useState(false);
+
+  // stable absolute bounds of the projects section
+  const boundsRef = React.useRef({ startY: 0, endY: 1, height: 1 });
+
   React.useEffect(() => {
-    const handleScroll = () => {
-      if (!containerRef.current) return;
+    const el = containerRef.current;
+    if (!el) return;
 
-      const { top, height } = containerRef.current.getBoundingClientRect();
-      const viewportHeight = window.innerHeight;
+    let raf = 0;
 
-      const totalDistance = height - viewportHeight;
-      let p = -top / totalDistance;
+    const measure = () => {
+      const rect = el.getBoundingClientRect();
+      const startY = window.scrollY + rect.top;
+      const height = rect.height;
 
-      // Header Visibility
-      const isInside = top <= 50 && top > -(height - viewportHeight - 50);
-      setHeaderVisible(!isInside);
+      // endY for visibility range (full container)
+      const endY = startY + height;
 
-      if (p < 0) p = 0;
-      if (p > 1) p = 1;
-      setProgress(p);
+      boundsRef.current = { startY, endY, height };
     };
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
+    const ro = new ResizeObserver(() => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(measure);
+    });
+
+    ro.observe(el);
+    measure();
+
+    window.addEventListener("resize", measure, { passive: true });
+
     return () => {
-      window.removeEventListener("scroll", handleScroll);
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, []);
+
+  React.useEffect(() => {
+    let raf = 0;
+
+    const compute = () => {
+      const el = containerRef.current;
+      if (!el) return;
+
+      const { startY, endY } = boundsRef.current;
+      const y = window.scrollY;
+      const vh = window.innerHeight;
+
+      // ✅ inside detection based on absolute scroll range, no flicker
+      // keep a buffer so sticky snapping never flips it off
+      const headerOffset = 80;
+      const buffer = Math.round(vh * 0.65);
+      const inside = y >= startY - headerOffset - buffer && y <= endY - headerOffset + buffer;
+
+      setIsInsideProjects(inside);
+      setHeaderVisible(!inside);
+
+      // ✅ progress based on viewport-height steps (snap accurate)
+      // local scroll inside projects section
+      const local = clamp(y - startY, 0, (totalSlides - 1) * vh);
+      const denom = Math.max(1, (totalSlides - 1) * vh);
+      const p = clamp01(local / denom);
+
+      // ✅ active index changes only when you actually reach the next stop
+      const idx = clamp(Math.floor(local / vh + 1e-6), 0, totalSlides - 1);
+
+      setProgress(p);
+      setActiveIndex(idx);
+    };
+
+    const onScroll = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(compute);
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+    compute();
+
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
       setHeaderVisible(true);
     };
-  }, [setHeaderVisible]);
+  }, [setHeaderVisible, totalSlides]);
 
   const introFade = Math.min(1, progress * 3);
   const introScale = 1 - introFade * 0.1;
@@ -301,18 +405,12 @@ function ProjectsSection() {
         }}
       />
 
-      <Box ref={containerRef} sx={SX.container} id="projects">
-        {/* Progress Bar */}
-        <Box
-          sx={{
-            ...SX.progressBarContainer,
-            opacity: progress > 0 && progress < 1 ? 1 : 0,
-          }}
-        >
-          <Box sx={{ ...SX.progressBarFill, height: `${progress * 100}%` }} />
-        </Box>
+      {/* show only inside projects, and hide on intro via your rail component */}
+      {isInsideProjects && (
+        <ProjectProgressRail progress={progress} activeIndex={activeIndex} totalSlides={totalSlides} />
+      )}
 
-        {/* --- SLIDE 1: INTRO (DARK + SHIMMER) --- */}
+      <Box ref={containerRef} sx={SX.container} id="projects">
         <Box sx={SX.introSlide}>
           <Box sx={SX.introVignette} />
           <Box
@@ -349,95 +447,9 @@ function ProjectsSection() {
           </Box>
         </Box>
 
-        {/* --- PROJECT SLIDES --- */}
-        {PROJECTS.map((project, index) => {
-          const zIndex = 2 + index;
-          return (
-            <Box
-              key={project.id}
-              sx={{
-                ...SX.stickySlide,
-                zIndex,
-                bgcolor: "#000",
-                boxShadow: "0 -20px 50px rgba(0,0,0,0.5)",
-              }}
-            >
-              <Box
-                sx={{
-                  ...SX.projectImage,
-                  backgroundImage: `url(${project.image})`,
-                  transform: "scale(1.1)",
-                }}
-              />
-              <Box sx={SX.gradientOverlay} />
-
-              <Box sx={SX.contentBox}>
-                <Typography sx={{ ...SX.projectSubtitle, color: project.accent }}>
-                  <Box component="span" sx={{ width: 40, height: 2, bgcolor: project.accent }} />
-                  {project.subtitle}
-                </Typography>
-
-                <Typography variant="h1" sx={SX.projectTitle}>
-                  {project.title}
-                </Typography>
-
-                <Typography variant="body1" sx={SX.projectDesc}>
-                  {project.desc}
-                </Typography>
-
-                <Stack direction="row" spacing={1} sx={{ mb: 4, flexWrap: "wrap" }}>
-                  {project.tags.map((tag) => (
-                    <Chip
-                      key={tag}
-                      label={tag}
-                      sx={{
-                        bgcolor: "rgba(255,255,255,0.1)",
-                        color: "#fff",
-                        backdropFilter: "blur(5px)",
-                        border: "1px solid rgba(255,255,255,0.2)",
-                        mb: 1,
-                      }}
-                    />
-                  ))}
-                </Stack>
-
-                <Stack direction="row" spacing={2}>
-                  <Button
-                    variant="contained"
-                    endIcon={<ArrowOutwardIcon />}
-                    sx={{
-                      ...SX.btn,
-                      bgcolor: "#fff",
-                      color: "#000",
-                      "&:hover": { bgcolor: "#e0e0e0" },
-                    }}
-                    href={project.link}
-                    target="_blank"
-                  >
-                    View Project
-                  </Button>
-
-                  {project.repo !== "#" && (
-                    <Button
-                      variant="outlined"
-                      startIcon={<GitHubIcon />}
-                      sx={{
-                        ...SX.btn,
-                        borderColor: "#fff",
-                        color: "#fff",
-                        "&:hover": { borderColor: "#fff", bgcolor: "rgba(255,255,255,0.1)" },
-                      }}
-                      href={project.repo}
-                      target="_blank"
-                    >
-                      Source
-                    </Button>
-                  )}
-                </Stack>
-              </Box>
-            </Box>
-          );
-        })}
+        {PROJECTS.map((p, i) => (
+          <ProjectSlide key={p.id} project={p} zIndex={2 + i} />
+        ))}
       </Box>
     </>
   );
