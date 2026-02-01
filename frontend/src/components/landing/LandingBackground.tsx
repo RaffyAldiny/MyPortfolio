@@ -1,4 +1,3 @@
-// src/components/landing/LandingBackground.tsx
 "use client";
 
 import * as React from "react";
@@ -65,13 +64,13 @@ const wrapTau = (v: number) => {
   return v;
 };
 
-function shapePoints(type: ShapeType, n: number, seed: number) {
+function shapePoints(type: ShapeType, n: number, seed: number, isMobile: boolean) {
   const rng = mulberry32(seed);
   const xs = new Float32Array(n);
   const ys = new Float32Array(n);
 
-  const scale = 5.8;
-  const jitter = () => rr(rng, -6.8, 6.8);
+  const scale = isMobile ? 3.0 : 5.8; // Resized for mobile
+  const jitter = () => rr(rng, isMobile ? -3.5 : -6.8, isMobile ? 3.5 : 6.8);
 
   for (let i = 0; i < n; i++) {
     const t = (i / n) * TAU;
@@ -206,7 +205,6 @@ export default function LandingBackground() {
     const ctx = canvas.getContext("2d", { alpha: true });
     if (!ctx) return;
 
-    // Crisp small sprites
     ctx.imageSmoothingEnabled = false;
 
     let raf = 0;
@@ -216,12 +214,10 @@ export default function LandingBackground() {
     let h = 0;
     let dpr = 1;
 
-    // overwritten in build() (same behavior)
     let FLOW = 320;
     let SHP = 720;
     let pad = 26;
 
-    // Flow arrays
     let fx = new Float32Array(0);
     let fy = new Float32Array(0);
     let vx = new Float32Array(0);
@@ -231,22 +227,19 @@ export default function LandingBackground() {
     let omega = new Float32Array(0);
     let hueBase = new Uint16Array(0);
     let sizeIdx = new Uint8Array(0);
-    let flowBloomMask = new Uint8Array(0); // 1 if bloom, 0 else
+    let flowBloomMask = new Uint8Array(0);
 
-    // Shape arrays
     let shHue = new Uint16Array(0);
     let shSize = new Uint8Array(0);
     let shPhase = new Float32Array(0);
     let shMod7 = new Uint8Array(0);
-    let shBloomMask = new Uint8Array(0); // 1 if bloom, 0 else
+    let shBloomMask = new Uint8Array(0);
 
-    // Cluster morph temp arrays
     let mx = new Float32Array(0);
     let my = new Float32Array(0);
 
     const H = 48;
 
-    // sprites + precomputed halves
     let sprBase: HTMLCanvasElement[][] = [];
     let sprBloom: HTMLCanvasElement[][] = [];
     let sprHalfW: number[][] = [];
@@ -277,14 +270,13 @@ export default function LandingBackground() {
 
       const isMobile = w < 640;
 
-      // SAME SETTINGS
-      FLOW = isMobile ? 150 : 850;
-      SHP = isMobile ? 100 : 250;
-      pad = isMobile ? 24 : 26;
+      // Resizing logic for mobile
+      FLOW = isMobile ? 150 : 320; // Less particles on mobile
+      SHP = isMobile ? 350 : 720;  // Halved shape particles
+      pad = isMobile ? 18 : 26;
 
-      // SAME sprite sizes/cores
-      const sizes = isMobile ? [9, 14, 22] : [8, 13, 20];
-      const cores = isMobile ? [1.0, 1.25, 1.55] : [1.0, 1.2, 1.5];
+      const sizes = isMobile ? [5, 10, 16] : [8, 13, 20];
+      const cores = isMobile ? [0.8, 1.0, 1.2] : [1.0, 1.2, 1.5];
 
       sprBase = Array.from({ length: H }, (_, k) => {
         const hue = Math.round((k * 360) / H);
@@ -295,7 +287,6 @@ export default function LandingBackground() {
         ];
       });
 
-      // Pre-baked bloom
       sprBloom = Array.from({ length: H }, (_, hi) => [
         makeBloomSprite(sprBase[hi][0], 2.1),
         makeBloomSprite(sprBase[hi][1], 2.0),
@@ -324,7 +315,6 @@ export default function LandingBackground() {
         sprBloom[hi][2].height * 0.5,
       ]);
 
-      // deterministic particles
       const rng = mulberry32(123456789);
 
       fx = new Float32Array(FLOW);
@@ -338,29 +328,21 @@ export default function LandingBackground() {
       sizeIdx = new Uint8Array(FLOW);
       flowBloomMask = new Uint8Array(FLOW);
 
-      const baseVx = isMobile ? 14 : 18;
-      const baseVy = isMobile ? -10 : -14;
+      const baseVx = isMobile ? 12 : 18;
+      const baseVy = isMobile ? -8 : -14;
 
       for (let i = 0; i < FLOW; i++) {
         fx[i] = rr(rng, 0, w);
         fy[i] = rr(rng, 0, h);
-
         vx[i] = baseVx + rr(rng, -14, 22);
         vy[i] = baseVy + rr(rng, -18, 14);
-
-        alp[i] = isMobile ? rr(rng, 0.58, 1.0) : rr(rng, 0.48, 0.98);
-
+        alp[i] = isMobile ? rr(rng, 0.50, 0.90) : rr(rng, 0.48, 0.98);
         phase[i] = rr(rng, 0, TAU);
-
         const spd = rr(rng, 0.95, 2.2);
         omega[i] = 1.6 * spd;
-
         hueBase[i] = Math.floor(rr(rng, 0, H));
-
         const pick = rr(rng, 0, 1);
         sizeIdx[i] = pick < 0.55 ? 0 : pick < 0.85 ? 1 : 2;
-
-        // replaces (i % 6) in hot loop
         flowBloomMask[i] = i % 6 === 0 ? 1 : 0;
       }
 
@@ -377,18 +359,15 @@ export default function LandingBackground() {
         shSize[i] = pick < 0.4 ? 0 : pick < 0.8 ? 1 : 2;
         shPhase[i] = rr(rngS, 0, TAU);
         shMod7[i] = i % 7;
-
-        // replaces (i % 7) in hot loop
         shBloomMask[i] = i % 7 === 0 ? 1 : 0;
       }
 
-      // cluster morph temp buffers
       mx = new Float32Array(SHP);
       my = new Float32Array(SHP);
 
       for (const s of SHAPES) {
-        leftSet[s] = shapePoints(s, SHP, left.seed + s.length * 101);
-        rightSet[s] = shapePoints(s, SHP, right.seed + s.length * 131);
+        leftSet[s] = shapePoints(s, SHP, left.seed + s.length * 101, isMobile);
+        rightSet[s] = shapePoints(s, SHP, right.seed + s.length * 131, isMobile);
       }
     };
 
@@ -467,7 +446,6 @@ export default function LandingBackground() {
 
       const timeHue = Math.floor(now / 220) % H;
 
-      // pass 1
       ctx.save();
       ctx.globalCompositeOperation = "source-over";
 
@@ -496,7 +474,6 @@ export default function LandingBackground() {
 
       ctx.restore();
 
-      // pass 2 bloom
       ctx.save();
       ctx.globalCompositeOperation = "screen";
 
@@ -520,12 +497,11 @@ export default function LandingBackground() {
         );
       }
 
-      // clusters
       const isMobile = w < 640;
-      const lx = isMobile ? w * 0.14 : w * 0.22;
-      const ly = isMobile ? h * 0.26 : h * 0.36;
-      const rx = isMobile ? w * 0.86 : w * 0.8;
-      const ry = isMobile ? h * 0.7 : h * 0.6;
+      const lx = isMobile ? w * 0.18 : w * 0.22;
+      const ly = isMobile ? h * 0.30 : h * 0.36;
+      const rx = isMobile ? w * 0.82 : w * 0.8;
+      const ry = isMobile ? h * 0.65 : h * 0.6;
 
       drawCluster(now, left, leftSet, lx, ly, 8);
       drawCluster(now, right, rightSet, rx, ry, 26);
@@ -592,12 +568,9 @@ export default function LandingBackground() {
         inset: 0,
         overflow: "hidden",
         zIndex: 0,
-
-        // PURE WHITE BACKGROUND ONLY
         background: "#FFFFFF",
       }}
     >
-      {/* mist layers */}
       <Box
         sx={{
           position: "absolute",
@@ -631,7 +604,6 @@ export default function LandingBackground() {
         }}
       />
 
-      {/* canvas particles */}
       <Box
         component="canvas"
         ref={canvasRef}
@@ -644,7 +616,6 @@ export default function LandingBackground() {
         }}
       />
 
-      {/* reduce motion support */}
       <Box
         sx={{
           "@media (prefers-reduced-motion: reduce)": {

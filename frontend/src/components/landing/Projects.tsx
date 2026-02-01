@@ -9,6 +9,7 @@ import Chip from "@mui/material/Chip";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import ArrowOutwardIcon from "@mui/icons-material/ArrowOutward";
 import GlobalStyles from "@mui/material/GlobalStyles";
+import { keyframes } from "@emotion/react";
 import { useHeaderTheme } from "@/context/HeaderTheme";
 
 /* ================== Data ================== */
@@ -48,6 +49,37 @@ const PROJECTS = [
   },
 ];
 
+/* ================== Animations ================== */
+const textShimmer = keyframes`
+  0% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+`;
+
+/* Optional: slow prism drift for subtle depth */
+const prismDrift = keyframes`
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+`;
+
+/* ================== Reduced motion ================== */
+function usePrefersReducedMotion() {
+  const [reduced, setReduced] = React.useState(false);
+
+  React.useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const sync = () => setReduced(mq.matches);
+    sync();
+    mq.addEventListener?.("change", sync);
+    return () => mq.removeEventListener?.("change", sync);
+  }, []);
+
+  return reduced;
+}
+
+/* ================== Tokens ================== */
+const TITLE_GRADIENT = "linear-gradient(90deg, #ff8ad8, #81ecff, #c598ff, #7dffcb)";
+
 /* ================== Styles ================== */
 const SX = {
   container: {
@@ -70,7 +102,7 @@ const SX = {
     willChange: "transform",
   },
 
-  // INTRO SLIDE (now DARK)
+  // INTRO SLIDE (dark)
   introSlide: {
     height: "100vh",
     width: "100%",
@@ -87,34 +119,51 @@ const SX = {
     zIndex: 1,
   },
 
+  introVignette: {
+    position: "absolute",
+    inset: 0,
+    background:
+      "radial-gradient(ellipse at center, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0) 55%), radial-gradient(ellipse at center, rgba(0,0,0,0) 0%, rgba(0,0,0,0.70) 82%)",
+    pointerEvents: "none",
+    zIndex: 0,
+  },
+
   introTitle: {
     fontWeight: 900,
     fontSize: { xs: "4rem", md: "10rem" },
     lineHeight: 0.8,
     textTransform: "uppercase",
-    background: "linear-gradient(135deg, #FF9A9E 0%, #A18CD1 100%)",
-    WebkitBackgroundClip: "text",
-    WebkitTextFillColor: "transparent",
     textAlign: "center",
-    textShadow: "0 10px 30px rgba(0,0,0,0.45)",
+
+    // shimmer text like TechStack
+    backgroundImage: TITLE_GRADIENT,
+    backgroundSize: "200% auto",
+    backgroundClip: "text",
+    WebkitBackgroundClip: "text",
+    color: "transparent",
+    WebkitTextFillColor: "transparent",
+
+    // glow
+    filter: "drop-shadow(0 0 18px rgba(212, 179, 255, 0.30)) drop-shadow(0 10px 30px rgba(0,0,0,0.45))",
   },
 
   introSub: {
     mt: 4,
-    fontWeight: 700,
-    color: "rgba(255,255,255,0.68)",
+    fontWeight: 800,
+    color: "rgba(255,255,255,0.72)",
     letterSpacing: 2,
     textTransform: "uppercase",
   },
 
-  // subtle vignette to make center pop (optional but nice)
-  introVignette: {
+  // subtle moving top sheen (optional)
+  introSheen: {
     position: "absolute",
     inset: 0,
-    background:
-      "radial-gradient(ellipse at center, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0) 55%), radial-gradient(ellipse at center, rgba(0,0,0,0) 0%, rgba(0,0,0,0.65) 80%)",
-    pointerEvents: "none",
     zIndex: 0,
+    opacity: 0.18,
+    backgroundImage:
+      "radial-gradient(circle at 35% 35%, rgba(129,236,255,0.25) 0%, transparent 45%), radial-gradient(circle at 70% 55%, rgba(255,138,216,0.22) 0%, transparent 55%)",
+    pointerEvents: "none",
   },
 
   projectImage: {
@@ -128,8 +177,7 @@ const SX = {
   gradientOverlay: {
     position: "absolute",
     inset: 0,
-    background:
-      "linear-gradient(to top, #000 0%, rgba(0,0,0,0.82) 40%, rgba(0,0,0,0) 100%)",
+    background: "linear-gradient(to top, #000 0%, rgba(0,0,0,0.82) 40%, rgba(0,0,0,0) 100%)",
     zIndex: 2,
   },
 
@@ -206,6 +254,8 @@ const SX = {
 
 /* ================== Component ================== */
 function ProjectsSection() {
+  const reducedMotion = usePrefersReducedMotion();
+
   const containerRef = React.useRef<HTMLDivElement>(null);
   const [progress, setProgress] = React.useState(0);
   const { setHeaderVisible } = useHeaderTheme();
@@ -220,6 +270,7 @@ function ProjectsSection() {
       const totalDistance = height - viewportHeight;
       let p = -top / totalDistance;
 
+      // Header Visibility
       const isInside = top <= 50 && top > -(height - viewportHeight - 50);
       setHeaderVisible(!isInside);
 
@@ -261,9 +312,17 @@ function ProjectsSection() {
           <Box sx={{ ...SX.progressBarFill, height: `${progress * 100}%` }} />
         </Box>
 
-        {/* --- SLIDE 1: INTRO (DARK) --- */}
+        {/* --- SLIDE 1: INTRO (DARK + SHIMMER) --- */}
         <Box sx={SX.introSlide}>
           <Box sx={SX.introVignette} />
+          <Box
+            aria-hidden
+            sx={{
+              ...SX.introSheen,
+              backgroundSize: "200% 200%",
+              animation: reducedMotion ? "none" : `${prismDrift} 8s ease-in-out infinite`,
+            }}
+          />
 
           <Box
             sx={{
@@ -275,7 +334,12 @@ function ProjectsSection() {
               textAlign: "center",
             }}
           >
-            <Typography sx={SX.introTitle}>
+            <Typography
+              sx={{
+                ...SX.introTitle,
+                animation: reducedMotion ? "none" : `${textShimmer} 3s linear infinite`,
+              }}
+            >
               WORK
               <br />
               ARCHIVES
