@@ -1,6 +1,7 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
+import Image from "next/image";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
@@ -12,66 +13,88 @@ import GlobalStyles from "@mui/material/GlobalStyles";
 import { keyframes } from "@emotion/react";
 import { useHeaderTheme } from "@/context/HeaderTheme";
 import ProjectProgressRail from "@/components/landing/ProjectProgressRail";
+import usePrefersReducedMotion from "@/hooks/usePrefersReducedMotion";
+import { ensureGsap, gsap, ScrollTrigger, useIsomorphicLayoutEffect } from "@/lib/gsap";
 
-/* ================== Data ================== */
 const PROJECTS = [
   {
     id: "comparigon",
     title: "COMPARIGON",
-    subtitle: "Flagship Platform",
-    desc: "A live engine for comparing PC components. Features real-time price tracking, specs visualization, and dynamic benchmarking charts powered by PostgreSQL.",
+    subtitle: "Device Intelligence Platform",
+    desc: "A comparison platform for smartphones, chipsets, and mobile hardware with structured specs, benchmark-focused browsing, and fast category navigation for side-by-side research.",
     tags: ["Next.js", "React", "PostgreSQL"],
-    image: "/images/comparigon.png",
-    accent: "#FF9A9E",
+    image: "/images/comparigon.avif",
+    accent: "#FF9B7A",
     link: "https://comparigon.com",
-    repo: "#",
+    repo: null,
   },
   {
-    id: "roblox",
+    id: "polylayer",
+    title: "POLYLAYER",
+    subtitle: "Knowledge Platform",
+    desc: "A 3D printer knowledge and catalog platform focused on structured descriptions, searchable product listings, comparison views, and detailed specification browsing for hardware research.",
+    tags: ["Next.js", "Django REST", "PostgreSQL"],
+    image: "/images/polylayer.avif",
+    accent: "#C6D0DB",
+    link: null,
+    repo: null,
+  },
+  {
+    id: "academic-management-system",
+    title: "ACADEMIC MS",
+    subtitle: "Campus Operations Portal",
+    desc: "An academic operations portal that brings announcements, calendars, library modules, and student service workflows into one admin-focused system for campus management.",
+    tags: ["Laravel", "Filament", "MySQL"],
+    image: "/images/academic-management-system.avif",
+    accent: "#88A8FF",
+    link: null,
+    repo: null,
+  },
+  {
+    id: "edubridge",
+    title: "EDUBRIDGE",
+    subtitle: "Student / Professional Network",
+    desc: "A role-based academic networking platform that connects students and professionals through separate account flows, structured onboarding, and school-to-career interaction paths.",
+    tags: ["Laravel", "MySQL", "Role-Based Auth"],
+    image: "/images/edubridge.avif",
+    accent: "#6AD5FF",
+    link: null,
+    repo: null,
+  },
+  {
+    id: "paws-and-promises",
+    title: "PAWS & PROMISES",
+    subtitle: "Adoption Campaign Site",
+    desc: "A pet adoption platform designed to showcase adoptable animals, communicate shelter advocacy clearly, and guide visitors toward adoption, volunteering, and community support actions.",
+    tags: ["Next.js", "Django", "Adoption Platform"],
+    image: "/images/paws-and-promises.avif",
+    accent: "#FFD84D",
+    link: null,
+    repo: null,
+  },
+  {
+    id: "brainwave",
     title: "BRAINWAVE",
-    subtitle: "Roblox Experience",
-    desc: "An immersive 3D game featuring custom physics, multiplayer replication, and Lua-scripted logic layers.",
-    tags: ["Lua", "Game Design", "Physics"],
-    image: "/images/brainwave_game.png",
+    subtitle: "Roblox Quiz Experience",
+    desc: "A Roblox trivia-platformer that mixes timed quiz prompts, obstacle progression, and HUD-driven gameplay into a fast-paced multiplayer-friendly learning game loop.",
+    tags: ["Roblox", "Luau", "Game Systems"],
+    image: "/images/brainwave-game.avif",
     accent: "#a18cd1",
     link: "https://www.roblox.com/games/14363008084/Brainwave",
-    repo: "#",
-  },
-  {
-    id: "shopee",
-    title: "SHOPEE BOT",
-    subtitle: "Automation Tool",
-    desc: "High-frequency inventory sync system. Automates order fulfillment via the Shopee Open Platform API.",
-    tags: ["Python", "Selenium", "Django"],
-    image: "/images/shopee.png",
-    accent: "#84fab0",
-    link: "#",
-    repo: "#",
+    repo: null,
   },
 ] as const;
 
-/* ================== Animations ================== */
 const textShimmer = keyframes`
   0% { background-position: 0% 50%; }
   100% { background-position: 100% 50%; }
 `;
+
 const prismDrift = keyframes`
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 `;
-
-function usePrefersReducedMotion() {
-  const [reduced, setReduced] = React.useState(false);
-  React.useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const sync = () => setReduced(mq.matches);
-    sync();
-    mq.addEventListener?.("change", sync);
-    return () => mq.removeEventListener?.("change", sync);
-  }, []);
-  return reduced;
-}
 
 const TITLE_GRADIENT =
   "linear-gradient(90deg, #ff8ad8, #81ecff, #c598ff, #7dffcb)";
@@ -79,14 +102,13 @@ const TITLE_GRADIENT =
 function clamp(n: number, a: number, b: number) {
   return Math.max(a, Math.min(b, n));
 }
+
 function clamp01(v: number) {
   return clamp(v, 0, 1);
 }
 
-/* ================== Styles ================== */
 const SX = {
   container: { width: "100%", position: "relative", bgcolor: "#050505" },
-
   stickySlide: {
     height: "100vh",
     width: "100%",
@@ -99,7 +121,6 @@ const SX = {
     alignItems: "flex-end",
     willChange: "transform",
   },
-
   introSlide: {
     height: "100vh",
     width: "100%",
@@ -115,7 +136,6 @@ const SX = {
     bgcolor: "#050505",
     zIndex: 1,
   },
-
   introVignette: {
     position: "absolute",
     inset: 0,
@@ -124,7 +144,6 @@ const SX = {
     pointerEvents: "none",
     zIndex: 0,
   },
-
   introSheen: {
     position: "absolute",
     inset: 0,
@@ -134,7 +153,6 @@ const SX = {
       "radial-gradient(circle at 35% 35%, rgba(129,236,255,0.25) 0%, transparent 45%), radial-gradient(circle at 70% 55%, rgba(255,138,216,0.22) 0%, transparent 55%)",
     pointerEvents: "none",
   },
-
   introTitle: {
     fontWeight: 900,
     fontSize: { xs: "4rem", md: "10rem" },
@@ -148,7 +166,6 @@ const SX = {
     filter:
       "drop-shadow(0 0 18px rgba(212, 179, 255, 0.30)) drop-shadow(0 10px 30px rgba(0,0,0,0.45))",
   },
-
   introSub: {
     mt: 4,
     fontWeight: 800,
@@ -156,15 +173,18 @@ const SX = {
     letterSpacing: 2,
     textTransform: "uppercase",
   },
-
-  projectImage: {
+  projectImageFrame: {
     position: "absolute",
     inset: 0,
-    backgroundSize: "cover",
-    backgroundPosition: "center",
     zIndex: 1,
+    overflow: "hidden",
+    willChange: "transform",
   },
-
+  projectImageInner: {
+    position: "relative",
+    width: "100%",
+    height: "100%",
+  },
   gradientOverlay: {
     position: "absolute",
     inset: 0,
@@ -172,7 +192,6 @@ const SX = {
       "linear-gradient(to top, #000 0%, rgba(0,0,0,0.82) 40%, rgba(0,0,0,0) 100%)",
     zIndex: 2,
   },
-
   contentBox: {
     position: "relative",
     zIndex: 3,
@@ -182,7 +201,6 @@ const SX = {
     p: { xs: 3, md: 8 },
     pb: { xs: 6, md: 10 },
   },
-
   projectSubtitle: {
     color: "#fff",
     fontWeight: 700,
@@ -194,7 +212,6 @@ const SX = {
     alignItems: "center",
     gap: 2,
   },
-
   projectTitle: {
     color: "#fff",
     fontWeight: 900,
@@ -203,7 +220,6 @@ const SX = {
     mb: 3,
     textShadow: "0 10px 30px rgba(0,0,0,0.5)",
   },
-
   projectDesc: {
     color: "rgba(255,255,255,0.8)",
     fontSize: { xs: "1rem", md: "1.25rem" },
@@ -211,7 +227,6 @@ const SX = {
     lineHeight: 1.6,
     mb: 4,
   },
-
   btn: {
     borderRadius: "50px",
     py: 1.5,
@@ -223,15 +238,47 @@ const SX = {
   },
 } as const;
 
-function ProjectSlide({ project, zIndex }: { project: (typeof PROJECTS)[number]; zIndex: number }) {
+const ProjectSlide = React.memo(function ProjectSlide({
+  project,
+  zIndex,
+  isPriority,
+}: {
+  project: (typeof PROJECTS)[number];
+  zIndex: number;
+  isPriority: boolean;
+}) {
   return (
-    <Box sx={{ ...SX.stickySlide, zIndex, bgcolor: "#000", boxShadow: "0 -20px 50px rgba(0,0,0,0.5)" }}>
-      <Box sx={{ ...SX.projectImage, backgroundImage: `url(${project.image})`, transform: "scale(1.1)" }} />
+    <Box
+      sx={{
+        ...SX.stickySlide,
+        zIndex,
+        bgcolor: "#000",
+        boxShadow: "0 -20px 50px rgba(0,0,0,0.5)",
+      }}
+      data-project-slide
+    >
+      <Box sx={SX.projectImageFrame} data-project-image>
+        <Box sx={SX.projectImageInner}>
+          <Image
+            src={project.image}
+            alt={`${project.title} preview`}
+            fill
+            sizes="100vw"
+            quality={82}
+            priority={isPriority}
+            style={{ objectFit: "cover" }}
+          />
+        </Box>
+      </Box>
       <Box sx={SX.gradientOverlay} />
 
-      <Box sx={SX.contentBox}>
+      <Box sx={SX.contentBox} data-project-content>
         <Typography sx={{ ...SX.projectSubtitle, color: project.accent }}>
-          <Box component="span" sx={{ width: 40, height: 2, bgcolor: project.accent }} />
+          <Box
+            component="span"
+            sx={{ width: 40, height: 2, bgcolor: project.accent, transformOrigin: "left center" }}
+            data-project-line
+          />
           {project.subtitle}
         </Typography>
 
@@ -248,6 +295,7 @@ function ProjectSlide({ project, zIndex }: { project: (typeof PROJECTS)[number];
             <Chip
               key={tag}
               label={tag}
+              data-project-tag
               sx={{
                 bgcolor: "rgba(255,255,255,0.1)",
                 color: "#fff",
@@ -259,19 +307,39 @@ function ProjectSlide({ project, zIndex }: { project: (typeof PROJECTS)[number];
           ))}
         </Stack>
 
-        <Stack direction="row" spacing={2}>
-          <Button
-            data-project-cta="1"
-            variant="contained"
-            endIcon={<ArrowOutwardIcon />}
-            sx={{ ...SX.btn, bgcolor: "#fff", color: "#000", "&:hover": { bgcolor: "#e0e0e0" } }}
-            href={project.link}
-            target="_blank"
-          >
-            View Project
-          </Button>
+        <Stack direction="row" spacing={2} data-project-actions>
+          {project.link ? (
+            <Button
+              data-project-cta="1"
+              variant="contained"
+              endIcon={<ArrowOutwardIcon />}
+              sx={{
+                ...SX.btn,
+                bgcolor: "#fff",
+                color: "#000",
+                "&:hover": { bgcolor: "#e0e0e0" },
+              }}
+              href={project.link}
+              target="_blank"
+            >
+              View Project
+            </Button>
+          ) : (
+            <Button
+              data-project-cta="1"
+              variant="contained"
+              disabled
+              sx={{
+                ...SX.btn,
+                bgcolor: "rgba(255,255,255,0.18)",
+                color: "rgba(255,255,255,0.72)",
+              }}
+            >
+              Private Build
+            </Button>
+          )}
 
-          {project.repo !== "#" && (
+          {project.repo ? (
             <Button
               variant="outlined"
               startIcon={<GitHubIcon />}
@@ -286,113 +354,217 @@ function ProjectSlide({ project, zIndex }: { project: (typeof PROJECTS)[number];
             >
               Source
             </Button>
-          )}
+          ) : null}
         </Stack>
       </Box>
     </Box>
   );
-}
+});
 
 function ProjectsSection() {
   const reducedMotion = usePrefersReducedMotion();
   const containerRef = React.useRef<HTMLDivElement>(null);
   const { setHeaderVisible } = useHeaderTheme();
 
-  const totalSlides = PROJECTS.length + 1; // intro + projects
+  const totalSlides = PROJECTS.length + 1;
 
   const [progress, setProgress] = React.useState(0);
   const [activeIndex, setActiveIndex] = React.useState(0);
   const [isInsideProjects, setIsInsideProjects] = React.useState(false);
 
-  // stable absolute bounds of the projects section
-  const boundsRef = React.useRef({ startY: 0, endY: 1, height: 1 });
+  useIsomorphicLayoutEffect(() => {
+    ensureGsap();
 
-  React.useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
+    const container = containerRef.current;
+    if (!container) return;
 
-    let raf = 0;
+    const ctx = gsap.context(() => {
+      if (!reducedMotion) {
+        const introPanel = container.querySelector<HTMLElement>('[data-project-intro="panel"]');
+        const introCopy = gsap.utils.toArray<HTMLElement>('[data-project-intro="copy"]');
+        const projectSlides = gsap.utils.toArray<HTMLElement>("[data-project-slide]");
 
-    const measure = () => {
-      const rect = el.getBoundingClientRect();
-      const startY = window.scrollY + rect.top;
-      const height = rect.height;
+        if (introCopy.length) {
+          gsap.fromTo(
+            introCopy,
+            { y: 26, autoAlpha: 0 },
+            {
+              y: 0,
+              autoAlpha: 1,
+              duration: 0.7,
+              ease: "power3.out",
+              stagger: 0.1,
+              scrollTrigger: {
+                trigger: container,
+                start: "top 75%",
+                once: true,
+              },
+            }
+          );
+        }
 
-      // endY for visibility range (full container)
-      const endY = startY + height;
+        if (introPanel) {
+          gsap.to(introPanel, {
+            scale: 0.9,
+            autoAlpha: 0,
+            ease: "none",
+            scrollTrigger: {
+              trigger: container,
+              start: "top top",
+              end: "+=100%",
+              scrub: true,
+            },
+          });
+        }
 
-      boundsRef.current = { startY, endY, height };
-    };
+        projectSlides.forEach((slide) => {
+          const image = slide.querySelector<HTMLElement>("[data-project-image]");
+          const content = slide.querySelector<HTMLElement>("[data-project-content]");
+          const line = slide.querySelector<HTMLElement>("[data-project-line]");
+          const tags = slide.querySelectorAll<HTMLElement>("[data-project-tag]");
+          const actions = slide.querySelector<HTMLElement>("[data-project-actions]");
 
-    const ro = new ResizeObserver(() => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(measure);
-    });
+          if (image) {
+            gsap.fromTo(
+              image,
+              { scale: 1.18 },
+              {
+                scale: 1.02,
+                ease: "none",
+                scrollTrigger: {
+                  trigger: slide,
+                  start: "top bottom",
+                  end: "bottom top",
+                  scrub: true,
+                },
+              }
+            );
+          }
 
-    ro.observe(el);
-    measure();
+          if (content) {
+            gsap.fromTo(
+              content,
+              { y: 80, autoAlpha: 0 },
+              {
+                y: 0,
+                autoAlpha: 1,
+                ease: "power3.out",
+                scrollTrigger: {
+                  trigger: slide,
+                  start: "top 78%",
+                  end: "top 42%",
+                  scrub: true,
+                },
+              }
+            );
+          }
 
-    window.addEventListener("resize", measure, { passive: true });
+          if (line) {
+            gsap.fromTo(
+              line,
+              { scaleX: 0 },
+              {
+                scaleX: 1,
+                ease: "power2.out",
+                scrollTrigger: {
+                  trigger: slide,
+                  start: "top 70%",
+                  toggleActions: "play none none reverse",
+                },
+              }
+            );
+          }
+
+          if (tags.length) {
+            gsap.fromTo(
+              tags,
+              { y: 14, autoAlpha: 0 },
+              {
+                y: 0,
+                autoAlpha: 1,
+                duration: 0.35,
+                stagger: 0.05,
+                ease: "power2.out",
+                scrollTrigger: {
+                  trigger: slide,
+                  start: "top 62%",
+                  toggleActions: "play none none reverse",
+                },
+              }
+            );
+          }
+
+          if (actions) {
+            gsap.fromTo(
+              actions,
+              { y: 18, autoAlpha: 0 },
+              {
+                y: 0,
+                autoAlpha: 1,
+                duration: 0.45,
+                ease: "power2.out",
+                scrollTrigger: {
+                  trigger: slide,
+                  start: "top 60%",
+                  toggleActions: "play none none reverse",
+                },
+              }
+            );
+          }
+        });
+      }
+
+      const syncProgress = (self: ScrollTrigger) => {
+        const nextProgress = clamp01(self.progress);
+        const nextIndex = clamp(
+          Math.floor(nextProgress * (totalSlides - 1) + 1e-4),
+          0,
+          totalSlides - 1
+        );
+
+        setProgress((current) =>
+          Math.abs(current - nextProgress) > 0.001 ? nextProgress : current
+        );
+        setActiveIndex((current) => (current === nextIndex ? current : nextIndex));
+      };
+
+      const sectionTrigger = ScrollTrigger.create({
+        trigger: container,
+        start: "top top",
+        end: "bottom bottom",
+        onEnter: () => {
+          setIsInsideProjects(true);
+          setHeaderVisible(false);
+        },
+        onEnterBack: () => {
+          setIsInsideProjects(true);
+          setHeaderVisible(false);
+        },
+        onLeave: () => {
+          setIsInsideProjects(false);
+          setHeaderVisible(true);
+        },
+        onLeaveBack: () => {
+          setIsInsideProjects(false);
+          setHeaderVisible(true);
+        },
+        onUpdate: syncProgress,
+      });
+
+      const active = sectionTrigger.isActive;
+      setIsInsideProjects(active);
+      setHeaderVisible(!active);
+      syncProgress(sectionTrigger);
+    }, container);
 
     return () => {
-      cancelAnimationFrame(raf);
-      ro.disconnect();
-      window.removeEventListener("resize", measure);
-    };
-  }, []);
-
-  React.useEffect(() => {
-    let raf = 0;
-
-    const compute = () => {
-      const el = containerRef.current;
-      if (!el) return;
-
-      const { startY, endY } = boundsRef.current;
-      const y = window.scrollY;
-      const vh = window.innerHeight;
-
-      // ✅ inside detection based on absolute scroll range, no flicker
-      // keep a buffer so sticky snapping never flips it off
-      const headerOffset = 80;
-      const buffer = Math.round(vh * 0.65);
-      const inside = y >= startY - headerOffset - buffer && y <= endY - headerOffset + buffer;
-
-      setIsInsideProjects(inside);
-      setHeaderVisible(!inside);
-
-      // ✅ progress based on viewport-height steps (snap accurate)
-      // local scroll inside projects section
-      const local = clamp(y - startY, 0, (totalSlides - 1) * vh);
-      const denom = Math.max(1, (totalSlides - 1) * vh);
-      const p = clamp01(local / denom);
-
-      // ✅ active index changes only when you actually reach the next stop
-      const idx = clamp(Math.floor(local / vh + 1e-6), 0, totalSlides - 1);
-
-      setProgress(p);
-      setActiveIndex(idx);
-    };
-
-    const onScroll = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(compute);
-    };
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll, { passive: true });
-    compute();
-
-    return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
       setHeaderVisible(true);
+      ctx.revert();
     };
-  }, [setHeaderVisible, totalSlides]);
+  }, [reducedMotion, setHeaderVisible, totalSlides]);
 
-  const introFade = Math.min(1, progress * 3);
-  const introScale = 1 - introFade * 0.1;
+  const introFade = reducedMotion ? 0 : Math.min(1, progress * 3);
+  const introScale = reducedMotion ? 1 : 1 - introFade * 0.1;
 
   return (
     <>
@@ -405,7 +577,6 @@ function ProjectsSection() {
         }}
       />
 
-      {/* show only inside projects, and hide on intro via your rail component */}
       {isInsideProjects && (
         <ProjectProgressRail progress={progress} activeIndex={activeIndex} totalSlides={totalSlides} />
       )}
@@ -431,24 +602,33 @@ function ProjectsSection() {
               opacity: 1 - introFade,
               textAlign: "center",
             }}
+            data-project-intro="panel"
           >
             <Typography
               sx={{
                 ...SX.introTitle,
                 animation: reducedMotion ? "none" : `${textShimmer} 3s linear infinite`,
               }}
+              data-project-intro="copy"
             >
               WORK
               <br />
               ARCHIVES
             </Typography>
 
-            <Typography sx={SX.introSub}>SCROLL TO EXPLORE</Typography>
+            <Typography sx={SX.introSub} data-project-intro="copy">
+              SCROLL TO EXPLORE
+            </Typography>
           </Box>
         </Box>
 
-        {PROJECTS.map((p, i) => (
-          <ProjectSlide key={p.id} project={p} zIndex={2 + i} />
+        {PROJECTS.map((project, index) => (
+          <ProjectSlide
+            key={project.id}
+            project={project}
+            zIndex={2 + index}
+            isPriority={index === 0}
+          />
         ))}
       </Box>
     </>

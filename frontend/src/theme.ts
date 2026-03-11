@@ -1,4 +1,4 @@
-// frontend/src/theme.ts
+﻿// frontend/src/theme.ts
 "use client";
 
 import { createTheme } from "@mui/material/styles";
@@ -8,8 +8,9 @@ const theme = createTheme({
     mode: "light",
   },
   typography: {
-    fontFamily: "var(--font-geist-sans)",
+    fontFamily: 'var(--font-poppins), "Segoe UI", sans-serif',
   },
 });
 
 export default theme;
+

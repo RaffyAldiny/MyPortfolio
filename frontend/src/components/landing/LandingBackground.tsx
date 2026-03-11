@@ -2,17 +2,10 @@
 
 import * as React from "react";
 import { Box } from "@mui/material";
-import { alpha } from "@mui/material/styles";
 import { keyframes } from "@emotion/react";
 
 type ShapeType = "heart" | "star" | "frog" | "cloud" | "butterfly";
 const SHAPES: ShapeType[] = ["heart", "star", "butterfly", "frog", "cloud"];
-
-const shimmer = keyframes`
-  0% { background-position: 0% 50%; }
-  50%{ background-position: 100% 50%; }
-  100%{ background-position: 0% 50%; }
-`;
 
 const mistA = keyframes`
   0%   { transform: translate3d(-1.3%, -0.9%, 0) scale(1);    opacity: 0.26; }
@@ -63,6 +56,16 @@ const wrapTau = (v: number) => {
   else if (v < 0) v += TAU * (1 + Math.floor(-v / TAU));
   return v;
 };
+
+function createShapeSetMap() {
+  return {
+    heart: { xs: new Float32Array(0), ys: new Float32Array(0) },
+    star: { xs: new Float32Array(0), ys: new Float32Array(0) },
+    frog: { xs: new Float32Array(0), ys: new Float32Array(0) },
+    cloud: { xs: new Float32Array(0), ys: new Float32Array(0) },
+    butterfly: { xs: new Float32Array(0), ys: new Float32Array(0) },
+  } satisfies Record<ShapeType, { xs: Float32Array; ys: Float32Array }>;
+}
 
 function shapePoints(type: ShapeType, n: number, seed: number, isMobile: boolean) {
   const rng = mulberry32(seed);
@@ -247,8 +250,8 @@ export default function LandingBackground() {
     let bloomHalfW: number[][] = [];
     let bloomHalfH: number[][] = [];
 
-    const leftSet: Record<ShapeType, { xs: Float32Array; ys: Float32Array }> = {} as any;
-    const rightSet: Record<ShapeType, { xs: Float32Array; ys: Float32Array }> = {} as any;
+    const leftSet = createShapeSetMap();
+    const rightSet = createShapeSetMap();
 
     const left = { i: 0, n: 1, t0: performance.now(), every: 7000, dur: 2200, seed: 9001 };
     const right = { i: 1, n: 2, t0: performance.now(), every: 9500, dur: 2400, seed: 4242 };
@@ -552,7 +555,7 @@ export default function LandingBackground() {
 
     return () => {
       stop();
-      window.removeEventListener("resize", onResize as any);
+      window.removeEventListener("resize", onResize);
       document.removeEventListener("visibilitychange", onVis);
       if (io) io.disconnect();
       startedRef.current = false;

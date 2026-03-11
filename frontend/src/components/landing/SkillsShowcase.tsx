@@ -1,14 +1,15 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
-import { Avatar, Box, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { Avatar, Box, Typography } from "@mui/material";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import { alpha } from "@mui/material/styles";
 import { keyframes } from "@emotion/react";
-import { SKILLS, type Skill } from "@/constants/skills";
+import { SKILLS, type Skill, type SkillGroup } from "@/constants/skills";
+import usePrefersReducedMotion from "@/hooks/usePrefersReducedMotion";
+import { ensureGsap, gsap, ScrollTrigger, useIsomorphicLayoutEffect } from "@/lib/gsap";
 
-/* ================== Animations ================== */
 const textShimmer = keyframes`
   0% { background-position: 0% 50%; }
   100% { background-position: 100% 50%; }
@@ -20,55 +21,22 @@ const prismRotate = keyframes`
   100% { background-position: 0% 50%; }
 `;
 
-const flyIn = keyframes`
-  0% { opacity: 0; transform: scale(1.1) translateY(12px); filter: blur(8px); }
-  100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0px); }
-`;
+type GroupKey = "all" | SkillGroup;
 
-/* ================== Reduced motion ================== */
-function usePrefersReducedMotion() {
-  const [reduced, setReduced] = React.useState(false);
+const GROUP_OPTIONS: ReadonlyArray<{ value: GroupKey; label: string }> = [
+  { value: "all", label: "All" },
+  { value: "frontend", label: "Frontend" },
+  { value: "backend", label: "Backend" },
+  { value: "data", label: "Data" },
+  { value: "tools", label: "Tools" },
+];
 
-  React.useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const sync = () => setReduced(mq.matches);
-    sync();
-    mq.addEventListener?.("change", sync);
-    return () => mq.removeEventListener?.("change", sync);
-  }, []);
-
-  return reduced;
-}
-
-/* ================== Grouping Logic ================== */
-type GroupKey = "all" | "frontend" | "backend" | "data" | "tools";
-
-const GROUP_SET: Record<GroupKey, Set<string>> = {
-  all: new Set(),
-  frontend: new Set(["React", "NextJS", "TypeScript", "JavaScript", "Vue.js", "Flutter", "Dart", "HTML5", "CSS3", "Sass", "Tailwind CSS", "Material UI"]),
-  backend: new Set(["Django", "Django Rest", "Laravel", "Node.js", "Python", "PHP", "Java", "C++", "Roblox Luau", "Shopee API"]),
-  data: new Set(["MySQL", "PostgreSQL", "MongoDB", "SQLite", "Amazon Redshift", "AWS Glue", "Power BI"]),
-  tools: new Set(["Git", "Linux", "Figma", "Firebase", "Vercel", "Hostinger", "Unity", "Digital Ocean"]),
-};
-
-/* ================== Prism tokens ================== */
-const PRISM_GRADIENT = "linear-gradient(135deg, rgba(255,138,216,0.75), rgba(129,236,255,0.70), rgba(197,152,255,0.70), rgba(125,255,203,0.70))";
-const PRISM_GRADIENT_SOFT = "linear-gradient(135deg, rgba(255,138,216,0.35), rgba(129,236,255,0.30), rgba(197,152,255,0.30), rgba(125,255,203,0.30))";
+const PRISM_GRADIENT =
+  "linear-gradient(135deg, rgba(255,138,216,0.75), rgba(129,236,255,0.70), rgba(197,152,255,0.70), rgba(125,255,203,0.70))";
 const TITLE_GRADIENT = "linear-gradient(90deg, #ff8ad8, #81ecff, #c598ff, #7dffcb)";
 const INK = "#0B0B10";
 
-/* ================== Compact Skill Pill ================== */
-function SkillPill({
-  skill,
-  index,
-  show,
-  reducedMotion,
-}: {
-  skill: Skill;
-  index: number;
-  show: boolean;
-  reducedMotion: boolean;
-}) {
+function SkillPill({ skill }: { skill: Skill }) {
   const { name, color, textColor, icon } = skill;
   const fg = textColor ?? "#2D2D3A";
   const baseShadow = `0 4px 14px ${alpha(color, 0.12)}`;
@@ -83,28 +51,35 @@ function SkillPill({
         py: { xs: 0.7, sm: 1.15 },
         borderRadius: { xs: 2.2, sm: 3 },
         position: "relative",
-        animation: show && !reducedMotion ? `${flyIn} 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards` : "none",
-        animationDelay: `${index * 0.03}s`,
-        opacity: show || reducedMotion ? 1 : 0,
         backgroundColor: "rgba(255, 255, 255, 0.22)",
         backdropFilter: "blur(6px)",
         border: "1px solid rgba(255, 255, 255, 0.45)",
         boxShadow: baseShadow,
+        transition: "transform 180ms ease, box-shadow 180ms ease",
+        willChange: "transform, opacity",
+        "&:hover": {
+          transform: "translateY(-4px)",
+          boxShadow: `0 12px 24px ${alpha(color, 0.22)}`,
+        },
         "&::before": {
           content: '""',
           position: "absolute",
           inset: 0,
           borderRadius: "inherit",
           padding: "1.5px",
-          background: `linear-gradient(135deg, ${alpha(color, 0.2)}, ${alpha(color, 0.8)}, ${alpha(color, 0.2)})`,
+          background: `linear-gradient(135deg, ${alpha(color, 0.2)}, ${alpha(
+            color,
+            0.8
+          )}, ${alpha(color, 0.2)})`,
           backgroundSize: "200% 200%",
-          animation: reducedMotion ? "none" : `${prismRotate} 4s linear infinite`,
+          animation: `${prismRotate} 4s linear infinite`,
           WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
           WebkitMaskComposite: "xor",
           maskComposite: "exclude",
           pointerEvents: "none",
         },
       }}
+      data-skill-pill
     >
       <Avatar
         src={icon}
@@ -119,51 +94,157 @@ function SkillPill({
         }}
         imgProps={{ style: { objectFit: "contain" } }}
       />
-      <Typography sx={{ fontSize: { xs: 10, sm: 13 }, fontWeight: 900, letterSpacing: 0.4, textTransform: "uppercase", color: fg }}>
+      <Typography
+        sx={{
+          fontSize: { xs: 10, sm: 13 },
+          fontWeight: 900,
+          letterSpacing: 0.4,
+          textTransform: "uppercase",
+          color: fg,
+        }}
+      >
         {name}
       </Typography>
     </Box>
   );
 }
 
-/* ================== Main Showcase ================== */
 export default function SkillsShowcase() {
-  const theme = useTheme();
   const reducedMotion = usePrefersReducedMotion();
-  const [isVisible, setIsVisible] = React.useState(false);
-  const containerRef = React.useRef<HTMLDivElement>(null);
   const [active, setActive] = React.useState<GroupKey>("all");
+  const [hasEntered, setHasEntered] = React.useState(reducedMotion);
+  const previousActiveRef = React.useRef<GroupKey>("all");
+  const rootRef = React.useRef<HTMLDivElement>(null);
+  const backdropRef = React.useRef<HTMLDivElement>(null);
+  const pillsRef = React.useRef<HTMLDivElement>(null);
 
   const filtered = React.useMemo(() => {
     if (active === "all") return SKILLS;
-    const allowed = GROUP_SET[active];
-    return SKILLS.filter((s) => allowed.has(s.name));
+    return SKILLS.filter((skill) => skill.groups.includes(active));
   }, [active]);
 
   React.useEffect(() => {
     if (reducedMotion) {
-      setIsVisible(true);
-      return;
+      setHasEntered(true);
     }
-    const el = containerRef.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.1 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
   }, [reducedMotion]);
+
+  useIsomorphicLayoutEffect(() => {
+    ensureGsap();
+
+    const root = rootRef.current;
+    if (!root) return;
+
+    const ctx = gsap.context(() => {
+      const revealTargets = gsap.utils.toArray<HTMLElement>("[data-skill-fade]");
+      const pills = gsap.utils.toArray<HTMLElement>("[data-skill-pill]");
+
+      if (reducedMotion) {
+        gsap.set([...revealTargets, ...pills], { autoAlpha: 1, clearProps: "transform" });
+        return;
+      }
+
+      gsap.set(revealTargets, { autoAlpha: 0, y: 24 });
+      gsap.set(pills, { autoAlpha: 0, y: 20, scale: 0.96 });
+
+      if (backdropRef.current) {
+        gsap.fromTo(
+          backdropRef.current,
+          { yPercent: -8 },
+          {
+            yPercent: 10,
+            ease: "none",
+            scrollTrigger: {
+              trigger: root,
+              start: "top bottom",
+              end: "bottom top",
+              scrub: true,
+            },
+          }
+        );
+      }
+
+      ScrollTrigger.create({
+        trigger: root,
+        start: "top 72%",
+        once: true,
+        onEnter: () => {
+          setHasEntered(true);
+
+          gsap
+            .timeline({ defaults: { ease: "power3.out" } })
+            .to(revealTargets, {
+              autoAlpha: 1,
+              y: 0,
+              duration: 0.7,
+              stagger: 0.08,
+            })
+            .to(
+              pills,
+              {
+                autoAlpha: 1,
+                y: 0,
+                scale: 1,
+                duration: 0.42,
+                stagger: 0.018,
+              },
+              "-=0.32"
+            );
+        },
+      });
+    }, root);
+
+    return () => ctx.revert();
+  }, [reducedMotion]);
+
+  useIsomorphicLayoutEffect(() => {
+    ensureGsap();
+
+    const scope = pillsRef.current;
+    if (!scope) return;
+
+    const ctx = gsap.context(() => {
+      const pills = gsap.utils.toArray<HTMLElement>("[data-skill-pill]");
+      if (!pills.length) return;
+
+      if (reducedMotion) {
+        gsap.set(pills, { autoAlpha: 1, clearProps: "transform" });
+        previousActiveRef.current = active;
+        return;
+      }
+
+      if (!hasEntered) {
+        return;
+      }
+
+      if (previousActiveRef.current === active) {
+        previousActiveRef.current = active;
+        return;
+      }
+
+      previousActiveRef.current = active;
+
+      gsap.fromTo(
+        pills,
+        { autoAlpha: 0, y: 18, scale: 0.95 },
+        {
+          autoAlpha: 1,
+          y: 0,
+          scale: 1,
+          duration: 0.34,
+          ease: "power2.out",
+          stagger: 0.015,
+          overwrite: true,
+        }
+      );
+    }, scope);
+
+    return () => ctx.revert();
+  }, [active, hasEntered, reducedMotion]);
 
   return (
     <Box
-      ref={containerRef}
-      id="techstacks"
+      ref={rootRef}
       sx={{
         width: "100%",
         minHeight: "100vh",
@@ -172,12 +253,13 @@ export default function SkillsShowcase() {
         alignItems: "center",
         justifyContent: "center",
         py: { xs: 6, md: 12 },
-        px: { xs: 0, sm: 3 }, // Remove padding-x on mobile for edge-to-edge scroll
+        px: { xs: 0, sm: 3 },
         position: "relative",
         overflow: "hidden",
       }}
     >
       <Box
+        ref={backdropRef}
         aria-hidden
         sx={{
           position: "absolute",
@@ -211,10 +293,8 @@ export default function SkillsShowcase() {
             WebkitBackgroundClip: "text",
             color: "transparent",
             filter: "drop-shadow(0 0 12px rgba(212, 179, 255, 0.3))",
-            opacity: isVisible ? 1 : 0,
-            transform: isVisible ? "translateY(0)" : "translateY(-15px)",
-            transition: "opacity 0.6s ease, transform 0.6s ease",
           }}
+          data-skill-fade
         >
           My Tech Stack
         </Typography>
@@ -230,32 +310,32 @@ export default function SkillsShowcase() {
             lineHeight: 1.5,
             maxWidth: 680,
             mx: "auto",
-            opacity: isVisible ? 1 : 0,
-            transition: "opacity 0.8s ease",
           }}
+          data-skill-fade
         >
-          Modern tools I use to craft clean user interfaces, reliable backends, and scalable production-ready systems.
+          Modern tools I use to craft clean user interfaces, reliable backends,
+          and scalable production-ready systems.
         </Typography>
 
-        {/* Filter Controls - Horizontal Scroll on Mobile */}
-        <Box 
-          sx={{ 
-            display: "flex", 
-            justifyContent: { xs: "flex-start", sm: "center" }, 
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: { xs: "flex-start", sm: "center" },
             mb: { xs: 4, md: 6 },
             overflowX: "auto",
             width: "100%",
-            pb: 2, // Space for scrollbar
+            pb: 2,
             px: { xs: 2, sm: 0 },
-            "&::-webkit-scrollbar": { display: "none" }, // Hide scrollbar
+            "&::-webkit-scrollbar": { display: "none" },
             msOverflowStyle: "none",
             scrollbarWidth: "none",
           }}
+          data-skill-fade
         >
           <ToggleButtonGroup
             exclusive
             value={active}
-            onChange={(_, v) => v && setActive(v)}
+            onChange={(_, value) => value && setActive(value)}
             sx={{
               position: "relative",
               borderRadius: { xs: 3, sm: 999 },
@@ -264,10 +344,9 @@ export default function SkillsShowcase() {
               border: "1px solid rgba(255,255,255,0.6)",
               backdropFilter: "blur(10px)",
               display: "flex",
-              flexWrap: "nowrap", // Force horizontal
+              flexWrap: "nowrap",
               gap: 0.5,
-              minWidth: "max-content", // Ensure buttons don't shrink
-
+              minWidth: "max-content",
               "& .MuiToggleButton-root": {
                 border: 0,
                 borderRadius: { xs: 2.5, sm: 999 },
@@ -275,21 +354,19 @@ export default function SkillsShowcase() {
                 fontWeight: 900,
                 letterSpacing: 0.8,
                 fontSize: { xs: 10, sm: 11.5 },
-                px: { xs: 2, sm: 2.5 }, // Wider padding for tap target
+                px: { xs: 2, sm: 2.5 },
                 py: { xs: 1, sm: 0.95 },
                 color: alpha(INK, 0.6),
                 transition: "all 0.2s ease",
                 whiteSpace: "nowrap",
-                "&:active": { transform: "scale(0.96)" }, // Clickable feedback
+                "&:active": { transform: "scale(0.96)" },
               },
-
               "& .MuiToggleButton-root.Mui-selected": {
                 backgroundColor: "rgba(255,255,255,0.9)",
                 color: INK,
                 boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
                 position: "relative",
               },
-
               "& .MuiToggleButton-root.Mui-selected::before": {
                 content: '""',
                 position: "absolute",
@@ -306,15 +383,16 @@ export default function SkillsShowcase() {
               },
             }}
           >
-            <ToggleButton value="all">All</ToggleButton>
-            <ToggleButton value="frontend">Frontend</ToggleButton>
-            <ToggleButton value="backend">Backend</ToggleButton>
-            <ToggleButton value="data">Data</ToggleButton>
-            <ToggleButton value="tools">Tools</ToggleButton>
+            {GROUP_OPTIONS.map((group) => (
+              <ToggleButton key={group.value} value={group.value}>
+                {group.label}
+              </ToggleButton>
+            ))}
           </ToggleButtonGroup>
         </Box>
 
         <Box
+          ref={pillsRef}
           sx={{
             display: "flex",
             flexWrap: "wrap",
@@ -326,17 +404,12 @@ export default function SkillsShowcase() {
             px: { xs: 1, sm: 0 },
           }}
         >
-          {filtered.map((skill, i) => (
-            <SkillPill 
-              key={skill.name} 
-              skill={skill} 
-              index={i} 
-              show={isVisible} 
-              reducedMotion={reducedMotion} 
-            />
+          {filtered.map((skill) => (
+            <SkillPill key={skill.name} skill={skill} />
           ))}
         </Box>
       </Box>
     </Box>
   );
 }
+

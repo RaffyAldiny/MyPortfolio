@@ -1,33 +1,29 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
-import { Box, Container, Stack, Typography } from "@mui/material";
+import { Box, Container, Stack } from "@mui/material";
 
 import LandingBackground from "@/components/landing/LandingBackground";
 import ProfileIntro from "@/components/landing/ProfileIntro";
 import SkillsShowcase from "@/components/landing/SkillsShowcase";
+import ResearchSpotlight from "@/components/landing/ResearchSpotlight";
 import ProjectsSection from "@/components/landing/Projects";
 import PrismDivider from "@/components/ui/PrismDivider";
-import LeftTimelineNav from "@/components/landing/LeftTimelineNav"; // <-- add this
+import LeftTimelineNav from "@/components/landing/LeftTimelineNav";
+import { TIMELINE_SECTIONS } from "@/constants/navigation";
 
 export default function Home() {
   return (
     <Box sx={{ minHeight: "100dvh" }}>
       <LandingBackground />
 
-      {/* Left timeline: NO ABOUT, NO FOOTER, SKILLS renamed */}
       <LeftTimelineNav
-        sections={[
-          { id: "intro", label: "Intro" },
-          { id: "techstacks", label: "Tech Stacks" },
-          { id: "projects", label: "Projects" },
-        ]}
-        scrollOffsetPx={76} // set to your header height
+        sections={TIMELINE_SECTIONS}
+        scrollOffsetPx={80}
         darkSectionId="projects"
         wrapAround
       />
 
-      {/* --- ZONE 1: INTRO --- */}
       <Box id="intro" sx={{ scrollSnapAlign: "start" }}>
         <Container
           maxWidth="lg"
@@ -45,7 +41,6 @@ export default function Home() {
         </Container>
       </Box>
 
-      {/* --- ZONE 2: TECH STACKS --- */}
       <Box id="techstacks" sx={{ scrollSnapAlign: "start" }}>
         <Container
           maxWidth="lg"
@@ -63,10 +58,24 @@ export default function Home() {
         </Container>
       </Box>
 
-      {/* --- ZONE 3: CINEMATIC PROJECTS --- */}
-      <ProjectsSection />
+      <Box id="research" sx={{ scrollSnapAlign: "start" }}>
+        <Container
+          maxWidth="lg"
+          sx={{
+            position: "relative",
+            zIndex: 1,
+            pt: { xs: 2, md: 2 },
+            pb: 10,
+          }}
+        >
+          <Stack alignItems="center" spacing={8}>
+            <ResearchSpotlight />
+            <PrismDivider width="70%" />
+          </Stack>
+        </Container>
+      </Box>
 
-      {/* footer removed for now */}
+      <ProjectsSection />
     </Box>
   );
 }

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import NextLink from "next/link";
@@ -7,6 +7,7 @@ import {
   Box,
   Button,
   Container,
+  Divider,
   Drawer,
   IconButton,
   Link as MuiLink,
@@ -17,9 +18,8 @@ import {
   Toolbar,
   Typography,
   useMediaQuery,
-  Divider,
 } from "@mui/material";
-import { alpha, useTheme, keyframes } from "@mui/material/styles";
+import { alpha, keyframes, useTheme } from "@mui/material/styles";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
 import GitHubIcon from "@mui/icons-material/GitHub";
@@ -27,20 +27,13 @@ import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import FacebookIcon from "@mui/icons-material/Facebook";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { useHeaderTheme } from "@/context/HeaderTheme";
+import { LANDING_NAV_ITEMS } from "@/constants/navigation";
 
-// --- CONFIGURATION ---
 const PRISM_GRADIENT =
   "linear-gradient(135deg, #FF9A9E 0%, #FECFEF 25%, #E0C3FC 50%, #8EC5FC 75%, #D4FFEC 100%)";
 const DARK_TEXT = "#2D2D3A";
 const GLASS_BG = "rgba(255, 255, 255, 0.75)";
 const GLASS_BLUR = "blur(12px)";
-
-// IMPORTANT: make sure these match the actual ids in your page.
-const NAV_ITEMS = [
-  { label: "Intro", href: "/#intro", subtitle: "Start here" },
-  { label: "Tech Stacks", href: "/#techstacks", subtitle: "Tools I use" },
-  { label: "Projects", href: "/#projects", subtitle: "My latest work" },
-];
 
 const SOCIALS = [
   { Icon: GitHubIcon, href: "https://github.com/" },
@@ -48,7 +41,6 @@ const SOCIALS = [
   { Icon: FacebookIcon, href: "https://facebook.com/" },
 ];
 
-// --- ANIMATIONS ---
 const shimmer = keyframes`
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
@@ -73,46 +65,30 @@ export default function SiteHeader() {
   const [open, setOpen] = React.useState(false);
   const { headerVisible } = useHeaderTheme();
 
-  // Use your actual AppBar height. You used 76 earlier in LeftTimelineNav.
-  const HEADER_OFFSET = isMdUp ? 80 : 56;
+  const headerOffset = isMdUp ? 80 : 56;
 
-  /**
-   * Smooth scroll helper that:
-   * - scrolls to element with id
-   * - applies header offset
-   * - keeps the hash updated (optional but nice)
-   */
   const scrollToSection = React.useCallback(
     (id: string) => {
       const el = document.getElementById(id);
       if (!el) return;
 
       const rect = el.getBoundingClientRect();
-      const y = window.scrollY + rect.top - HEADER_OFFSET;
+      const y = window.scrollY + rect.top - headerOffset;
 
       window.history.replaceState(null, "", `/#${id}`);
       window.scrollTo({ top: y, behavior: "smooth" });
     },
-    [HEADER_OFFSET]
+    [headerOffset]
   );
 
-  /**
-   * Click handler for any anchor in this header:
-   * - Prevent default navigation (so snap/sticky doesn’t fight a full route change)
-   * - Smooth scroll
-   * - Close drawer (if open)
-   */
   const handleNavClick = React.useCallback(
-    (href: string) => (e: React.MouseEvent) => {
-      // Only intercept hash links
+    (href: string) => (event: React.MouseEvent) => {
       const hashIndex = href.indexOf("#");
       const hash = hashIndex >= 0 ? href.slice(hashIndex + 1) : "";
       if (!hash) return;
 
-      e.preventDefault();
+      event.preventDefault();
       setOpen(false);
-
-      // Wait a tick for Drawer close layout changes (mobile)
       requestAnimationFrame(() => scrollToSection(hash));
     },
     [scrollToSection]
@@ -196,7 +172,7 @@ export default function SiteHeader() {
 
             {isMdUp && (
               <Stack direction="row" spacing={1} sx={{ mr: 2 }}>
-                {NAV_ITEMS.map((item) => (
+                {LANDING_NAV_ITEMS.map((item) => (
                   <MuiLink
                     key={item.href}
                     component={NextLink}
@@ -221,9 +197,9 @@ export default function SiteHeader() {
 
             <Stack direction="row" spacing={1} alignItems="center">
               {isMdUp &&
-                SOCIALS.map(({ Icon, href }, i) => (
+                SOCIALS.map(({ Icon, href }, index) => (
                   <IconButton
-                    key={i}
+                    key={index}
                     component="a"
                     href={href}
                     target="_blank"
@@ -234,7 +210,6 @@ export default function SiteHeader() {
                   </IconButton>
                 ))}
 
-              {/* View Projects -> smooth scroll to #projects */}
               <Button
                 component={NextLink}
                 href="/#projects"
@@ -357,7 +332,7 @@ export default function SiteHeader() {
             </Stack>
 
             <List disablePadding>
-              {NAV_ITEMS.map((item) => (
+              {LANDING_NAV_ITEMS.map((item) => (
                 <ListItemButton
                   key={item.href}
                   component={NextLink}
@@ -403,7 +378,6 @@ export default function SiteHeader() {
               ))}
             </List>
 
-            {/* Drawer-only CTA too (optional, but nice) */}
             <Box sx={{ mt: 2 }}>
               <Button
                 fullWidth
@@ -432,9 +406,9 @@ export default function SiteHeader() {
             <Divider sx={{ mb: 2, borderStyle: "dashed", opacity: 0.4 }} />
 
             <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
-              {SOCIALS.map(({ Icon, href }, i) => (
+              {SOCIALS.map(({ Icon, href }, index) => (
                 <IconButton
-                  key={i}
+                  key={index}
                   component="a"
                   href={href}
                   target="_blank"
@@ -480,3 +454,4 @@ export default function SiteHeader() {
     </>
   );
 }
+

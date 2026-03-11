@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import {
@@ -13,11 +13,12 @@ import {
 import KeyboardArrowUpRoundedIcon from "@mui/icons-material/KeyboardArrowUpRounded";
 import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
 import { alpha } from "@mui/material/styles";
+import { ensureGsap, ScrollTrigger, useIsomorphicLayoutEffect } from "@/lib/gsap";
 
 type SectionItem = { id: string; label: string };
 
 type Props = {
-  sections: SectionItem[];
+  sections: ReadonlyArray<SectionItem>;
   scrollOffsetPx?: number;
   darkSectionId?: string;
   wrapAround?: boolean;
@@ -35,14 +36,15 @@ function Dot({
   dark: boolean;
   sizePx: number;
 }) {
-  const s = `${sizePx}px`;
+  const size = `${sizePx}px`;
+
   return (
     <Box
       sx={{
-        width: s,
-        height: s,
-        minWidth: s,
-        minHeight: s,
+        width: size,
+        height: size,
+        minWidth: size,
+        minHeight: size,
         borderRadius: "999px",
         display: "inline-block",
         flexShrink: 0,
@@ -76,13 +78,13 @@ export default function LeftTimelineNav({
   const [activeId, setActiveId] = React.useState(sections[0]?.id ?? "");
 
   const activeIndex = React.useMemo(() => {
-    const i = sections.findIndex((s) => s.id === activeId);
-    return i >= 0 ? i : 0;
+    const index = sections.findIndex((section) => section.id === activeId);
+    return index >= 0 ? index : 0;
   }, [activeId, sections]);
 
   const isDarkOverlay = React.useMemo(() => {
-    const darkIdx = sections.findIndex((s) => s.id === darkSectionId);
-    return darkIdx !== -1 && activeIndex >= darkIdx;
+    const darkIndex = sections.findIndex((section) => section.id === darkSectionId);
+    return darkIndex !== -1 && activeIndex >= darkIndex;
   }, [activeIndex, darkSectionId, sections]);
 
   const text = isDarkOverlay ? "rgba(255,255,255,0.92)" : "rgba(25,25,35,0.88)";
@@ -97,6 +99,7 @@ export default function LeftTimelineNav({
     (id: string) => {
       const el = document.getElementById(id);
       if (!el) return;
+
       const y = window.scrollY + el.getBoundingClientRect().top - scrollOffsetPx;
       window.scrollTo({ top: y, behavior: "smooth" });
     },
@@ -107,61 +110,66 @@ export default function LeftTimelineNav({
     (dir: -1 | 1) => {
       if (!sections.length) return;
 
-      let idx = activeIndex + dir;
-      if (idx < 0) idx = wrapAround ? sections.length - 1 : 0;
-      if (idx > sections.length - 1) idx = wrapAround ? 0 : sections.length - 1;
+      let index = activeIndex + dir;
+      if (index < 0) index = wrapAround ? sections.length - 1 : 0;
+      if (index > sections.length - 1) index = wrapAround ? 0 : sections.length - 1;
 
-      scrollToId(sections[idx].id);
+      scrollToId(sections[index].id);
     },
     [activeIndex, scrollToId, sections, wrapAround]
   );
 
-  // Cache elements for faster scroll detection
-  const elsRef = React.useRef<Array<{ id: string; el: HTMLElement | null }>>([]);
-
   React.useEffect(() => {
-    elsRef.current = sections.map((s) => ({ id: s.id, el: document.getElementById(s.id) }));
-    if (!activeId && sections[0]?.id) setActiveId(sections[0].id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sections]);
+    if (!activeId && sections[0]?.id) {
+      setActiveId(sections[0].id);
+    }
+  }, [activeId, sections]);
 
-  React.useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
+    ensureGsap();
     if (!sections.length) return;
-
-    let raf = 0;
 
     const pickActive = () => {
       const activationY = scrollOffsetPx + 6;
-      let chosen = sections[0].id;
+      let nextId = sections[0].id;
 
-      for (const item of elsRef.current) {
-        if (!item.el) item.el = document.getElementById(item.id);
-        const el = item.el;
+      for (const section of sections) {
+        const el = document.getElementById(section.id);
         if (!el) continue;
 
-        if (el.getBoundingClientRect().top <= activationY) chosen = item.id;
+        if (el.getBoundingClientRect().top <= activationY) {
+          nextId = section.id;
+        }
       }
 
-      setActiveId(chosen);
+      setActiveId((current) => (current === nextId ? current : nextId));
     };
 
-    const onScroll = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(pickActive);
-    };
+    const triggers = sections
+      .map((section) => {
+        const el = document.getElementById(section.id);
+        if (!el) return null;
 
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll, { passive: true });
+        return ScrollTrigger.create({
+          trigger: el,
+          start: () => `top top+=${scrollOffsetPx + 6}`,
+          end: () => `bottom top+=${scrollOffsetPx + 6}`,
+          onEnter: () => setActiveId(section.id),
+          onEnterBack: () => setActiveId(section.id),
+        });
+      })
+      .filter(Boolean);
+
+    ScrollTrigger.addEventListener("refresh", pickActive);
+    ScrollTrigger.refresh();
     pickActive();
 
     return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
+      ScrollTrigger.removeEventListener("refresh", pickActive);
+      triggers.forEach((trigger) => trigger?.kill());
     };
   }, [sections, scrollOffsetPx]);
 
-  // Hard-lock IconButton into a perfect circle
   const circleBtnBase = {
     width: 40,
     height: 40,
@@ -185,7 +193,6 @@ export default function LeftTimelineNav({
     "&:hover": { bgcolor: isDarkOverlay ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.07)" },
   } as const;
 
-  /* ======================= MOBILE: align with View Project CTA ======================= */
   const [ctaBottomPx, setCtaBottomPx] = React.useState<number | null>(null);
 
   React.useEffect(() => {
@@ -203,21 +210,17 @@ export default function LeftTimelineNav({
         return;
       }
 
-      const vh = window.innerHeight;
-
-      // pick CTA whose bottom is closest to viewport bottom (most "bottom-aligned" CTA)
+      const viewportHeight = window.innerHeight;
       let best: HTMLElement | null = null;
       let bestBottom = -Infinity;
 
       for (const el of nodes) {
-        const r = el.getBoundingClientRect();
-
-        // visible enough
-        const visible = r.bottom > 0 && r.top < vh;
+        const rect = el.getBoundingClientRect();
+        const visible = rect.bottom > 0 && rect.top < viewportHeight;
         if (!visible) continue;
 
-        if (r.bottom > bestBottom) {
-          bestBottom = r.bottom;
+        if (rect.bottom > bestBottom) {
+          bestBottom = rect.bottom;
           best = el;
         }
       }
@@ -228,9 +231,7 @@ export default function LeftTimelineNav({
       }
 
       const rect = best.getBoundingClientRect();
-      const distanceFromBottom = Math.max(0, Math.round(vh - rect.bottom));
-
-      // tiny clamp so it doesn’t get glued to the edge on very small screens
+      const distanceFromBottom = Math.max(0, Math.round(viewportHeight - rect.bottom));
       const clamped = Math.min(Math.max(distanceFromBottom, 12), 140);
       setCtaBottomPx(clamped);
     };
@@ -242,8 +243,6 @@ export default function LeftTimelineNav({
 
     window.addEventListener("scroll", onScrollOrResize, { passive: true });
     window.addEventListener("resize", onScrollOrResize, { passive: true });
-
-    // initial
     findVisibleCtaBottom();
 
     return () => {
@@ -254,10 +253,8 @@ export default function LeftTimelineNav({
   }, [isMobile]);
 
   if (isMobile) {
-    const inProjects = isDarkOverlay; // your projects zone is dark now
+    const inProjects = isDarkOverlay;
     const bottom = inProjects ? (ctaBottomPx ?? 18) : 18;
-
-    // Keep it on the right in projects so it’s paired with the left CTA visually.
     const dockRight = inProjects;
 
     return (
@@ -292,12 +289,12 @@ export default function LeftTimelineNav({
             <KeyboardArrowUpRoundedIcon sx={{ transform: "rotate(-90deg)" }} />
           </IconButton>
 
-          {sections.map((s) => {
-            const isActive = s.id === activeId;
+          {sections.map((section) => {
+            const isActive = section.id === activeId;
             return (
               <Box
-                key={s.id}
-                onClick={() => scrollToId(s.id)}
+                key={section.id}
+                onClick={() => scrollToId(section.id)}
                 sx={{
                   width: isActive ? 22 : 8,
                   height: 8,
@@ -310,7 +307,6 @@ export default function LeftTimelineNav({
             );
           })}
 
-          {/* show label only when centered mode (outside projects) */}
           {!dockRight && (
             <Typography
               sx={{
@@ -335,7 +331,6 @@ export default function LeftTimelineNav({
     );
   }
 
-  /* ======================= DESKTOP UI ======================= */
   return (
     <Box
       sx={{
@@ -355,17 +350,19 @@ export default function LeftTimelineNav({
         </Tooltip>
 
         <Stack spacing={1.25} sx={{ pl: 0.5 }}>
-          {sections.map((s) => {
-            const isActive = s.id === activeId;
+          {sections.map((section) => {
+            const isActive = section.id === activeId;
 
             return (
               <Box
-                key={s.id}
-                onClick={() => scrollToId(s.id)}
+                key={section.id}
+                onClick={() => scrollToId(section.id)}
                 role="button"
                 tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") scrollToId(s.id);
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    scrollToId(section.id);
+                  }
                 }}
                 sx={{
                   display: "flex",
@@ -395,7 +392,7 @@ export default function LeftTimelineNav({
                     WebkitTextFillColor: isActive ? "transparent" : "unset",
                   }}
                 >
-                  {s.label}
+                  {section.label}
                 </Typography>
               </Box>
             );
@@ -411,3 +408,4 @@ export default function LeftTimelineNav({
     </Box>
   );
 }
+
