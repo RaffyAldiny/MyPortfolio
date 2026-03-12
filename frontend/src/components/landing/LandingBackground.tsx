@@ -217,9 +217,12 @@ export default function LandingBackground() {
     let h = 0;
     let dpr = 1;
 
-    let FLOW = 320;
-    let SHP = 720;
+    let FLOW = 120;
+    let SHP = 200;
     let pad = 26;
+    let isMobileViewport = false;
+    let lowPowerDevice = false;
+    const targetFrameMs = 1000 / 60;
 
     let fx = new Float32Array(0);
     let fy = new Float32Array(0);
@@ -241,7 +244,7 @@ export default function LandingBackground() {
     let mx = new Float32Array(0);
     let my = new Float32Array(0);
 
-    const H = 48;
+    const H = 24;
 
     let sprBase: HTMLCanvasElement[][] = [];
     let sprBloom: HTMLCanvasElement[][] = [];
@@ -271,22 +274,26 @@ export default function LandingBackground() {
       canvas.style.height = `${h}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-      const isMobile = w < 640;
+      isMobileViewport = w < 640;
+      const nav = window.navigator as Navigator & { deviceMemory?: number };
+      const cores = nav.hardwareConcurrency ?? 8;
+      const memory = nav.deviceMemory ?? 8;
+      lowPowerDevice = cores <= 6 || memory <= 8;
 
       // Resizing logic for mobile
-      FLOW = isMobile ? 150 : 320; // Less particles on mobile
-      SHP = isMobile ? 350 : 720;  // Halved shape particles
-      pad = isMobile ? 18 : 26;
+      FLOW = isMobileViewport ? 60 : lowPowerDevice ? 90 : 120;
+      SHP = isMobileViewport ? 100 : lowPowerDevice ? 140 : 200;
+      pad = isMobileViewport ? 18 : 26;
 
-      const sizes = isMobile ? [5, 10, 16] : [8, 13, 20];
-      const cores = isMobile ? [0.8, 1.0, 1.2] : [1.0, 1.2, 1.5];
+      const sizes = isMobileViewport ? [5, 10, 16] : [8, 13, 20];
+      const coreSizes = isMobileViewport ? [0.8, 1.0, 1.2] : [1.0, 1.2, 1.5];
 
       sprBase = Array.from({ length: H }, (_, k) => {
         const hue = Math.round((k * 360) / H);
         return [
-          makePrismSprite(hue, sizes[0], cores[0]),
-          makePrismSprite(hue, sizes[1], cores[1]),
-          makePrismSprite(hue, sizes[2], cores[2]),
+          makePrismSprite(hue, sizes[0], coreSizes[0]),
+          makePrismSprite(hue, sizes[1], coreSizes[1]),
+          makePrismSprite(hue, sizes[2], coreSizes[2]),
         ];
       });
 
@@ -331,22 +338,22 @@ export default function LandingBackground() {
       sizeIdx = new Uint8Array(FLOW);
       flowBloomMask = new Uint8Array(FLOW);
 
-      const baseVx = isMobile ? 12 : 18;
-      const baseVy = isMobile ? -8 : -14;
+      const baseVx = isMobileViewport ? 12 : 18;
+      const baseVy = isMobileViewport ? -8 : -14;
 
       for (let i = 0; i < FLOW; i++) {
         fx[i] = rr(rng, 0, w);
         fy[i] = rr(rng, 0, h);
         vx[i] = baseVx + rr(rng, -14, 22);
         vy[i] = baseVy + rr(rng, -18, 14);
-        alp[i] = isMobile ? rr(rng, 0.50, 0.90) : rr(rng, 0.48, 0.98);
+        alp[i] = isMobileViewport ? rr(rng, 0.50, 0.90) : rr(rng, 0.48, 0.98);
         phase[i] = rr(rng, 0, TAU);
         const spd = rr(rng, 0.95, 2.2);
         omega[i] = 1.6 * spd;
         hueBase[i] = Math.floor(rr(rng, 0, H));
         const pick = rr(rng, 0, 1);
         sizeIdx[i] = pick < 0.55 ? 0 : pick < 0.85 ? 1 : 2;
-        flowBloomMask[i] = i % 6 === 0 ? 1 : 0;
+        flowBloomMask[i] = i % 14 === 0 ? 1 : 0;
       }
 
       const rngS = mulberry32(246813579);
@@ -362,15 +369,15 @@ export default function LandingBackground() {
         shSize[i] = pick < 0.4 ? 0 : pick < 0.8 ? 1 : 2;
         shPhase[i] = rr(rngS, 0, TAU);
         shMod7[i] = i % 7;
-        shBloomMask[i] = i % 7 === 0 ? 1 : 0;
+        shBloomMask[i] = i % 16 === 0 ? 1 : 0;
       }
 
       mx = new Float32Array(SHP);
       my = new Float32Array(SHP);
 
       for (const s of SHAPES) {
-        leftSet[s] = shapePoints(s, SHP, left.seed + s.length * 101, isMobile);
-        rightSet[s] = shapePoints(s, SHP, right.seed + s.length * 131, isMobile);
+        leftSet[s] = shapePoints(s, SHP, left.seed + s.length * 101, isMobileViewport);
+        rightSet[s] = shapePoints(s, SHP, right.seed + s.length * 131, isMobileViewport);
       }
     };
 
@@ -434,8 +441,13 @@ export default function LandingBackground() {
     };
 
     const frame = (now: number) => {
-      const dt = Math.min(0.033, Math.max(0.001, (now - last) / 1000));
-      last = now;
+      const elapsedMs = now - last;
+      if (elapsedMs < targetFrameMs) {
+        raf = requestAnimationFrame(frame);
+        return;
+      }
+      const dt = Math.min(0.05, Math.max(0.001, elapsedMs / 1000));
+      last = now - (elapsedMs % targetFrameMs);
 
       ctx.clearRect(0, 0, w, h);
 
@@ -500,11 +512,10 @@ export default function LandingBackground() {
         );
       }
 
-      const isMobile = w < 640;
-      const lx = isMobile ? w * 0.18 : w * 0.22;
-      const ly = isMobile ? h * 0.30 : h * 0.36;
-      const rx = isMobile ? w * 0.82 : w * 0.8;
-      const ry = isMobile ? h * 0.65 : h * 0.6;
+      const lx = isMobileViewport ? w * 0.18 : w * 0.22;
+      const ly = isMobileViewport ? h * 0.30 : h * 0.36;
+      const rx = isMobileViewport ? w * 0.82 : w * 0.8;
+      const ry = isMobileViewport ? h * 0.65 : h * 0.6;
 
       drawCluster(now, left, leftSet, lx, ly, 8);
       drawCluster(now, right, rightSet, rx, ry, 26);

@@ -183,7 +183,7 @@ function ProfileIntroInner() {
     if (!root || reducedMotion) return;
 
     const ctx = gsap.context(() => {
-      gsap
+      const introTl = gsap
         .timeline({ defaults: { ease: "power3.out", duration: 0.78 } })
         .from('[data-hero="hook"]', { y: 30, autoAlpha: 0 })
         .from(
@@ -200,12 +200,30 @@ function ProfileIntroInner() {
           "-=0.32"
         );
 
-      gsap.to('[data-hero="avatar-shell"]', {
-        y: -10,
-        duration: 3.6,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
+      const FLOAT_TARGETS = [
+        '[data-hero="hook"]',
+        '[data-hero="avatar-shell"]',
+        '[data-hero="eyebrow"]',
+        '[data-hero="name"]',
+        '[data-hero="title"]',
+        '[data-hero="glass"]',
+      ];
+
+      gsap.set(FLOAT_TARGETS, { willChange: "transform" });
+
+      introTl.eventCallback("onComplete", () => {
+        FLOAT_TARGETS.forEach((target, index) => {
+          gsap.to(target, {
+            y: -14,
+            duration: 2.6,
+            repeat: -1,
+            yoyo: true,
+            ease: "sine.inOut",
+            delay: index * 0.14,
+            force3D: true,
+            overwrite: "auto",
+          });
+        });
       });
 
       gsap.to('[data-hero="ring-outer"]', {
@@ -234,21 +252,6 @@ function ProfileIntroInner() {
         transformOrigin: "70% 70%",
       });
 
-      gsap.to('[data-hero="hook"]', {
-        y: -6,
-        duration: 3.4,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-      });
-
-      gsap.to('[data-hero="glass"]', {
-        y: -5,
-        duration: 4.2,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-      });
     }, root);
 
     return () => ctx.revert();

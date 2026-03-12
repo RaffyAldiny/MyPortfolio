@@ -22,7 +22,18 @@ const PROJECTS = [
     title: "COMPARIGON",
     subtitle: "Device Intelligence Platform",
     desc: "A comparison platform for smartphones, chipsets, and mobile hardware with structured specs, benchmark-focused browsing, and fast category navigation for side-by-side research.",
-    tags: ["Next.js", "React", "PostgreSQL"],
+    tags: [
+      "Laravel",
+      "Alpine JS",
+      "Livewire",
+      "Tailwind CSS",
+      "DigitalOcean",
+      "Filament",
+      "MySQL",
+      "Cloudflare",
+      "Blade",
+      "SEO Optimized",
+    ],
     image: "/images/comparigon.avif",
     accent: "#FF9B7A",
     link: "https://comparigon.com",
@@ -33,7 +44,7 @@ const PROJECTS = [
     title: "POLYLAYER",
     subtitle: "Knowledge Platform",
     desc: "A 3D printer knowledge and catalog platform focused on structured descriptions, searchable product listings, comparison views, and detailed specification browsing for hardware research.",
-    tags: ["Next.js", "Django REST", "PostgreSQL"],
+    tags: ["Next.js", "Django REST", "PostgreSQL", "Material UI"],
     image: "/images/polylayer.avif",
     accent: "#C6D0DB",
     link: null,
@@ -528,32 +539,37 @@ function ProjectsSection() {
         setActiveIndex((current) => (current === nextIndex ? current : nextIndex));
       };
 
+      const headerTrigger = ScrollTrigger.create({
+        trigger: container,
+        start: "top bottom",
+        end: "bottom top",
+        onToggle: ({ isActive }) => {
+          setHeaderVisible(!isActive);
+        },
+      });
+
       const sectionTrigger = ScrollTrigger.create({
         trigger: container,
         start: "top top",
         end: "bottom bottom",
         onEnter: () => {
           setIsInsideProjects(true);
-          setHeaderVisible(false);
         },
         onEnterBack: () => {
           setIsInsideProjects(true);
-          setHeaderVisible(false);
         },
         onLeave: () => {
           setIsInsideProjects(false);
-          setHeaderVisible(true);
         },
         onLeaveBack: () => {
           setIsInsideProjects(false);
-          setHeaderVisible(true);
         },
         onUpdate: syncProgress,
       });
 
       const active = sectionTrigger.isActive;
       setIsInsideProjects(active);
-      setHeaderVisible(!active);
+      setHeaderVisible(!headerTrigger.isActive);
       syncProgress(sectionTrigger);
     }, container);
 
