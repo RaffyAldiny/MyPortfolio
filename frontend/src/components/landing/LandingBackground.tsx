@@ -128,7 +128,7 @@ function shapePoints(type: ShapeType, n: number, seed: number, isMobile: boolean
   return { xs, ys };
 }
 
-/** True colored prism sprite. */
+/** Green duotone glow sprite. */
 function makePrismSprite(hue: number, size: number, core: number) {
   const c = document.createElement("canvas");
   c.width = size;
@@ -141,14 +141,14 @@ function makePrismSprite(hue: number, size: number, core: number) {
   const rOuter = size / 2;
 
   const h1 = hue;
-  const h2 = (hue + 32) % 360;
-  const h3 = (hue + 72) % 360;
+  const h2 = Math.min(150, hue + 14);
+  const h3 = Math.min(164, hue + 28);
 
   const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, rOuter);
-  g.addColorStop(0.0, `hsla(${h1}, 100%, 90%, 0.95)`);
-  g.addColorStop(0.18, `hsla(${h2}, 100%, 74%, 0.65)`);
-  g.addColorStop(0.38, `hsla(${h3}, 100%, 68%, 0.35)`);
-  g.addColorStop(0.62, `hsla(${h2}, 100%, 70%, 0.16)`);
+  g.addColorStop(0.0, `hsla(${h1}, 88%, 92%, 0.95)`);
+  g.addColorStop(0.18, `hsla(${h2}, 78%, 74%, 0.64)`);
+  g.addColorStop(0.38, `hsla(${h3}, 62%, 58%, 0.34)`);
+  g.addColorStop(0.62, `hsla(${h2}, 72%, 62%, 0.16)`);
   g.addColorStop(1.0, `rgba(255,255,255,0)`);
   ctx.fillStyle = g;
   ctx.beginPath();
@@ -288,10 +288,10 @@ export default function LandingBackground() {
       const sizes = isMobileViewport ? [5, 10, 16] : [8, 13, 20];
       const coreSizes = isMobileViewport ? [0.8, 1.0, 1.2] : [1.0, 1.2, 1.5];
 
-      sprBase = Array.from({ length: H }, (_, k) => {
-        const hue = Math.round((k * 360) / H);
-        return [
-          makePrismSprite(hue, sizes[0], coreSizes[0]),
+	      sprBase = Array.from({ length: H }, (_, k) => {
+	        const hue = 96 + Math.round((k * 40) / Math.max(1, H - 1));
+	        return [
+	          makePrismSprite(hue, sizes[0], coreSizes[0]),
           makePrismSprite(hue, sizes[1], coreSizes[1]),
           makePrismSprite(hue, sizes[2], coreSizes[2]),
         ];
@@ -582,7 +582,7 @@ export default function LandingBackground() {
         inset: 0,
         overflow: "hidden",
         zIndex: 0,
-        background: "#FFFFFF",
+        background: "#FCFDFB",
       }}
     >
       <Box
@@ -592,10 +592,10 @@ export default function LandingBackground() {
           pointerEvents: "none",
           filter: "blur(48px)",
           background: `
-            radial-gradient(980px 560px at 18% 22%, rgba(255,255,255,0.32), transparent 62%),
-            radial-gradient(860px 520px at 78% 18%, rgba(255,255,255,0.22), transparent 64%),
-            radial-gradient(820px 560px at 70% 78%, rgba(255,255,255,0.18), transparent 62%),
-            radial-gradient(760px 560px at 26% 78%, rgba(255,255,255,0.16), transparent 64%)
+            radial-gradient(980px 560px at 18% 22%, rgba(28,219,47,0.12), transparent 62%),
+            radial-gradient(860px 520px at 78% 18%, rgba(207,250,201,0.12), transparent 64%),
+            radial-gradient(820px 560px at 70% 78%, rgba(12,122,25,0.1), transparent 62%),
+            radial-gradient(760px 560px at 26% 78%, rgba(247,251,244,0.18), transparent 64%)
           `,
           animation: `${mistA} 12s ease-in-out infinite`,
           mixBlendMode: "soft-light",
@@ -608,10 +608,10 @@ export default function LandingBackground() {
           pointerEvents: "none",
           filter: "blur(54px)",
           background: `
-            radial-gradient(920px 600px at 30% 35%, rgba(255,255,255,0.20), transparent 66%),
-            radial-gradient(820px 560px at 88% 52%, rgba(255,255,255,0.18), transparent 66%),
-            radial-gradient(880px 600px at 52% 92%, rgba(255,255,255,0.16), transparent 68%),
-            radial-gradient(760px 560px at 8% 58%, rgba(255,255,255,0.14), transparent 70%)
+            radial-gradient(920px 600px at 30% 35%, rgba(247,251,244,0.15), transparent 66%),
+            radial-gradient(820px 560px at 88% 52%, rgba(28,219,47,0.1), transparent 66%),
+            radial-gradient(880px 600px at 52% 92%, rgba(12,122,25,0.1), transparent 68%),
+            radial-gradient(760px 560px at 8% 58%, rgba(207,250,201,0.12), transparent 70%)
           `,
           animation: `${mistB} 16s ease-in-out infinite`,
           mixBlendMode: "overlay",

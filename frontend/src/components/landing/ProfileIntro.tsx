@@ -9,23 +9,27 @@ import usePrefersReducedMotion from "@/hooks/usePrefersReducedMotion";
 import { ensureGsap, gsap, useIsomorphicLayoutEffect } from "@/lib/gsap";
 
 const PROFILE = {
-  name: "Rafael Alden Agoncillo",
+  name: "RaffyAldiny",
   title: "Computer Science Graduate / Full-Stack Developer",
-  imageSrc: "/resources/my%20portfolio-picture.jpg",
+  imageSrc: "/resources/my-portfolio-picture.avif",
 } as const;
 
 const PRISM_GRADIENT =
-  "linear-gradient(135deg, #FF9A9E 0%, #FECFEF 25%, #E0C3FC 50%, #8EC5FC 75%, #D4FFEC 100%)";
+  "linear-gradient(135deg, #F3FFF0 0%, #CFFAC9 24%, #8EF587 46%, #1CDB2F 62%, #159E22 82%, #0B5A14 100%)";
 
 const AVATAR_SIZE = { xs: 130, md: 160 } as const;
 
 const SX = {
   root: {
+    minHeight: { xs: "calc(100dvh - 104px)", md: "calc(100dvh - 120px)" },
+    display: "flex",
+    justifyContent: "center",
     alignItems: "center",
     textAlign: "center",
     width: "100%",
+    maxWidth: 760,
     mx: "auto",
-    py: { xs: 4, md: 6 },
+    py: { xs: 3, md: 6 },
     overflow: "hidden",
     position: "relative",
   },
@@ -33,13 +37,11 @@ const SX = {
     fontWeight: 900,
     letterSpacing: "0.02em",
     textTransform: "uppercase",
-    fontSize: { xs: "2.0rem", sm: "2.7rem", md: "3.35rem" },
+    fontSize: { xs: "2.35rem", sm: "2.7rem", md: "3.35rem" },
     lineHeight: 1.1,
     mb: 0,
-    background: "linear-gradient(135deg, #FF9A9E 0%, #E0C3FC 50%, #8EC5FC 100%)",
-    WebkitBackgroundClip: "text",
-    WebkitTextFillColor: "transparent",
-    filter: "drop-shadow(0px 4px 12px rgba(224, 195, 252, 0.5))",
+    color: "#1CDB2F",
+    filter: "drop-shadow(0px 2px 8px rgba(28, 219, 47, 0.12))",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -52,9 +54,9 @@ const SX = {
     background: PRISM_GRADIENT,
     WebkitBackgroundClip: "text",
     WebkitTextFillColor: "transparent",
-    filter: "drop-shadow(0 0 8px rgba(224, 195, 252, 0.6))",
+    filter: "drop-shadow(0 0 8px rgba(28, 219, 47, 0.22))",
   },
-  avatarWrap: { position: "relative", display: "inline-flex", mt: 1 },
+  avatarWrap: { position: "relative", display: "inline-flex" },
   ringOuter: {
     position: "absolute",
     top: -24,
@@ -62,7 +64,7 @@ const SX = {
     right: -24,
     bottom: -24,
     borderRadius: "50%",
-    border: "1px dashed rgba(184, 242, 255, 0.6)",
+    border: "1px dashed rgba(143, 174, 130, 0.46)",
     zIndex: 0,
   },
   ringInner: {
@@ -72,7 +74,7 @@ const SX = {
     right: -8,
     bottom: -8,
     borderRadius: "50%",
-    background: "linear-gradient(135deg, #FFC7EA, #B8F2FF)",
+    background: "linear-gradient(135deg, #F6FBF3, #8FAE82)",
     zIndex: 1,
     mask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
     maskComposite: "exclude",
@@ -85,73 +87,92 @@ const SX = {
     zIndex: 3,
     pointerEvents: "none",
     background:
-      "linear-gradient(135deg, rgba(255, 154, 158, 0.6) 0%, rgba(224, 195, 252, 0.6) 50%, rgba(142, 197, 252, 0.6) 100%)",
-    mixBlendMode: "color",
+      "linear-gradient(135deg, rgba(243, 255, 240, 0.18) 0%, rgba(28, 219, 47, 0.12) 56%, rgba(11, 90, 20, 0.14) 100%)",
+    mixBlendMode: "soft-light",
     margin: "4px",
   },
   avatarFrame: {
     width: AVATAR_SIZE,
     height: AVATAR_SIZE,
     border: "4px solid #fff",
-    boxShadow: "0 10px 40px rgba(184, 242, 255, 0.4)",
+    boxShadow: "0 10px 40px rgba(91, 130, 96, 0.16)",
     zIndex: 2,
     position: "relative",
     backgroundColor: "#fff",
     overflow: "hidden",
     borderRadius: "50%",
   },
-  textWrap: { width: "100%", px: 2 },
+  textWrap: { width: "100%", px: { xs: 1.5, md: 2 } },
   nameIntro: {
-    fontWeight: 600,
-    color: "text.secondary",
-    textTransform: "uppercase",
-    letterSpacing: "0.15em",
-    fontSize: "1.05rem",
+    fontWeight: 700,
+    color: "#314634",
+    textTransform: "none",
+    letterSpacing: "0.04em",
+    fontSize: { xs: "1rem", md: "1.05rem" },
     mb: -0.5,
   },
   name: {
     fontWeight: 800,
     letterSpacing: "-0.03em",
-    fontSize: { xs: "2.2rem", md: "3.15rem" },
-    background: "linear-gradient(135deg, #2A2A3C 30%, #5B4B75 100%)",
+    fontSize: { xs: "1.95rem", md: "2.7rem" },
+    background:
+      "linear-gradient(90deg, #338E3E 0%, #68D873 50%, #338E3E 100%)",
     WebkitBackgroundClip: "text",
     WebkitTextFillColor: "transparent",
     pb: 1,
     lineHeight: 1.2,
-    filter: "drop-shadow(0px 2px 2px rgba(91, 75, 117, 0.15))",
+    filter: "drop-shadow(0px 1px 1px rgba(51, 142, 62, 0.1))",
+    display: "inline-flex",
+    alignItems: "center",
+    gap: { xs: 0.8, md: 1.05 },
+    flexWrap: "wrap",
+    justifyContent: "center",
+  },
+  sakura: {
+    fontSize: { xs: "1.45rem", md: "1.65rem" },
+    color: "#4DBB5A",
+    WebkitTextFillColor: "#4DBB5A",
+    background: "none",
+    lineHeight: 1,
+    transform: "translateY(-1px)",
+    textShadow: "none",
   },
   title: {
     fontWeight: 600,
     color: "text.secondary",
     letterSpacing: -0.5,
-    mb: 3,
+    mb: { xs: 3, md: 3.4 },
     opacity: 0.8,
     fontSize: { xs: "1.2rem", md: "1.4rem" },
+    textAlign: "center",
   },
   glass: {
     maxWidth: "680px",
     mx: "auto",
-    px: { xs: 3, md: 5 },
-    py: { xs: 2, md: 3 },
-    borderRadius: "40px",
-    backgroundColor: "rgba(255, 255, 255, 0.45)",
+    width: "100%",
+    px: { xs: 2.5, md: 5 },
+    py: { xs: 2.2, md: 3 },
+    borderRadius: { xs: "28px", md: "40px" },
+    backgroundColor: "rgba(250, 255, 249, 0.9)",
     backdropFilter: "blur(8px)",
-    border: "1px solid rgba(255, 255, 255, 0.4)",
-    boxShadow: "0 8px 32px rgba(224, 195, 252, 0.2)",
+    border: "1px solid rgba(28, 219, 47, 0.28)",
+    boxShadow:
+      "0 0 0 1px rgba(28, 219, 47, 0.08), 0 0 26px rgba(28, 219, 47, 0.14), 0 18px 40px rgba(28, 219, 47, 0.08)",
   },
   bio: {
-    fontSize: { xs: "0.95rem", md: "1.0rem" },
+    fontSize: { xs: "0.88rem", md: "1.0rem" },
     lineHeight: 1.8,
-    color: "#4A5568",
+    color: "#465546",
     fontWeight: 500,
+    textAlign: "center",
   },
   highlight: {
     fontWeight: 700,
-    color: "#2D2D3A",
+    color: "#1F3222",
     position: "relative",
     whiteSpace: "nowrap",
     backgroundImage:
-      "linear-gradient(120deg, transparent 0%, transparent 10%, #FFC7EA 10%, #B8F2FF 100%)",
+      "linear-gradient(120deg, transparent 0%, transparent 10%, #EDF5E8 10%, #CFE2C6 100%)",
     backgroundRepeat: "no-repeat",
     backgroundSize: "100% 45%",
     backgroundPosition: "0 90%",
@@ -258,7 +279,7 @@ function ProfileIntroInner() {
   }, [reducedMotion]);
 
   return (
-    <Stack ref={rootRef} spacing={3} sx={SX.root}>
+    <Stack ref={rootRef} spacing={{ xs: 3.2, md: 4 }} sx={SX.root}>
       <Typography variant="h1" sx={SX.hook} data-hero="hook">
         HELLO THERE!
         <Box component="span" sx={SX.waveEmoji} data-hero="wave">
@@ -266,7 +287,7 @@ function ProfileIntroInner() {
         </Box>
       </Typography>
 
-      <Box sx={{ ...SX.avatarWrap, mt: 5 }} data-hero="avatar-shell">
+      <Box sx={SX.avatarWrap} data-hero="avatar-shell">
         <Box sx={SX.ringOuter} data-hero="ring-outer" />
         <Box sx={SX.ringInner} data-hero="ring-inner" />
         <Box sx={SX.prismOverlay} />
@@ -284,12 +305,18 @@ function ProfileIntroInner() {
       </Box>
 
       <Box sx={SX.textWrap}>
-        <Stack spacing={0} alignItems="center" sx={{ mb: 1, mt: 3 }}>
+        <Stack spacing={0} alignItems="center" sx={{ mb: { xs: 1, md: 1.25 } }}>
           <Typography variant="subtitle1" sx={SX.nameIntro} data-hero="eyebrow">
-            I am
+            I&apos;m
           </Typography>
           <Typography variant="h3" sx={SX.name} data-hero="name">
+            <Box component="span" sx={SX.sakura}>
+              ✿
+            </Box>
             {name}
+            <Box component="span" sx={SX.sakura}>
+              ✿
+            </Box>
           </Typography>
         </Stack>
 

@@ -12,7 +12,8 @@ type Props = {
 };
 
 const PRISM_GRADIENT =
-  "linear-gradient(90deg, #ff8ad8, #81ecff, #c598ff, #7dffcb)";
+  "linear-gradient(90deg, #F3FFF0 0%, #CFFAC9 22%, #79EE70 50%, #1CDB2F 78%, #0B5A14 100%)";
+const LABEL_GREEN = "#8DFF74";
 
 function clamp01(v: number) {
   if (v < 0) return 0;
@@ -31,7 +32,6 @@ export default function ProjectProgressRail({ progress, activeIndex, totalSlides
 
   const totalProjects = Math.max(1, totalSlides - 1); // intro excluded
   const labelDesktop = `PROJECT ${String(activeIndex).padStart(2, "0")} / ${String(totalProjects).padStart(2, "0")}`;
-  const labelMobile = `P ${String(activeIndex).padStart(2, "0")}/${String(totalProjects).padStart(2, "0")}`;
 
   /* --- Desktop (vertical) --- */
   const railH = 200;
@@ -70,34 +70,35 @@ export default function ProjectProgressRail({ progress, activeIndex, totalSlides
 
   return (
     <Box sx={wrapperSx}>
-      {/* Badge */}
-      <Box
-        sx={{
-          mb: isMobile ? 0.7 : 1.2,
-          px: isMobile ? 0.9 : 1.15,
-          py: isMobile ? 0.4 : 0.65,
-          borderRadius: 999,
-          bgcolor: "rgba(0,0,0,0.45)",
-          backdropFilter: "blur(10px)",
-          border: "1px solid rgba(255,255,255,0.14)",
-          textAlign: "center",
-        }}
-      >
-        <Typography
+      {!isMobile && (
+        <Box
           sx={{
-            fontSize: isMobile ? 9.5 : 10.5,
-            fontWeight: 900,
-            letterSpacing: isMobile ? 1 : 1.8,
-            textTransform: "uppercase",
-            background: PRISM_GRADIENT,
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            whiteSpace: "nowrap",
+            mb: 1.2,
+            px: 1.15,
+            py: 0.65,
+            borderRadius: 999,
+            bgcolor: "rgba(0,0,0,0.45)",
+            backdropFilter: "blur(10px)",
+            border: "1px solid rgba(141,255,116,0.26)",
+            boxShadow: "0 0 12px rgba(28,219,47,0.12)",
+            textAlign: "center",
           }}
         >
-          {isMobile ? labelMobile : labelDesktop}
-        </Typography>
-      </Box>
+          <Typography
+            sx={{
+              fontSize: 10.5,
+              fontWeight: 900,
+              letterSpacing: 1.8,
+              textTransform: "uppercase",
+              color: LABEL_GREEN,
+              textShadow: "0 0 10px rgba(28,219,47,0.18)",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {labelDesktop}
+          </Typography>
+        </Box>
+      )}
 
       {/* Rail */}
       {isMobile ? (
@@ -110,6 +111,7 @@ export default function ProjectProgressRail({ progress, activeIndex, totalSlides
             borderRadius: 999,
             bgcolor: "rgba(255,255,255,0.10)",
             overflow: "hidden",
+            boxShadow: "0 0 0 1px rgba(141,255,116,0.12), 0 8px 24px rgba(4,18,7,0.14)",
           }}
         >
           {/* Fill (LEFT -> RIGHT) */}
@@ -120,7 +122,7 @@ export default function ProjectProgressRail({ progress, activeIndex, totalSlides
               bottom: 0,
               left: 0,
               width: `${p * 100}%`,
-              background: "linear-gradient(to right, #FF9A9E, #A18CD1)",
+              background: "linear-gradient(to right, #CFFAC9, #1CDB2F)",
               borderRadius: 999,
             }}
           />
@@ -172,7 +174,7 @@ export default function ProjectProgressRail({ progress, activeIndex, totalSlides
               right: 0,
               top: 0,
               height: `${p * 100}%`,
-              background: "linear-gradient(to bottom, #FF9A9E, #A18CD1)",
+              background: "linear-gradient(to bottom, #CFFAC9, #1CDB2F)",
               borderRadius: 999,
             }}
           />

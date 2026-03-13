@@ -5,12 +5,13 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
 import Stack from "@mui/material/Stack";
+import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import ArrowOutwardIcon from "@mui/icons-material/ArrowOutward";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import MailOutlineIcon from "@mui/icons-material/MailOutline";
-import { alpha, keyframes } from "@mui/material/styles";
+import { alpha } from "@mui/material/styles";
 import usePrefersReducedMotion from "@/hooks/usePrefersReducedMotion";
 import { ensureGsap, gsap, useIsomorphicLayoutEffect } from "@/lib/gsap";
 
@@ -18,28 +19,19 @@ const ARTICLE_URL =
   "https://journal.ijprse.com/index.php/ijprse/article/view/1126";
 const PDF_URL =
   "https://journal.ijprse.com/index.php/ijprse/article/download/1126/1088/1867";
-const PRISM_GRADIENT =
-  "linear-gradient(135deg, #FF9A9E 0%, #FECFEF 25%, #E0C3FC 50%, #8EC5FC 75%, #D4FFEC 100%)";
-const METRIC_PRISM =
-  "linear-gradient(90deg, #FF6FA8 0%, #FF93CF 18%, #C08CFF 40%, #73B5FF 66%, #83E8FF 84%, #8CFFD8 100%)";
-
-const prismDrift = keyframes`
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-`;
-
-const metricGlow = keyframes`
-  0% {
-    filter: saturate(1.08) brightness(1);
-  }
-  50% {
-    filter: saturate(1.35) brightness(1.08);
-  }
-  100% {
-    filter: saturate(1.08) brightness(1);
-  }
-`;
+const CELEB_DF_URL = "https://github.com/yuezunli/celeb-deepfakeforensics";
+const EFFICIENTNET_B0_URL =
+  "https://keras.io/api/applications/efficientnet/efficientnet_models/#efficientnetb0-function";
+const GAT_URL = "https://arxiv.org/pdf/1710.10903";
+const GRU_URL =
+  "https://www.geeksforgeeks.org/machine-learning/gated-recurrent-unit-networks/";
+const BORDER_GREEN = alpha("#1CDB2F", 0.46);
+const DARK_GREEN = "#115419";
+const LABEL_GREEN = "#1CDB2F";
+const METRIC_GREEN = "#17B827";
+const AUTHOR_ICON_GREEN = "#168922";
+const TOOLTIP_BG = "#113416";
+const TOOLTIP_FG = "#E7FFE3";
 
 const BADGES = [
   "EfficientNet-B0",
@@ -55,14 +47,91 @@ const METRICS = [
   { label: "Published", value: "Dec 22, 2024" },
 ] as const;
 
+function HoverLinkTooltip({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactElement;
+}) {
+  return (
+    <Tooltip
+      title={title}
+      arrow
+      enterDelay={120}
+      leaveDelay={80}
+      slotProps={{
+        tooltip: {
+          sx: {
+            bgcolor: TOOLTIP_BG,
+            color: TOOLTIP_FG,
+            border: `1px solid ${alpha("#1CDB2F", 0.34)}`,
+            boxShadow: `0 10px 22px ${alpha("#1CDB2F", 0.14)}`,
+            fontSize: "0.74rem",
+            fontWeight: 700,
+            px: 1.15,
+            py: 0.8,
+            borderRadius: 1.5,
+          },
+        },
+        arrow: {
+          sx: {
+            color: TOOLTIP_BG,
+          },
+        },
+      }}
+    >
+      {children}
+    </Tooltip>
+  );
+}
+
+function ReferenceLink({
+  href,
+  children,
+}: {
+  href: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <HoverLinkTooltip title={href}>
+      <Box
+        component="a"
+        href={href}
+        target="_blank"
+        rel="noreferrer"
+        sx={{
+          color: "inherit",
+          textDecorationLine: "underline",
+          textDecorationColor: alpha("#1CDB2F", 0.92),
+          textDecorationThickness: "2px",
+          textUnderlineOffset: "0.26em",
+          transition:
+            "color 160ms ease, text-decoration-color 160ms ease, background-color 160ms ease, box-shadow 160ms ease",
+          borderRadius: 0.5,
+          "&:hover": {
+            color: DARK_GREEN,
+            textDecorationColor: "#1CDB2F",
+            backgroundColor: alpha("#1CDB2F", 0.08),
+            boxShadow: `0 2px 0 ${alpha("#1CDB2F", 0.14)}`,
+          },
+        }}
+      >
+        {children}
+      </Box>
+    </HoverLinkTooltip>
+  );
+}
+
 const SX = {
   section: {
     width: "100%",
-    minHeight: { xs: "auto", md: "88vh" },
+    minHeight: { xs: "auto", md: "calc(100dvh - 80px)" },
     position: "relative",
     display: "flex",
     alignItems: "center",
-    py: { xs: 6, md: 10 },
+    justifyContent: "center",
+    py: { xs: 4, md: 2 },
   },
   aura: {
     position: "absolute",
@@ -76,26 +145,36 @@ const SX = {
     position: "relative",
     zIndex: 1,
     width: "100%",
+    maxWidth: 1120,
     borderRadius: { xs: 4, md: 6 },
     overflow: "hidden",
-    background: `linear-gradient(#FFFFFF, #FFFFFF) padding-box, ${PRISM_GRADIENT} border-box`,
-    border: "1px solid transparent",
+    background: "#FFFFFF",
+    border: `1px solid ${BORDER_GREEN}`,
     boxShadow: "0 24px 60px rgba(15, 23, 42, 0.08)",
   },
   panel: {
-    p: { xs: 3, md: 5 },
+    p: { xs: 2.25, sm: 3, md: 5 },
     display: "grid",
-    gap: { xs: 3, md: 4 },
+    gap: { xs: 2.25, sm: 3, md: 4 },
     gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 1.3fr) minmax(280px, 0.7fr)" },
+    alignItems: { xs: "stretch", lg: "center" },
+  },
+  thesisLabel: {
+    fontSize: { xs: "0.72rem", md: "0.78rem" },
+    fontWeight: 800,
+    letterSpacing: "0.08em",
+    color: "#0E4E13",
+    mb: 1,
+    textAlign: "left",
   },
   paperTitle: {
     fontWeight: 800,
     letterSpacing: "-0.015em",
     fontSize: { xs: "1.32rem", md: "2.1rem" },
     lineHeight: 1.28,
-    color: "#111111",
-    textAlign: "justify",
-    textJustify: "inter-word",
+    color: "#16391B",
+    textAlign: { xs: "left", md: "justify" },
+    textJustify: { md: "inter-word" },
     maxWidth: 720,
   },
   authors: {
@@ -117,7 +196,7 @@ const SX = {
   authorGroup: {
     display: "inline-flex",
     alignItems: "center",
-    gap: 0.45,
+    gap: { xs: 0.7, md: 0.45 },
     flexWrap: "nowrap",
   },
   authorName: {
@@ -136,14 +215,14 @@ const SX = {
     display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
-    color: "#4C6898",
+    color: AUTHOR_ICON_GREEN,
     textDecoration: "none",
     transition: "color 160ms ease, transform 160ms ease",
     "& .MuiSvgIcon-root": {
       fontSize: "0.95rem",
     },
     "&:hover": {
-      color: "#111111",
+      color: DARK_GREEN,
       transform: "translateY(-1px)",
     },
   },
@@ -151,56 +230,66 @@ const SX = {
     color: "#111111",
   },
   summary: {
-    color: alpha("#162235", 0.82),
+    color: alpha("#243226", 0.82),
     fontSize: { xs: "0.96rem", md: "1.06rem" },
-    lineHeight: 1.85,
-    textAlign: "justify",
-    textJustify: "inter-word",
+    lineHeight: { xs: 1.76, md: 1.85 },
+    textAlign: { xs: "left", md: "justify" },
+    textJustify: { md: "inter-word" },
     maxWidth: 760,
+  },
+  summaryAccent: {
+    textDecorationLine: "underline",
+    textDecorationColor: alpha("#1CDB2F", 0.92),
+    textDecorationThickness: "2px",
+    textUnderlineOffset: "0.26em",
   },
   metricGrid: {
     display: "grid",
-    gridTemplateColumns: { xs: "1fr", sm: "repeat(3, minmax(0, 1fr))" },
-    gap: 1.5,
+    gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+    gap: { xs: 1, sm: 1.5 },
   },
   metricCard: {
-    p: 2,
+    p: { xs: 1.1, sm: 1.5, md: 2 },
     borderRadius: 3,
-    background: `linear-gradient(#FFFFFF, #FFFFFF) padding-box, ${PRISM_GRADIENT} border-box`,
-    border: "1px solid transparent",
-    boxShadow: `0 12px 28px ${alpha("#875FC8", 0.12)}, 0 4px 12px ${alpha("#295D98", 0.08)}`,
+    background: "#FFFFFF",
+    border: `1px solid ${BORDER_GREEN}`,
+    boxShadow: `0 10px 24px ${alpha("#1CDB2F", 0.14)}`,
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    textAlign: "center",
   },
   metricValue: {
+    display: "block",
     fontWeight: 900,
     letterSpacing: "-0.03em",
-    fontSize: { xs: "1.4rem", md: "1.8rem" },
-    background: METRIC_PRISM,
-    WebkitBackgroundClip: "text",
-    WebkitTextFillColor: "transparent",
-    backgroundSize: "200% 200%",
-    WebkitTextStroke: `0.35px ${alpha("#355077", 0.2)}`,
-    animation: `${prismDrift} 5s ease-in-out infinite, ${metricGlow} 2.8s ease-in-out infinite`,
+    fontSize: { xs: "1.02rem", sm: "1.4rem", md: "1.8rem" },
+    color: METRIC_GREEN,
+    textShadow: "0 0 10px rgba(28, 219, 47, 0.18)",
+    transform: "translateZ(0)",
   },
   metricLabel: {
     mt: 0.5,
-    fontWeight: 700,
-    fontSize: 12,
-    letterSpacing: "0.12em",
+    fontWeight: 600,
+    fontSize: { xs: 9.5, sm: 12 },
+    letterSpacing: { xs: "0.06em", sm: "0.12em" },
     textTransform: "uppercase",
-    color: alpha("#21304A", 0.62),
+    color: "#084E10",
+    textAlign: "center",
   },
   sideCard: {
     alignSelf: "stretch",
     borderRadius: 4,
-    p: { xs: 3, md: 4 },
-    background: `linear-gradient(#FFFFFF, #FFFFFF) padding-box, ${PRISM_GRADIENT} border-box`,
-    border: "1px solid transparent",
-    boxShadow: `inset 0 1px 0 ${alpha("#FFFFFF", 0.9)}, 0 18px 40px rgba(15, 23, 42, 0.06)`,
-    color: "#1C2A3D",
+    p: { xs: 2.25, sm: 3, md: 4 },
+    background: "#FFFFFF",
+    border: `1px solid ${BORDER_GREEN}`,
+    boxShadow: `inset 0 1px 0 ${alpha("#FFFFFF", 0.9)}, 0 18px 40px ${alpha("#1CDB2F", 0.1)}`,
+    color: "#154D1C",
     display: "flex",
     flexDirection: "column",
     justifyContent: "space-between",
-    gap: 3,
+    gap: { xs: 2.25, md: 3 },
     minHeight: { xs: "auto", lg: 420 },
   },
   sideLabel: {
@@ -208,53 +297,56 @@ const SX = {
     fontWeight: 900,
     letterSpacing: "0.18em",
     textTransform: "uppercase",
-    background: PRISM_GRADIENT,
-    WebkitBackgroundClip: "text",
-    WebkitTextFillColor: "transparent",
+    color: LABEL_GREEN,
   },
   journalTitle: {
     fontWeight: 700,
     lineHeight: 1.8,
-    color: "#213A63",
-    textShadow: `0 1px 0 ${alpha("#FFFFFF", 0.9)}`,
+    color: DARK_GREEN,
   },
   sideText: {
     fontWeight: 600,
     lineHeight: 1.8,
-    color: alpha("#21304A", 0.84),
+    color: alpha("#263A2A", 0.84),
   },
   chipWrap: {
     display: "flex",
     flexWrap: "wrap",
-    gap: 1,
+    gap: { xs: 0.75, md: 1 },
   },
   chip: {
-    background: `linear-gradient(#FFFFFF, #FFFFFF) padding-box, ${PRISM_GRADIENT} border-box`,
     bgcolor: "#FFFFFF",
-    color: "#31445F",
-    border: "1px solid transparent",
+    color: DARK_GREEN,
+    border: `1px solid ${alpha("#1CDB2F", 0.58)}`,
     fontWeight: 700,
+    height: { xs: 28, md: 32 },
+    "& .MuiChip-label": {
+      px: { xs: 1, md: 1.25 },
+      fontSize: { xs: "0.75rem", md: "0.81rem" },
+    },
   },
   actions: {
     display: "flex",
-    gap: 1.5,
-    flexWrap: { xs: "wrap", md: "nowrap" },
+    gap: { xs: 1, md: 1.5 },
+    flexWrap: "nowrap",
     alignItems: "center",
+    flexDirection: "row",
   },
   primaryBtn: {
     position: "relative",
     borderRadius: 999,
-    px: 2.1,
     py: 1,
     textTransform: "none",
-    fontWeight: 800,
-    fontSize: "0.88rem",
+    fontWeight: 700,
     whiteSpace: "nowrap",
-    minWidth: "auto",
-    color: "#11314A",
-    background: `linear-gradient(#FFFFFF, #FFFFFF) padding-box, ${PRISM_GRADIENT} border-box`,
-    border: "1.5px solid transparent",
-    boxShadow: "0 8px 24px rgba(142, 197, 252, 0.18)",
+    minWidth: 0,
+    flex: 1,
+    px: { xs: 1.35, sm: 2.1 },
+    fontSize: { xs: "0.76rem", sm: "0.88rem" },
+    color: "#FFFFFF",
+    background: "#1CDB2F",
+    border: `1.5px solid ${alpha("#1CDB2F", 0.62)}`,
+    boxShadow: `0 8px 24px ${alpha("#1CDB2F", 0.14)}`,
     "& .MuiButton-endIcon": {
       ml: 0.6,
     },
@@ -262,26 +354,23 @@ const SX = {
       fontSize: "1rem",
     },
     "&:hover": {
-      background:
-        `linear-gradient(${alpha("#FFFFFF", 0.94)}, ${alpha(
-          "#FFFFFF",
-          0.94
-        )}) padding-box, ${PRISM_GRADIENT} border-box`,
-      boxShadow: "0 10px 28px rgba(142, 197, 252, 0.24)",
+      background: "#18C029",
+      boxShadow: `0 10px 28px ${alpha("#1CDB2F", 0.18)}`,
     },
   },
   secondaryBtn: {
     borderRadius: 999,
-    px: 2.1,
     py: 1,
     textTransform: "none",
-    fontWeight: 800,
-    fontSize: "0.88rem",
+    fontWeight: 700,
     whiteSpace: "nowrap",
-    minWidth: "auto",
-    color: "#31445F",
-    background: `linear-gradient(#FFFFFF, #FFFFFF) padding-box, ${PRISM_GRADIENT} border-box`,
-    border: "1.5px solid transparent",
+    minWidth: 0,
+    flex: 1,
+    px: { xs: 1.1, sm: 2.1 },
+    fontSize: { xs: "0.76rem", sm: "0.88rem" },
+    color: DARK_GREEN,
+    background: "#FFFFFF",
+    border: `1.5px solid ${alpha("#1CDB2F", 0.58)}`,
     "& .MuiButton-startIcon": {
       mr: 0.6,
     },
@@ -289,12 +378,7 @@ const SX = {
       fontSize: "1rem",
     },
     "&:hover": {
-      background:
-        `linear-gradient(${alpha("#FFFFFF", 0.94)}, ${alpha(
-          "#FFFFFF",
-          0.94
-        )}) padding-box, ${PRISM_GRADIENT} border-box`,
-      bgcolor: "transparent",
+      background: alpha("#1CDB2F", 0.12),
     },
   },
 } as const;
@@ -328,9 +412,9 @@ export default function ResearchSpotlight() {
 
       gsap.fromTo(
         "[data-research-card]",
-        { y: 24, rotateX: 2 },
+        { y: 16, rotateX: 2 },
         {
-          y: -18,
+          y: -6,
           rotateX: 0,
           ease: "none",
           scrollTrigger: {
@@ -353,6 +437,10 @@ export default function ResearchSpotlight() {
       <Box sx={SX.card} data-research-card>
         <Box sx={SX.panel}>
           <Box>
+            <Typography sx={SX.thesisLabel} data-research-reveal>
+              | My Thesis Study
+            </Typography>
+
             <Typography sx={SX.paperTitle} data-research-reveal>
               Enhancement of Deepfake Detection Framework Integrating EfficientNet-B0,
               Graph Attention Networks, and Gated Recurrent Units
@@ -370,24 +458,28 @@ export default function ResearchSpotlight() {
                     1
                   </Box>
                 </Typography>
-                <Box
-                  component="a"
-                  href="mailto:rafaelagoncillo@gmail.com"
-                  sx={SX.authorIconLink}
-                  aria-label="Email Rafael Alden F. Agoncillo"
-                >
-                  <MailOutlineIcon />
-                </Box>
-                <Box
-                  component="a"
-                  href="https://github.com/RaffyAldiny"
-                  target="_blank"
-                  rel="noreferrer"
-                  sx={SX.authorIconLink}
-                  aria-label="GitHub profile of Rafael Alden F. Agoncillo"
-                >
-                  <GitHubIcon />
-                </Box>
+                <HoverLinkTooltip title="rafaelagoncillo@gmail.com">
+                  <Box
+                    component="a"
+                    href="mailto:rafaelagoncillo@gmail.com"
+                    sx={SX.authorIconLink}
+                    aria-label="Email Rafael Alden F. Agoncillo"
+                  >
+                    <MailOutlineIcon />
+                  </Box>
+                </HoverLinkTooltip>
+                <HoverLinkTooltip title="https://github.com/RaffyAldiny">
+                  <Box
+                    component="a"
+                    href="https://github.com/RaffyAldiny"
+                    target="_blank"
+                    rel="noreferrer"
+                    sx={SX.authorIconLink}
+                    aria-label="GitHub profile of Rafael Alden F. Agoncillo"
+                  >
+                    <GitHubIcon />
+                  </Box>
+                </HoverLinkTooltip>
               </Box>
 
               <Typography component="span" sx={SX.authorSeparator}>
@@ -401,24 +493,43 @@ export default function ResearchSpotlight() {
                     2
                   </Box>
                 </Typography>
-                <Box
-                  component="a"
-                  href="https://github.com/b0kja85"
-                  target="_blank"
-                  rel="noreferrer"
-                  sx={SX.authorIconLink}
-                  aria-label="GitHub profile of James Kenneth M. Kiunisala"
-                >
-                  <GitHubIcon />
-                </Box>
+                <HoverLinkTooltip title="https://github.com/b0kja85">
+                  <Box
+                    component="a"
+                    href="https://github.com/b0kja85"
+                    target="_blank"
+                    rel="noreferrer"
+                    sx={SX.authorIconLink}
+                    aria-label="GitHub profile of James Kenneth M. Kiunisala"
+                  >
+                    <GitHubIcon />
+                  </Box>
+                </HoverLinkTooltip>
               </Box>
             </Box>
 
             <Typography sx={{ ...SX.summary, mt: 2 }} data-research-reveal>
               My published thesis study proposes a deepfake detection framework that
-              combines EfficientNet-B0 for feature extraction, Graph Attention Networks
-              for spatial relationships, and GRU layers for temporal analysis. The paper
-              reports 80.60% accuracy with 0.28 loss on Celeb-DF v2, outperforming
+              combines{" "}
+              <ReferenceLink href={EFFICIENTNET_B0_URL}>EfficientNet-B0</ReferenceLink>{" "}
+              for feature extraction,{" "}
+              <ReferenceLink href={GAT_URL}>Graph Attention Networks (GATs)</ReferenceLink>{" "}
+              for spatial relationships, and{" "}
+              <ReferenceLink href={GRU_URL}>Gated Recurrent Units (GRUs)</ReferenceLink>{" "}
+              for temporal analysis. The paper
+              reports{" "}
+              <Box component="span" sx={SX.summaryAccent}>
+                80.60% accuracy
+              </Box>{" "}
+              with{" "}
+              <Box component="span" sx={SX.summaryAccent}>
+                0.28 loss
+              </Box>{" "}
+              on{" "}
+              <ReferenceLink href={CELEB_DF_URL}>
+                Celeb-DF v2
+              </ReferenceLink>
+              , outperforming
               several common baselines.
             </Typography>
 
@@ -435,7 +546,7 @@ export default function ResearchSpotlight() {
           </Box>
 
           <Box sx={SX.sideCard} data-research-reveal>
-            <Box>
+            <Box sx={{ display: { xs: "none", sm: "block" } }}>
               <Typography sx={SX.sideLabel}>Journal</Typography>
               <Typography sx={{ ...SX.journalTitle, mt: 1 }}>
                 International Journal of Progressive Research in Science and Engineering
@@ -458,26 +569,30 @@ export default function ResearchSpotlight() {
               <Typography sx={SX.sideLabel}>Access</Typography>
 
               <Box sx={SX.actions}>
-                <Button
-                  href={ARTICLE_URL}
-                  target="_blank"
-                  rel="noreferrer"
-                  endIcon={<ArrowOutwardIcon />}
-                  sx={SX.primaryBtn}
-                >
-                  View Article
-                </Button>
+                <HoverLinkTooltip title={ARTICLE_URL}>
+                  <Button
+                    href={ARTICLE_URL}
+                    target="_blank"
+                    rel="noreferrer"
+                    endIcon={<ArrowOutwardIcon />}
+                    sx={SX.primaryBtn}
+                  >
+                    View Article
+                  </Button>
+                </HoverLinkTooltip>
 
-                <Button
-                  href={PDF_URL}
-                  target="_blank"
-                  rel="noreferrer"
-                  variant="outlined"
-                  startIcon={<DescriptionOutlinedIcon />}
-                  sx={SX.secondaryBtn}
-                >
-                  Download PDF
-                </Button>
+                <HoverLinkTooltip title={PDF_URL}>
+                  <Button
+                    href={PDF_URL}
+                    target="_blank"
+                    rel="noreferrer"
+                    variant="outlined"
+                    startIcon={<DescriptionOutlinedIcon />}
+                    sx={SX.secondaryBtn}
+                  >
+                    Download PDF
+                  </Button>
+                </HoverLinkTooltip>
               </Box>
             </Stack>
           </Box>

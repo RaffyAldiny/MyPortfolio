@@ -59,9 +59,9 @@ export default function ZoneTimeline() {
                 width: 10,
                 height: 10,
                 borderRadius: "50%",
-                bgcolor: isActive ? "#FF9A9E" : "rgba(255,255,255,0.35)",
+                bgcolor: isActive ? "#1CDB2F" : "rgba(255,255,255,0.35)",
                 boxShadow: isActive
-                  ? "0 0 12px rgba(255,154,158,0.8)"
+                  ? "0 0 12px rgba(28,219,47,0.42)"
                   : "none",
                 transition: "all 0.3s ease",
               }}

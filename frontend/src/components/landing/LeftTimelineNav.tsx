@@ -20,12 +20,13 @@ type SectionItem = { id: string; label: string };
 type Props = {
   sections: ReadonlyArray<SectionItem>;
   scrollOffsetPx?: number;
-  darkSectionId?: string;
+  darkSectionId?: string | string[];
   wrapAround?: boolean;
 };
 
-const PRISM_GRADIENT =
-  "linear-gradient(135deg,#FF9A9E 0%,#FECFEF 25%,#E0C3FC 50%,#8EC5FC 75%,#D4FFEC 100%)";
+const ACTIVE_GREEN = "#1CDB2F";
+const ACTIVE_GREEN_DARK = "#0F5E19";
+const SOFT_GREEN = "#79D883";
 
 function Dot({
   active,
@@ -50,14 +51,18 @@ function Dot({
         flexShrink: 0,
         overflow: "hidden",
         boxSizing: "border-box",
-        background: active ? PRISM_GRADIENT : "transparent",
+        background: active ? ACTIVE_GREEN : "transparent",
         border: `1px solid ${
-          active ? "transparent" : dark ? "rgba(255,255,255,0.32)" : "rgba(0,0,0,0.22)"
+          active
+            ? alpha(ACTIVE_GREEN, 0.5)
+            : dark
+              ? "rgba(200,255,196,0.34)"
+              : alpha(ACTIVE_GREEN_DARK, 0.42)
         }`,
         boxShadow: active
           ? dark
-            ? "0 0 0 4px rgba(224,195,252,0.16)"
-            : "0 0 0 4px rgba(91,75,117,0.12)"
+            ? "0 0 0 3px rgba(28,219,47,0.14)"
+            : "0 0 0 3px rgba(28,219,47,0.1)"
           : "none",
         transform: "translateZ(0)",
         transition: "all 140ms ease",
@@ -76,24 +81,31 @@ export default function LeftTimelineNav({
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
   const [activeId, setActiveId] = React.useState(sections[0]?.id ?? "");
+  const [isInsideDarkSection, setIsInsideDarkSection] = React.useState(false);
+
+  const darkSectionIds = React.useMemo(
+    () =>
+      (Array.isArray(darkSectionId) ? darkSectionId : [darkSectionId]).filter(
+        (id): id is string => Boolean(id)
+      ),
+    [darkSectionId]
+  );
 
   const activeIndex = React.useMemo(() => {
     const index = sections.findIndex((section) => section.id === activeId);
     return index >= 0 ? index : 0;
   }, [activeId, sections]);
 
-  const isDarkOverlay = React.useMemo(() => {
-    const darkIndex = sections.findIndex((section) => section.id === darkSectionId);
-    return darkIndex !== -1 && activeIndex >= darkIndex;
-  }, [activeIndex, darkSectionId, sections]);
+  const isDarkOverlay = isInsideDarkSection;
 
-  const text = isDarkOverlay ? "rgba(255,255,255,0.92)" : "rgba(25,25,35,0.88)";
-  const textMuted = isDarkOverlay ? "rgba(255,255,255,0.6)" : "rgba(25,25,35,0.6)";
+  const text = isDarkOverlay ? "rgba(255,255,255,0.92)" : "#1E3A22";
+  const textMuted = isDarkOverlay ? "rgba(220,255,214,0.76)" : alpha(ACTIVE_GREEN_DARK, 0.82);
+  const activeText = isDarkOverlay ? "#8DFF74" : ACTIVE_GREEN;
   const bg = isDarkOverlay ? "rgba(30,30,40,0.82)" : "rgba(255,255,255,0.85)";
-  const border = isDarkOverlay ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.12)";
+  const border = isDarkOverlay ? alpha("#8DFF74", 0.28) : alpha(ACTIVE_GREEN, 0.22);
   const shadow = isDarkOverlay
-    ? "drop-shadow(0 2px 12px rgba(0,0,0,0.58))"
-    : "drop-shadow(0 2px 12px rgba(255,255,255,0.72))";
+    ? "drop-shadow(0 2px 8px rgba(0,0,0,0.42))"
+    : "drop-shadow(0 2px 8px rgba(255,255,255,0.52))";
 
   const scrollToId = React.useCallback(
     (id: string) => {
@@ -170,6 +182,67 @@ export default function LeftTimelineNav({
     };
   }, [sections, scrollOffsetPx]);
 
+  useIsomorphicLayoutEffect(() => {
+    ensureGsap();
+    if (!darkSectionIds.length) return;
+
+    const syncDarkSection = (triggers: ScrollTrigger[]) => {
+      const nextIsInsideDarkSection = triggers.some((trigger) => trigger.isActive);
+      setIsInsideDarkSection((current) =>
+        current === nextIsInsideDarkSection ? current : nextIsInsideDarkSection
+      );
+    };
+
+    const triggers = darkSectionIds
+      .map((id) => {
+        const el = document.getElementById(id);
+        if (!el) return null;
+
+        const index = sections.findIndex((section) => section.id === id);
+        const nextSectionId = index >= 0 ? sections[index + 1]?.id : undefined;
+        const nextEl = nextSectionId ? document.getElementById(nextSectionId) : null;
+
+        return ScrollTrigger.create({
+          trigger: el,
+          start: "top bottom",
+          ...(nextEl
+            ? {
+                endTrigger: nextEl,
+                end: "top bottom",
+              }
+            : {
+                end: "bottom top",
+              }),
+          onEnter: () => {
+            setIsInsideDarkSection(true);
+          },
+          onEnterBack: () => {
+            setIsInsideDarkSection(true);
+          },
+          onLeave: () => {
+            setIsInsideDarkSection(false);
+          },
+          onLeaveBack: () => {
+            setIsInsideDarkSection(false);
+          },
+        });
+      })
+      .filter((trigger): trigger is ScrollTrigger => Boolean(trigger));
+
+    const refreshDarkSection = () => {
+      syncDarkSection(triggers);
+    };
+
+    ScrollTrigger.addEventListener("refresh", refreshDarkSection);
+    ScrollTrigger.refresh();
+    syncDarkSection(triggers);
+
+    return () => {
+      ScrollTrigger.removeEventListener("refresh", refreshDarkSection);
+      triggers.forEach((trigger) => trigger.kill());
+    };
+  }, [darkSectionIds, sections]);
+
   const circleBtnBase = {
     width: 40,
     height: 40,
@@ -185,15 +258,22 @@ export default function LeftTimelineNav({
 
   const btnSx = {
     ...circleBtnBase,
-    color: text,
-    bgcolor: bg,
-    backdropFilter: "blur(10px)",
+    color: isDarkOverlay ? "#D9FFD0" : SOFT_GREEN,
+    bgcolor: isDarkOverlay ? "rgba(35,35,42,0.9)" : "rgba(248,255,247,0.94)",
     border: "1px solid",
+    borderWidth: 1.5,
     borderColor: border,
-    "&:hover": { bgcolor: isDarkOverlay ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.07)" },
+    boxShadow: isDarkOverlay
+      ? "0 0 0 1px rgba(141,255,116,0.06)"
+      : "0 0 0 1px rgba(28,219,47,0.05)",
+    "&:hover": {
+      bgcolor: isDarkOverlay ? "rgba(54,72,54,0.92)" : "rgba(235,255,232,0.98)",
+      borderColor: isDarkOverlay ? alpha("#8DFF74", 0.4) : alpha(ACTIVE_GREEN, 0.34),
+    },
   } as const;
 
   const [ctaBottomPx, setCtaBottomPx] = React.useState<number | null>(null);
+  const mobileDockRef = React.useRef<HTMLDivElement | null>(null);
 
   React.useEffect(() => {
     if (!isMobile) return;
@@ -231,8 +311,10 @@ export default function LeftTimelineNav({
       }
 
       const rect = best.getBoundingClientRect();
-      const distanceFromBottom = Math.max(0, Math.round(viewportHeight - rect.bottom));
-      const clamped = Math.min(Math.max(distanceFromBottom, 12), 140);
+      const distanceFromBottom = viewportHeight - rect.bottom;
+      const dockHeight = mobileDockRef.current?.getBoundingClientRect().height ?? rect.height;
+      const centeredBottom = distanceFromBottom + (rect.height - dockHeight) / 2;
+      const clamped = Math.min(Math.max(Math.round(centeredBottom), 8), 140);
       setCtaBottomPx(clamped);
     };
 
@@ -259,6 +341,7 @@ export default function LeftTimelineNav({
 
     return (
       <Box
+        ref={mobileDockRef}
         sx={{
           position: "fixed",
           zIndex: 9999,
@@ -275,18 +358,17 @@ export default function LeftTimelineNav({
           alignItems="center"
           spacing={1}
           sx={{
-            px: 1.25,
-            py: 1,
+            px: 1.05,
+            py: 0.78,
             borderRadius: 999,
             bgcolor: bg,
-            backdropFilter: "blur(12px)",
             border: "1px solid",
             borderColor: border,
-            boxShadow: "0 8px 30px rgba(0,0,0,0.18)",
+            boxShadow: "0 6px 18px rgba(0,0,0,0.12)",
           }}
         >
-          <IconButton size="small" onClick={() => jump(-1)} sx={{ color: text }}>
-            <KeyboardArrowUpRoundedIcon sx={{ transform: "rotate(-90deg)" }} />
+          <IconButton size="small" onClick={() => jump(-1)} sx={{ color: isDarkOverlay ? "#D9FFD0" : SOFT_GREEN }}>
+            <KeyboardArrowUpRoundedIcon sx={{ transform: "rotate(-90deg)", fontSize: "1.15rem" }} />
           </IconButton>
 
           {sections.map((section) => {
@@ -296,10 +378,10 @@ export default function LeftTimelineNav({
                 key={section.id}
                 onClick={() => scrollToId(section.id)}
                 sx={{
-                  width: isActive ? 22 : 8,
-                  height: 8,
-                  borderRadius: 4,
-                  background: isActive ? PRISM_GRADIENT : alpha(text, 0.25),
+                  width: isActive ? 19 : 7,
+                  height: 7,
+                  borderRadius: 3.5,
+                  background: isActive ? ACTIVE_GREEN : alpha(text, 0.25),
                   transition: "all 0.35s cubic-bezier(0.4,0,0.2,1)",
                   cursor: "pointer",
                 }}
@@ -323,8 +405,8 @@ export default function LeftTimelineNav({
             </Typography>
           )}
 
-          <IconButton size="small" onClick={() => jump(1)} sx={{ color: text }}>
-            <KeyboardArrowDownRoundedIcon sx={{ transform: "rotate(-90deg)" }} />
+          <IconButton size="small" onClick={() => jump(1)} sx={{ color: isDarkOverlay ? "#D9FFD0" : SOFT_GREEN }}>
+            <KeyboardArrowDownRoundedIcon sx={{ transform: "rotate(-90deg)", fontSize: "1.15rem" }} />
           </IconButton>
         </Stack>
       </Box>
@@ -382,14 +464,11 @@ export default function LeftTimelineNav({
                     fontWeight: isActive ? 900 : 750,
                     letterSpacing: 1.2,
                     textTransform: "uppercase",
-                    color: isActive ? text : textMuted,
+                    color: isActive ? activeText : textMuted,
                     opacity: isActive ? 1 : 0.88,
                     transition: "opacity 160ms ease, transform 160ms ease, color 160ms ease",
                     transform: "translateX(0px)",
                     whiteSpace: "nowrap",
-                    background: isActive ? PRISM_GRADIENT : "none",
-                    WebkitBackgroundClip: isActive ? "text" : "unset",
-                    WebkitTextFillColor: isActive ? "transparent" : "unset",
                   }}
                 >
                   {section.label}
