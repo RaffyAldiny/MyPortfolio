@@ -11,7 +11,6 @@ import { useMediaQuery, useTheme } from "@mui/material";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import ArrowOutwardIcon from "@mui/icons-material/ArrowOutward";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import GlobalStyles from "@mui/material/GlobalStyles";
 import { keyframes } from "@emotion/react";
 import { useHeaderTheme } from "@/context/HeaderTheme";
 import ProjectProgressRail from "@/components/landing/ProjectProgressRail";
@@ -137,8 +136,6 @@ const prismDrift = keyframes`
   100% { background-position: 0% 50%; }
 `;
 
-const TITLE_GRADIENT =
-  "linear-gradient(90deg, #F3FFF0 0%, #CFFAC9 22%, #79EE70 50%, #1CDB2F 78%, #0B5A14 100%)";
 const NEON_GREEN = "#B8FF9D";
 const DARK_GREEN_SHADOW = "rgba(4, 24, 8, 0.24)";
 
@@ -151,24 +148,30 @@ function clamp01(v: number) {
 }
 
 const SX = {
-  container: { width: "100%", position: "relative", bgcolor: "#050505" },
+  container: {
+    width: "100%",
+    position: "relative",
+    bgcolor: "#050505",
+    minHeight: "100dvh",
+    scrollSnapAlign: "start",
+    scrollSnapStop: "always",
+  },
   stickySlide: {
     height: "100vh",
     width: "100%",
-    position: "sticky",
-    top: 0,
+    position: "relative",
     overflow: "hidden",
     scrollSnapAlign: "start",
     scrollSnapStop: "always",
     display: "flex",
     alignItems: "flex-end",
+    isolation: "isolate",
     willChange: "transform",
   },
   introSlide: {
     height: "100vh",
     width: "100%",
-    position: "sticky",
-    top: 0,
+    position: "relative",
     overflow: "hidden",
     scrollSnapAlign: "start",
     scrollSnapStop: "always",
@@ -177,6 +180,7 @@ const SX = {
     alignItems: "center",
     justifyContent: "center",
     bgcolor: "#050505",
+    isolation: "isolate",
     zIndex: 1,
   },
   introVignette: {
@@ -330,14 +334,16 @@ const ProjectSlide = React.memo(function ProjectSlide({
   project,
   zIndex,
   isPriority,
+  shouldRenderVideo,
 }: {
   project: (typeof PROJECTS)[number];
   zIndex: number;
   isPriority: boolean;
+  shouldRenderVideo: boolean;
 }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const activeVideoSrc = project.video
+  const activeVideoSrc = shouldRenderVideo && project.video
     ? isMobile
       ? project.video.mobile
       : project.video.desktop
@@ -377,6 +383,7 @@ const ProjectSlide = React.memo(function ProjectSlide({
 
               <Box
                 component="video"
+                key={activeVideoSrc}
                 src={activeVideoSrc}
                 autoPlay
                 muted
@@ -385,11 +392,21 @@ const ProjectSlide = React.memo(function ProjectSlide({
                 preload={isPriority ? "auto" : "metadata"}
                 poster={project.image}
                 aria-label={`${project.title} preview video`}
+                disablePictureInPicture
                 onLoadedData={() => setVideoReady(true)}
+                onCanPlay={() => setVideoReady(true)}
+                onError={() => setVideoReady(false)}
                 sx={{
                   ...SX.projectVideoLayer,
+                  backfaceVisibility: "hidden",
+                  WebkitBackfaceVisibility: "hidden",
+                  willChange: "transform, opacity",
+                  backgroundColor: "#000",
+                  filter: "blur(0px)",
                   opacity: videoReady ? 1 : 0,
-                  transform: videoReady ? "scale(1)" : "scale(1.02)",
+                  transform: videoReady
+                    ? "translate3d(0,0,0) scale(1)"
+                    : "translate3d(0,0,0) scale(1.02)",
                   transition:
                     "opacity 520ms ease, transform 820ms cubic-bezier(0.22, 1, 0.36, 1)",
                 }}
@@ -588,37 +605,6 @@ function ProjectsSection() {
         }
 
         if (introTitleLines.length || introSubWrap || introAccent) {
-          gsap.set(introTitleLines, {
-            yPercent: 118,
-            rotateX: -68,
-            rotateY: -6,
-            autoAlpha: 0,
-            transformOrigin: "50% 100%",
-            willChange: "transform, opacity",
-          });
-          if (introSubWrap) {
-            gsap.set(introSubWrap, {
-              clipPath: "inset(0 0 100% 0)",
-              autoAlpha: 1,
-              willChange: "clip-path, transform, opacity",
-            });
-          }
-          if (introSub) {
-            gsap.set(introSub, {
-              y: 18,
-              autoAlpha: 0,
-              willChange: "transform, opacity",
-            });
-          }
-          if (introAccent) {
-            gsap.set(introAccent, {
-              scaleX: 0.2,
-              autoAlpha: 0,
-              transformOrigin: "50% 50%",
-              willChange: "transform, opacity",
-            });
-          }
-
           const introReveal = gsap.timeline({
             defaults: { ease: "power3.out" },
             scrollTrigger: {
@@ -649,8 +635,16 @@ function ProjectsSection() {
           }
 
           if (introTitleLines.length) {
-            introReveal.to(
+            introReveal.fromTo(
               introTitleLines,
+              {
+                yPercent: 118,
+                rotateX: -68,
+                rotateY: -6,
+                autoAlpha: 0,
+                transformOrigin: "50% 100%",
+                willChange: "transform, opacity",
+              },
               {
                 yPercent: 0,
                 rotateX: 0,
@@ -665,8 +659,14 @@ function ProjectsSection() {
           }
 
           if (introAccent) {
-            introReveal.to(
+            introReveal.fromTo(
               introAccent,
+              {
+                scaleX: 0.2,
+                autoAlpha: 0,
+                transformOrigin: "50% 50%",
+                willChange: "transform, opacity",
+              },
               {
                 scaleX: 1,
                 autoAlpha: 1,
@@ -678,8 +678,13 @@ function ProjectsSection() {
           }
 
           if (introSubWrap) {
-            introReveal.to(
+            introReveal.fromTo(
               introSubWrap,
+              {
+                clipPath: "inset(0 0 100% 0)",
+                autoAlpha: 1,
+                willChange: "clip-path, transform, opacity",
+              },
               {
                 clipPath: "inset(0 0 0% 0)",
                 duration: 0.58,
@@ -690,8 +695,13 @@ function ProjectsSection() {
           }
 
           if (introSub) {
-            introReveal.to(
+            introReveal.fromTo(
               introSub,
+              {
+                y: 18,
+                autoAlpha: 0,
+                willChange: "transform, opacity",
+              },
               {
                 y: 0,
                 autoAlpha: 1,
@@ -748,12 +758,12 @@ function ProjectsSection() {
               {
                 y: 0,
                 autoAlpha: 1,
+                duration: 0.72,
                 ease: "power3.out",
                 scrollTrigger: {
                   trigger: slide,
                   start: "top 78%",
-                  end: "top 42%",
-                  scrub: true,
+                  toggleActions: "play none none none",
                 },
               }
             );
@@ -788,7 +798,7 @@ function ProjectsSection() {
                 scrollTrigger: {
                   trigger: slide,
                   start: "top 62%",
-                  toggleActions: "play none none reverse",
+                  toggleActions: "play none none none",
                 },
               }
             );
@@ -806,7 +816,7 @@ function ProjectsSection() {
                 scrollTrigger: {
                   trigger: slide,
                   start: "top 60%",
-                  toggleActions: "play none none reverse",
+                  toggleActions: "play none none none",
                 },
               }
             );
@@ -891,15 +901,6 @@ function ProjectsSection() {
 
   return (
     <>
-      <GlobalStyles
-        styles={{
-          html: {
-            scrollSnapType: "y mandatory",
-            scrollPaddingTop: "0px",
-          },
-        }}
-      />
-
       {isInsideProjects && (
         <ProjectProgressRail progress={progress} activeIndex={activeIndex} totalSlides={totalSlides} />
       )}
@@ -964,6 +965,7 @@ function ProjectsSection() {
             project={project}
             zIndex={2 + index}
             isPriority={index === 0}
+            shouldRenderVideo={isInsideProjects && Math.abs(activeIndex - (index + 1)) <= 1}
           />
         ))}
       </Box>

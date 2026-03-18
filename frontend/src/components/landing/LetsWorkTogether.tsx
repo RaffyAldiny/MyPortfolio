@@ -18,7 +18,6 @@ import { ensureGsap, gsap, useIsomorphicLayoutEffect } from "@/lib/gsap";
 
 const EMAIL = "rafaelagoncillo@gmail.com";
 const GITHUB_URL = "https://github.com/RaffyAldiny";
-const BORDER_GREEN = alpha("#1CDB2F", 0.42);
 const DARK_GREEN = "#113E18";
 const COPY_SUCCESS = "Email copied";
 
@@ -44,84 +43,69 @@ const SX = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    py: { xs: 6, md: 2 },
+    py: { xs: 4.5, md: 3 },
+    px: { xs: 1.5, md: 2.5 },
   },
   backdrop: {
     position: "absolute",
     inset: 0,
     pointerEvents: "none",
-    opacity: 0.22,
-    backgroundImage: `
-      radial-gradient(rgba(28, 219, 47, 0.18) 1px, transparent 1px),
-      radial-gradient(rgba(17, 62, 24, 0.12) 1px, transparent 1px)
-    `,
-    backgroundSize: { xs: "18px 18px", md: "28px 28px" },
-    backgroundPosition: "0 0, 9px 9px",
-    maskImage: "radial-gradient(circle at 50% 50%, #000 0%, #000 52%, transparent 88%)",
+    opacity: 0.18,
+    backgroundImage:
+      "radial-gradient(circle at 14% 24%, rgba(232,255,226,0.16) 0%, transparent 22%), radial-gradient(circle at 82% 18%, rgba(232,255,226,0.12) 0%, transparent 18%), radial-gradient(circle at 74% 76%, rgba(232,255,226,0.14) 0%, transparent 24%)",
   },
   shell: {
     position: "relative",
     zIndex: 1,
     width: "100%",
-    maxWidth: 1060,
+    maxWidth: 1320,
     pointerEvents: "none",
+    px: { xs: 0, md: 1.5 },
   },
   panel: {
-    p: { xs: 1, sm: 1.5, md: 1.5 },
+    p: { xs: 1.2, sm: 1.4, md: 1.6 },
     display: "grid",
-    gap: { xs: 2.5, md: 3 },
-    gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 1.12fr) minmax(300px, 0.78fr)" },
+    gap: { xs: 2.2, md: 3.2 },
+    gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 1.18fr) minmax(320px, 0.82fr)" },
     alignItems: "center",
+    borderRadius: { xs: 5, md: 6 },
+    background: "linear-gradient(180deg, rgba(85,191,82,0.88) 0%, rgba(59,167,61,0.84) 42%, rgba(44,143,50,0.82) 100%)",
+    border: "1px solid rgba(230,255,224,0.26)",
+    boxShadow: "0 20px 48px rgba(22,82,24,0.14)",
+    backdropFilter: "blur(8px)",
   },
   copyPanel: {
     position: "relative",
     pointerEvents: "auto",
-    px: { xs: 1.2, sm: 2, md: 2.15 },
-    py: { xs: 2.2, md: 2.35 },
+    px: { xs: 1.2, sm: 1.6, md: 2.1 },
+    py: { xs: 1.8, md: 2.25 },
     alignSelf: "center",
-    "&::before": {
-      content: '""',
-      position: "absolute",
-      inset: { xs: "-8% -6% auto auto", md: "-12% auto auto -6%" },
-      width: { xs: 180, md: 280 },
-      height: { xs: 180, md: 280 },
-      borderRadius: "50%",
-      background:
-        "radial-gradient(circle, rgba(28,219,47,0.12) 0%, rgba(28,219,47,0.04) 42%, transparent 72%)",
-      pointerEvents: "none",
-    },
-    "&::after": {
-      content: '""',
-      position: "absolute",
-      left: { xs: 0, md: 6 },
-      top: { xs: 0, md: 6 },
-      width: { xs: 86, md: 128 },
-      height: 5,
-      borderRadius: 999,
-      background:
-        "linear-gradient(90deg, rgba(28,219,47,0.92) 0%, rgba(178,255,153,0.12) 100%)",
-      boxShadow: "0 0 12px rgba(28,219,47,0.12)",
-    },
   },
   copyInner: {
     position: "relative",
     zIndex: 1,
+    borderRadius: { xs: 4, md: 5 },
+    background: "rgba(237,255,233,0.08)",
+    border: "1px solid rgba(237,255,233,0.14)",
+    backdropFilter: "blur(12px)",
+    padding: "clamp(1.15rem, 1rem + 0.7vw, 2.1rem)",
+    paddingRight: "clamp(1.4rem, 1.15rem + 1vw, 2.8rem)",
   },
   kicker: {
-    fontSize: { xs: "0.72rem", md: "0.76rem" },
+    fontSize: { xs: "0.72rem", md: "0.8rem" },
     fontWeight: 900,
     letterSpacing: "0.12em",
     textTransform: "uppercase",
-    color: "#0D6417",
+    color: "#EDFFE8",
     mb: 1.2,
   },
   title: {
     fontWeight: 900,
     letterSpacing: "-0.03em",
-    fontSize: { xs: "2rem", sm: "2.6rem", md: "3.4rem" },
+    fontSize: { xs: "1.84rem", sm: "2.38rem", md: "3.68rem" },
     lineHeight: 0.94,
-    color: DARK_GREEN,
-    maxWidth: 680,
+    color: "#F7FFF4",
+    maxWidth: 760,
   },
   titleLine: {
     display: "block",
@@ -129,27 +113,27 @@ const SX = {
   titleLineWithRule: {
     display: "flex",
     alignItems: "center",
-    gap: { xs: 1, md: 1.15 },
+    gap: { xs: 1, md: 1.4 },
     flexWrap: "nowrap",
   },
   titleRule: {
     flex: "1 1 auto",
-    minWidth: { xs: 52, sm: 86, md: 132 },
-    maxWidth: { xs: 116, sm: 170, md: 200 },
-    height: { xs: 4, md: 4 },
+    minWidth: { xs: 52, sm: 86, md: 164 },
+    maxWidth: { xs: 116, sm: 170, md: 240 },
+    height: { xs: 4, md: 5 },
     borderRadius: 999,
     alignSelf: "center",
     background:
-      "linear-gradient(90deg, rgba(28,219,47,0.96) 0%, rgba(163,248,156,0.58) 52%, rgba(163,248,156,0.06) 100%)",
-    boxShadow: "0 0 12px rgba(28,219,47,0.18)",
+      "linear-gradient(90deg, rgba(230,255,224,0.96) 0%, rgba(198,255,184,0.62) 52%, rgba(198,255,184,0.06) 100%)",
+    boxShadow: "0 0 12px rgba(230,255,224,0.18)",
     transform: { xs: "translateY(3px)", md: "translateY(5px)" },
   },
   summary: {
     mt: 2,
-    maxWidth: 680,
-    color: alpha("#243226", 0.84),
-    fontSize: { xs: "0.98rem", md: "1rem" },
-    lineHeight: 1.7,
+    maxWidth: 760,
+    color: "rgba(241,255,238,0.86)",
+    fontSize: { xs: "0.98rem", md: "1.08rem" },
+    lineHeight: 1.8,
   },
   accentRow: {
     mt: 2.25,
@@ -158,34 +142,34 @@ const SX = {
     columnGap: 1,
     rowGap: 0.35,
     alignItems: "center",
-    color: "#16641F",
+    color: "#E6FFE0",
   },
   availabilityDot: {
     width: 10,
     height: 10,
     borderRadius: "50%",
-    bgcolor: "#1CDB2F",
-    boxShadow: "0 0 0 5px rgba(28,219,47,0.12)",
+    bgcolor: "#E7FFE2",
+    boxShadow: "0 0 0 5px rgba(231,255,226,0.10)",
   },
   chipWrap: {
-    mt: 2.6,
+    mt: 3,
     display: "flex",
     flexWrap: "wrap",
     gap: 1,
   },
   chip: {
-    bgcolor: "#FFFFFF",
-    color: DARK_GREEN,
-    border: `1px solid ${alpha("#1CDB2F", 0.52)}`,
+    bgcolor: "rgba(245,255,242,0.14)",
+    color: "#F6FFF3",
+    border: `1px solid ${alpha("#ECFFE8", 0.2)}`,
     fontWeight: 700,
-    height: { xs: 30, md: 32 },
+    height: { xs: 30, md: 34 },
     "& .MuiChip-label": {
-      px: { xs: 1.1, md: 1.2 },
-      fontSize: { xs: "0.78rem", md: "0.8rem" },
+      px: { xs: 1.1, md: 1.35 },
+      fontSize: { xs: "0.78rem", md: "0.85rem" },
     },
   },
   ctaRow: {
-    mt: 3,
+    mt: 3.5,
     display: "flex",
     gap: { xs: 1, md: 1.5 },
     flexWrap: "wrap",
@@ -193,45 +177,45 @@ const SX = {
   },
   primaryBtn: {
     borderRadius: 999,
-    px: { xs: 2, md: 2.2 },
-    py: { xs: 1.1, md: 0.95 },
+    px: { xs: 2, md: 2.5 },
+    py: 1.1,
     textTransform: "none",
     fontWeight: 800,
-    fontSize: { xs: "0.92rem", md: "0.9rem" },
-    color: "#FFFFFF",
-    background: "#1CDB2F",
-    border: `1.5px solid ${alpha("#1CDB2F", 0.62)}`,
-    boxShadow: `0 10px 28px ${alpha("#1CDB2F", 0.16)}`,
+    fontSize: { xs: "0.92rem", md: "0.96rem" },
+    background: "#F2FFF0",
+    color: "#0E5A18",
+    border: `1.5px solid ${alpha("#F2FFF0", 0.56)}`,
+    boxShadow: `0 10px 28px ${alpha("#06210A", 0.18)}`,
     "&:hover": {
-      background: "#18C029",
-      boxShadow: `0 12px 30px ${alpha("#1CDB2F", 0.2)}`,
+      background: "#E6FFE0",
+      boxShadow: `0 12px 30px ${alpha("#06210A", 0.22)}`,
     },
   },
   secondaryBtn: {
     borderRadius: 999,
-    px: { xs: 1.7, md: 1.95 },
-    py: { xs: 1.05, md: 0.9 },
+    px: { xs: 1.7, md: 2.2 },
+    py: 1.05,
     textTransform: "none",
     fontWeight: 800,
-    fontSize: { xs: "0.88rem", md: "0.88rem" },
-    color: DARK_GREEN,
-    background: "#FFFFFF",
-    border: `1.5px solid ${alpha("#1CDB2F", 0.5)}`,
+    fontSize: { xs: "0.88rem", md: "0.94rem" },
+    color: "#F5FFF2",
+    background: "rgba(255,255,255,0.06)",
+    border: `1.5px solid ${alpha("#ECFFE8", 0.24)}`,
     "&:hover": {
-      background: alpha("#1CDB2F", 0.1),
+      background: "rgba(255,255,255,0.12)",
     },
   },
   sideCard: {
     pointerEvents: "auto",
     borderRadius: 4,
-    p: { xs: 2.25, sm: 3, md: 3.2 },
+    p: { xs: 2.1, sm: 2.7, md: 3.6 },
     background:
-      "linear-gradient(180deg, rgba(236,249,232,0.94) 0%, rgba(247,255,245,0.96) 100%)",
-    border: `1px solid ${BORDER_GREEN}`,
-    boxShadow: `inset 0 1px 0 ${alpha("#FFFFFF", 0.9)}, 0 16px 36px ${alpha("#1CDB2F", 0.08)}`,
+      "linear-gradient(180deg, rgba(248,255,246,0.94) 0%, rgba(240,255,237,0.92) 100%)",
+    border: `1px solid ${alpha("#E6FFE0", 0.18)}`,
+    boxShadow: `inset 0 1px 0 ${alpha("#FFFFFF", 0.9)}, 0 16px 36px ${alpha("#06210A", 0.12)}`,
     display: "flex",
     flexDirection: "column",
-    gap: { xs: 2.25, md: 2.4 },
+    gap: { xs: 2.05, md: 2.7 },
     alignSelf: "center",
     position: "relative",
     overflow: "hidden",
@@ -257,7 +241,7 @@ const SX = {
     background: "rgba(255,255,255,0.86)",
     border: `1px solid ${alpha("#1CDB2F", 0.24)}`,
     color: "#1A5D23",
-    fontSize: { xs: "0.72rem", md: "0.68rem" },
+    fontSize: "0.72rem",
     fontWeight: 900,
     letterSpacing: "0.12em",
     textTransform: "uppercase",
@@ -270,14 +254,14 @@ const SX = {
     boxShadow: "0 0 0 4px rgba(28,219,47,0.1)",
   },
   sideLabel: {
-    fontSize: { xs: 12, md: 11 },
+    fontSize: 12,
     fontWeight: 900,
     letterSpacing: "0.18em",
     textTransform: "uppercase",
     color: "#1CDB2F",
   },
   contactCard: {
-    p: { xs: 1.4, md: 1.45 },
+    p: { xs: 1.4, md: 1.7 },
     borderRadius: 3.25,
     background: "rgba(255,255,255,0.92)",
     border: `1px solid ${alpha("#1CDB2F", 0.22)}`,
@@ -292,14 +276,14 @@ const SX = {
   },
   contactTitle: {
     color: alpha("#23412A", 0.76),
-    fontSize: { xs: "0.75rem", md: "0.7rem" },
+    fontSize: "0.75rem",
     fontWeight: 800,
     letterSpacing: "0.08em",
     textTransform: "uppercase",
   },
   contactValue: {
     color: DARK_GREEN,
-    fontSize: { xs: "0.76rem", md: "0.78rem" },
+    fontSize: { xs: "0.76rem", md: "0.84rem" },
     fontWeight: 700,
     whiteSpace: "nowrap",
     overflow: "hidden",
@@ -312,7 +296,7 @@ const SX = {
     py: 0.5,
     textTransform: "none",
     fontWeight: 800,
-    fontSize: { xs: "0.7rem", md: "0.66rem" },
+    fontSize: "0.7rem",
     whiteSpace: "nowrap",
     flexShrink: 0,
     color: "#138B21",
@@ -330,10 +314,10 @@ const SX = {
     minWidth: 0,
   },
   inlineCopyBtn: {
-    width: { xs: 22, md: 20 },
-    height: { xs: 22, md: 20 },
-    minWidth: { xs: 22, md: 20 },
-    minHeight: { xs: 22, md: 20 },
+    width: 22,
+    height: 22,
+    minWidth: 22,
+    minHeight: 22,
     borderRadius: 1,
     color: "#1A8A25",
     flexShrink: 0,
@@ -345,7 +329,7 @@ const SX = {
   processList: {
     display: "flex",
     flexDirection: "column",
-    gap: { xs: 1.1, md: 0.95 },
+    gap: 1.1,
   },
   processItem: {
     display: "flex",
@@ -461,9 +445,6 @@ export default function LetsWorkTogether() {
       const reveal = gsap.utils.toArray<HTMLElement>("[data-contact-reveal]");
       const titleLines = gsap.utils.toArray<HTMLElement>("[data-contact-title-line]");
 
-      gsap.set(reveal, { autoAlpha: 0, y: 26 });
-      gsap.set(titleLines, { autoAlpha: 0, yPercent: 110, rotateX: -60, transformOrigin: "50% 100%" });
-
       const tl = gsap.timeline({
         defaults: { ease: "power3.out" },
         scrollTrigger: {
@@ -473,15 +454,28 @@ export default function LetsWorkTogether() {
         },
       });
 
-      tl.to(titleLines, {
-        autoAlpha: 1,
-        yPercent: 0,
-        rotateX: 0,
-        duration: 0.95,
-        stagger: 0.1,
-        ease: "expo.out",
-      }).to(
+      tl.fromTo(
+        titleLines,
+        {
+          autoAlpha: 0,
+          yPercent: 110,
+          rotateX: -60,
+          transformOrigin: "50% 100%",
+        },
+        {
+          autoAlpha: 1,
+          yPercent: 0,
+          rotateX: 0,
+          duration: 0.95,
+          stagger: 0.1,
+          ease: "expo.out",
+        }
+      ).fromTo(
         reveal,
+        {
+          autoAlpha: 0,
+          y: 26,
+        },
         {
           autoAlpha: 1,
           y: 0,
@@ -530,7 +524,7 @@ export default function LetsWorkTogether() {
 
               <Box sx={SX.accentRow} data-contact-reveal>
                 <Box sx={SX.availabilityDot} />
-                <Typography sx={{ fontWeight: 800, fontSize: { xs: "0.92rem", md: "0.92rem" } }}>
+                <Typography sx={{ fontWeight: 800, fontSize: { xs: "0.92rem", md: "1rem" } }}>
                   Open for serious builds, product collaborations, and tailored system
                   work.
                 </Typography>
@@ -543,11 +537,7 @@ export default function LetsWorkTogether() {
               </Box>
 
               <Box sx={SX.ctaRow} data-contact-reveal>
-                <Button
-                  href={`mailto:${EMAIL}`}
-                  endIcon={<ArrowOutwardIcon />}
-                  sx={SX.primaryBtn}
-                >
+                <Button href={`mailto:${EMAIL}`} endIcon={<ArrowOutwardIcon />} sx={SX.primaryBtn}>
                   Start a Conversation
                 </Button>
 
@@ -641,8 +631,8 @@ export default function LetsWorkTogether() {
               <Box sx={{ ...SX.processList, mt: 1.6 }}>
                 {PROCESS.map((item) => (
                   <Box key={item} sx={SX.processItem} data-contact-reveal>
-                    <TaskAltRoundedIcon sx={{ color: "#18A626", fontSize: { xs: "1.1rem", md: "1rem" }, mt: 0.15 }} />
-                    <Typography sx={{ fontWeight: 700, fontSize: { xs: "0.94rem", md: "0.9rem" } }}>
+                    <TaskAltRoundedIcon sx={{ color: "#18A626", fontSize: "1.1rem", mt: 0.15 }} />
+                    <Typography sx={{ fontWeight: 700, fontSize: { xs: "0.94rem", md: "0.98rem" } }}>
                       {item}
                     </Typography>
                   </Box>

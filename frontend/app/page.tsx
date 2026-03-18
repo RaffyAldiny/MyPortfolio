@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Box, Container, Stack } from "@mui/material";
+import GlobalStyles from "@mui/material/GlobalStyles";
 
 import LandingBackground from "@/components/landing/LandingBackground";
 import ProfileIntro from "@/components/landing/ProfileIntro";
@@ -12,9 +13,32 @@ import LetsWorkTogether from "@/components/landing/LetsWorkTogether";
 import LeftTimelineNav from "@/components/landing/LeftTimelineNav";
 import { TIMELINE_SECTIONS } from "@/constants/navigation";
 
+const sectionSnapSx = {
+  height: "100dvh",
+  scrollSnapAlign: "start" as const,
+  scrollSnapStop: "always" as const,
+  scrollMarginTop: { xs: "56px", md: "80px" },
+  display: "flex",
+  alignItems: "stretch",
+  overflow: "clip",
+};
+
 export default function Home() {
   return (
-    <Box sx={{ minHeight: "100dvh" }}>
+    <Box sx={{ minHeight: "100dvh", scrollBehavior: "smooth" }}>
+      <GlobalStyles
+        styles={{
+          html: {
+            scrollSnapType: "y mandatory",
+            scrollBehavior: "smooth",
+            scrollPaddingTop: "0px",
+          },
+          body: {
+            scrollSnapType: "y mandatory",
+          },
+        }}
+      />
+
       <LandingBackground />
 
       <LeftTimelineNav
@@ -24,80 +48,85 @@ export default function Home() {
         wrapAround
       />
 
-      <Box
-        id="intro"
-        sx={{ scrollSnapAlign: "start", scrollMarginTop: { xs: "56px", md: "80px" } }}
-      >
-        <Container
-          maxWidth="lg"
-          sx={{
-            position: "relative",
-            zIndex: 1,
-            pt: { xs: 8, md: 12 },
-            pb: 10,
-          }}
-        >
-          <Stack alignItems="center" spacing={8}>
-            <ProfileIntro />
-          </Stack>
-        </Container>
+      <Box sx={{ scrollSnapType: "y mandatory" }}>
+        <Box id="intro" sx={sectionSnapSx}>
+          <Container
+            maxWidth="lg"
+            sx={{
+              flex: 1,
+              position: "relative",
+              zIndex: 1,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Stack alignItems="center" spacing={8} sx={{ width: "100%" }}>
+              <ProfileIntro />
+            </Stack>
+          </Container>
+        </Box>
+
+        <Box id="techstacks" sx={sectionSnapSx}>
+          <Container
+            maxWidth="lg"
+            sx={{
+              flex: 1,
+              position: "relative",
+              zIndex: 1,
+              py: { xs: 2, md: 0 },
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            <Stack alignItems="center" spacing={8}>
+              <SkillsShowcase />
+            </Stack>
+          </Container>
+        </Box>
+
+        <ProjectsSection />
+
+        <Box id="research" sx={sectionSnapSx}>
+          <Container
+            maxWidth="lg"
+            sx={{
+              flex: 1,
+              position: "relative",
+              zIndex: 1,
+              py: { xs: 2, md: 0 },
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            <Stack alignItems="center" spacing={8}>
+              <ResearchSpotlight />
+            </Stack>
+          </Container>
+        </Box>
+
+        <Box id="contact" sx={sectionSnapSx}>
+          <Container
+            maxWidth={false}
+            sx={{
+              flex: 1,
+              position: "relative",
+              zIndex: 1,
+              width: "100%",
+              maxWidth: "100%",
+              px: 0,
+              py: { xs: 2, md: 0 },
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            <Stack alignItems="center" spacing={8} sx={{ width: "100%" }}>
+              <LetsWorkTogether />
+            </Stack>
+          </Container>
+        </Box>
       </Box>
 
-      <Box
-        id="techstacks"
-        sx={{ scrollSnapAlign: "start", scrollMarginTop: { xs: "56px", md: "80px" } }}
-      >
-        <Container
-          maxWidth="lg"
-          sx={{
-            position: "relative",
-            zIndex: 1,
-            py: { xs: 2, md: 0 },
-          }}
-        >
-          <Stack alignItems="center" spacing={8}>
-            <SkillsShowcase />
-          </Stack>
-        </Container>
-      </Box>
-
-      <ProjectsSection />
-
-      <Box
-        id="research"
-        sx={{ scrollSnapAlign: "start", scrollMarginTop: { xs: "56px", md: "80px" } }}
-      >
-        <Container
-          maxWidth="lg"
-          sx={{
-            position: "relative",
-            zIndex: 1,
-            py: { xs: 2, md: 0 },
-          }}
-        >
-          <Stack alignItems="center" spacing={8}>
-            <ResearchSpotlight />
-          </Stack>
-        </Container>
-      </Box>
-
-      <Box
-        id="contact"
-        sx={{ scrollSnapAlign: "start", scrollMarginTop: { xs: "56px", md: "80px" } }}
-      >
-        <Container
-          maxWidth="lg"
-          sx={{
-            position: "relative",
-            zIndex: 1,
-            py: { xs: 2, md: 0 },
-          }}
-        >
-          <Stack alignItems="center" spacing={8}>
-            <LetsWorkTogether />
-          </Stack>
-        </Container>
-      </Box>
     </Box>
   );
 }

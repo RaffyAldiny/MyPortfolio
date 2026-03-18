@@ -27,7 +27,7 @@ const SX = {
     alignItems: "center",
     textAlign: "center",
     width: "100%",
-    maxWidth: 760,
+    maxWidth: 860,
     mx: "auto",
     py: { xs: 3, md: 6 },
     overflow: "hidden",
@@ -102,7 +102,13 @@ const SX = {
     overflow: "hidden",
     borderRadius: "50%",
   },
-  textWrap: { width: "100%", px: { xs: 1.5, md: 2 } },
+  textWrap: {
+    width: "100%",
+    px: { xs: 1.5, md: 2 },
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+  },
   nameIntro: {
     fontWeight: 700,
     color: "#314634",
@@ -147,7 +153,7 @@ const SX = {
     textAlign: "center",
   },
   glass: {
-    maxWidth: "680px",
+    maxWidth: "760px",
     mx: "auto",
     width: "100%",
     px: { xs: 2.5, md: 5 },
@@ -160,7 +166,7 @@ const SX = {
       "0 0 0 1px rgba(28, 219, 47, 0.08), 0 0 26px rgba(28, 219, 47, 0.14), 0 18px 40px rgba(28, 219, 47, 0.08)",
   },
   bio: {
-    fontSize: { xs: "0.88rem", md: "1.0rem" },
+    fontSize: { xs: "0.88rem", md: "0.95rem" },
     lineHeight: 1.8,
     color: "#465546",
     fontWeight: 500,
