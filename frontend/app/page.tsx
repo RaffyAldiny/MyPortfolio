@@ -44,7 +44,7 @@ export default function Home() {
       <LeftTimelineNav
         sections={TIMELINE_SECTIONS}
         scrollOffsetPx={80}
-        darkSectionId="projects"
+        darkSectionId={["projects", "contact"]}
         wrapAround
       />
 
@@ -108,6 +108,7 @@ export default function Home() {
         <Box id="contact" sx={sectionSnapSx}>
           <Container
             maxWidth={false}
+            disableGutters
             sx={{
               flex: 1,
               position: "relative",
@@ -115,7 +116,7 @@ export default function Home() {
               width: "100%",
               maxWidth: "100%",
               px: 0,
-              py: { xs: 2, md: 0 },
+              py: 0,
               display: "flex",
               alignItems: "center",
             }}

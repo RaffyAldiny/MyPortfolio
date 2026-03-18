@@ -96,7 +96,10 @@ const PROJECTS = [
     desc: "A role-based academic networking platform that connects students and professionals through separate account flows, structured onboarding, and school-to-career interaction paths.",
     tags: ["Laravel", "MySQL", "Role-Based Auth"],
     image: "/images/edubridge.avif",
-    video: null,
+    video: {
+      desktop: "/videos/projects/Edubridge-Desktop.mp4",
+      mobile: "/videos/projects/Edubridge-Mobile.mp4",
+    },
     accent: "#2CCF3D",
     link: null,
     repo: null,
@@ -108,7 +111,10 @@ const PROJECTS = [
     desc: "A pet adoption platform designed to showcase adoptable animals, communicate shelter advocacy clearly, and guide visitors toward adoption, volunteering, and community support actions.",
     tags: ["Next.js", "Django", "Adoption Platform"],
     image: "/images/paws-and-promises.avif",
-    video: null,
+    video: {
+      desktop: "/videos/projects/Paws-and-Promises-Desktop.mp4?v=20260319",
+      mobile: "/videos/projects/Paws-and-Promises-Mobile.mp4?v=20260319",
+    },
     accent: "#9AF58E",
     link: null,
     repo: null,

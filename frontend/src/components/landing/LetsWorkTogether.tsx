@@ -13,8 +13,9 @@ import GitHubIcon from "@mui/icons-material/GitHub";
 import MailOutlineIcon from "@mui/icons-material/MailOutline";
 import TaskAltRoundedIcon from "@mui/icons-material/TaskAltRounded";
 import { alpha } from "@mui/material/styles";
+import { useHeaderTheme } from "@/context/HeaderTheme";
 import usePrefersReducedMotion from "@/hooks/usePrefersReducedMotion";
-import { ensureGsap, gsap, useIsomorphicLayoutEffect } from "@/lib/gsap";
+import { ensureGsap, gsap, ScrollTrigger, useIsomorphicLayoutEffect } from "@/lib/gsap";
 
 const EMAIL = "rafaelagoncillo@gmail.com";
 const GITHUB_URL = "https://github.com/RaffyAldiny";
@@ -38,61 +39,72 @@ const PROCESS = [
 const SX = {
   section: {
     width: "100%",
-    minHeight: { xs: "auto", md: "calc(100dvh - 80px)" },
+    minHeight: "100dvh",
     position: "relative",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    py: { xs: 4.5, md: 3 },
-    px: { xs: 1.5, md: 2.5 },
+    py: 0,
+    px: 0,
+    background: "#57bc53",
   },
   backdrop: {
     position: "absolute",
     inset: 0,
     pointerEvents: "none",
-    opacity: 0.18,
+    opacity: 0.12,
     backgroundImage:
-      "radial-gradient(circle at 14% 24%, rgba(232,255,226,0.16) 0%, transparent 22%), radial-gradient(circle at 82% 18%, rgba(232,255,226,0.12) 0%, transparent 18%), radial-gradient(circle at 74% 76%, rgba(232,255,226,0.14) 0%, transparent 24%)",
+      "radial-gradient(circle at 60% 30%, rgba(232,255,226,0.12) 0%, transparent 24%), radial-gradient(circle at 78% 72%, rgba(232,255,226,0.1) 0%, transparent 22%)",
   },
   shell: {
     position: "relative",
     zIndex: 1,
     width: "100%",
-    maxWidth: 1320,
+    minHeight: "100dvh",
+    maxWidth: 1440,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
     pointerEvents: "none",
-    px: { xs: 0, md: 1.5 },
+    px: { xs: 2, md: 4 },
   },
   panel: {
-    p: { xs: 1.2, sm: 1.4, md: 1.6 },
+    p: { xs: 1.4, sm: 1.6, md: 2.2 },
     display: "grid",
     gap: { xs: 2.2, md: 3.2 },
-    gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 1.18fr) minmax(320px, 0.82fr)" },
+    gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 1.04fr) minmax(360px, 0.76fr)" },
     alignItems: "center",
-    borderRadius: { xs: 5, md: 6 },
-    background: "linear-gradient(180deg, rgba(85,191,82,0.88) 0%, rgba(59,167,61,0.84) 42%, rgba(44,143,50,0.82) 100%)",
-    border: "1px solid rgba(230,255,224,0.26)",
-    boxShadow: "0 20px 48px rgba(22,82,24,0.14)",
+    alignContent: "center",
+    width: "100%",
+    minHeight: "100dvh",
+    borderRadius: 0,
+    background: "transparent",
+    border: "none",
+    boxShadow: "none",
     backdropFilter: "blur(8px)",
   },
   copyPanel: {
     position: "relative",
     pointerEvents: "auto",
     px: { xs: 1.2, sm: 1.6, md: 2.1 },
-    py: { xs: 1.8, md: 2.25 },
+    py: { xs: 2.4, md: 2.8 },
     alignSelf: "center",
+    justifySelf: "center",
+    width: "100%",
+    maxWidth: 980,
   },
   copyInner: {
     position: "relative",
     zIndex: 1,
     borderRadius: { xs: 4, md: 5 },
-    background: "rgba(237,255,233,0.08)",
-    border: "1px solid rgba(237,255,233,0.14)",
+    background: "rgba(237,255,233,0.07)",
+    border: "1px solid rgba(237,255,233,0.10)",
     backdropFilter: "blur(12px)",
     padding: "clamp(1.15rem, 1rem + 0.7vw, 2.1rem)",
     paddingRight: "clamp(1.4rem, 1.15rem + 1vw, 2.8rem)",
   },
   kicker: {
-    fontSize: { xs: "0.72rem", md: "0.8rem" },
+    fontSize: { xs: "0.68rem", md: "0.74rem" },
     fontWeight: 900,
     letterSpacing: "0.12em",
     textTransform: "uppercase",
@@ -102,7 +114,7 @@ const SX = {
   title: {
     fontWeight: 900,
     letterSpacing: "-0.03em",
-    fontSize: { xs: "1.84rem", sm: "2.38rem", md: "3.68rem" },
+    fontSize: { xs: "1.72rem", sm: "2.2rem", md: "3.38rem" },
     lineHeight: 0.94,
     color: "#F7FFF4",
     maxWidth: 760,
@@ -132,7 +144,7 @@ const SX = {
     mt: 2,
     maxWidth: 760,
     color: "rgba(241,255,238,0.86)",
-    fontSize: { xs: "0.98rem", md: "1.08rem" },
+    fontSize: { xs: "0.92rem", md: "1rem" },
     lineHeight: 1.8,
   },
   accentRow: {
@@ -165,7 +177,7 @@ const SX = {
     height: { xs: 30, md: 34 },
     "& .MuiChip-label": {
       px: { xs: 1.1, md: 1.35 },
-      fontSize: { xs: "0.78rem", md: "0.85rem" },
+      fontSize: { xs: "0.74rem", md: "0.8rem" },
     },
   },
   ctaRow: {
@@ -181,7 +193,7 @@ const SX = {
     py: 1.1,
     textTransform: "none",
     fontWeight: 800,
-    fontSize: { xs: "0.92rem", md: "0.96rem" },
+    fontSize: { xs: "0.86rem", md: "0.9rem" },
     background: "#F2FFF0",
     color: "#0E5A18",
     border: `1.5px solid ${alpha("#F2FFF0", 0.56)}`,
@@ -197,7 +209,7 @@ const SX = {
     py: 1.05,
     textTransform: "none",
     fontWeight: 800,
-    fontSize: { xs: "0.88rem", md: "0.94rem" },
+    fontSize: { xs: "0.82rem", md: "0.88rem" },
     color: "#F5FFF2",
     background: "rgba(255,255,255,0.06)",
     border: `1.5px solid ${alpha("#ECFFE8", 0.24)}`,
@@ -208,15 +220,17 @@ const SX = {
   sideCard: {
     pointerEvents: "auto",
     borderRadius: 4,
-    p: { xs: 2.1, sm: 2.7, md: 3.6 },
-    background:
-      "linear-gradient(180deg, rgba(248,255,246,0.94) 0%, rgba(240,255,237,0.92) 100%)",
-    border: `1px solid ${alpha("#E6FFE0", 0.18)}`,
+    p: { xs: 2.1, sm: 2.7, md: 3.8 },
+    background: "#FFFFFF",
+    border: `1px solid ${alpha("#1CDB2F", 0.34)}`,
     boxShadow: `inset 0 1px 0 ${alpha("#FFFFFF", 0.9)}, 0 16px 36px ${alpha("#06210A", 0.12)}`,
     display: "flex",
     flexDirection: "column",
     gap: { xs: 2.05, md: 2.7 },
     alignSelf: "center",
+    justifySelf: "center",
+    width: "100%",
+    maxWidth: 460,
     position: "relative",
     overflow: "hidden",
     backdropFilter: "blur(6px)",
@@ -254,7 +268,7 @@ const SX = {
     boxShadow: "0 0 0 4px rgba(28,219,47,0.1)",
   },
   sideLabel: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: 900,
     letterSpacing: "0.18em",
     textTransform: "uppercase",
@@ -264,7 +278,7 @@ const SX = {
     p: { xs: 1.4, md: 1.7 },
     borderRadius: 3.25,
     background: "rgba(255,255,255,0.92)",
-    border: `1px solid ${alpha("#1CDB2F", 0.22)}`,
+    border: `1px solid ${alpha("#1CDB2F", 0.34)}`,
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
@@ -276,14 +290,14 @@ const SX = {
   },
   contactTitle: {
     color: alpha("#23412A", 0.76),
-    fontSize: "0.75rem",
+    fontSize: "0.7rem",
     fontWeight: 800,
     letterSpacing: "0.08em",
     textTransform: "uppercase",
   },
   contactValue: {
     color: DARK_GREEN,
-    fontSize: { xs: "0.76rem", md: "0.84rem" },
+    fontSize: { xs: "0.72rem", md: "0.8rem" },
     fontWeight: 700,
     whiteSpace: "nowrap",
     overflow: "hidden",
@@ -296,13 +310,13 @@ const SX = {
     py: 0.5,
     textTransform: "none",
     fontWeight: 800,
-    fontSize: "0.7rem",
+    fontSize: "0.66rem",
     whiteSpace: "nowrap",
     flexShrink: 0,
     color: "#138B21",
-    borderColor: alpha("#1CDB2F", 0.34),
+    borderColor: alpha("#1CDB2F", 0.44),
     "&:hover": {
-      borderColor: alpha("#1CDB2F", 0.5),
+      borderColor: alpha("#1CDB2F", 0.58),
       background: alpha("#1CDB2F", 0.08),
     },
   },
@@ -396,6 +410,7 @@ function ContactRow({
 export default function LetsWorkTogether() {
   const reducedMotion = usePrefersReducedMotion();
   const rootRef = React.useRef<HTMLDivElement>(null);
+  const { setHeaderVisible } = useHeaderTheme();
   const [copied, setCopied] = React.useState(false);
   const copyResetRef = React.useRef<number | null>(null);
 
@@ -488,6 +503,30 @@ export default function LetsWorkTogether() {
 
     return () => ctx.revert();
   }, [reducedMotion]);
+
+  useIsomorphicLayoutEffect(() => {
+    ensureGsap();
+
+    const root = rootRef.current;
+    if (!root) return;
+
+    const trigger = ScrollTrigger.create({
+      trigger: root,
+      start: "top top",
+      end: "bottom top",
+      onEnter: () => setHeaderVisible(false),
+      onEnterBack: () => setHeaderVisible(false),
+      onLeave: () => setHeaderVisible(true),
+      onLeaveBack: () => setHeaderVisible(true),
+    });
+
+    setHeaderVisible(!trigger.isActive);
+
+    return () => {
+      trigger.kill();
+      setHeaderVisible(true);
+    };
+  }, [setHeaderVisible]);
 
   return (
     <Box ref={rootRef} sx={SX.section}>
