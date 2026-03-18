@@ -63,21 +63,21 @@ const SX = {
     position: "relative",
     zIndex: 1,
     width: "100%",
-    maxWidth: 1140,
+    maxWidth: 1060,
     pointerEvents: "none",
   },
   panel: {
-    p: { xs: 1, sm: 1.5, md: 2 },
+    p: { xs: 1, sm: 1.5, md: 1.5 },
     display: "grid",
-    gap: { xs: 2.5, md: 4 },
-    gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 1.18fr) minmax(320px, 0.82fr)" },
+    gap: { xs: 2.5, md: 3 },
+    gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 1.12fr) minmax(300px, 0.78fr)" },
     alignItems: "center",
   },
   copyPanel: {
     position: "relative",
     pointerEvents: "auto",
-    px: { xs: 1.2, sm: 2, md: 2.5 },
-    py: { xs: 2.2, md: 2.8 },
+    px: { xs: 1.2, sm: 2, md: 2.15 },
+    py: { xs: 2.2, md: 2.35 },
     alignSelf: "center",
     "&::before": {
       content: '""',
@@ -108,7 +108,7 @@ const SX = {
     zIndex: 1,
   },
   kicker: {
-    fontSize: { xs: "0.72rem", md: "0.8rem" },
+    fontSize: { xs: "0.72rem", md: "0.76rem" },
     fontWeight: 900,
     letterSpacing: "0.12em",
     textTransform: "uppercase",
@@ -118,10 +118,10 @@ const SX = {
   title: {
     fontWeight: 900,
     letterSpacing: "-0.03em",
-    fontSize: { xs: "2rem", sm: "2.6rem", md: "4rem" },
+    fontSize: { xs: "2rem", sm: "2.6rem", md: "3.4rem" },
     lineHeight: 0.94,
     color: DARK_GREEN,
-    maxWidth: 760,
+    maxWidth: 680,
   },
   titleLine: {
     display: "block",
@@ -129,14 +129,14 @@ const SX = {
   titleLineWithRule: {
     display: "flex",
     alignItems: "center",
-    gap: { xs: 1, md: 1.4 },
+    gap: { xs: 1, md: 1.15 },
     flexWrap: "nowrap",
   },
   titleRule: {
     flex: "1 1 auto",
-    minWidth: { xs: 52, sm: 86, md: 164 },
-    maxWidth: { xs: 116, sm: 170, md: 240 },
-    height: { xs: 4, md: 5 },
+    minWidth: { xs: 52, sm: 86, md: 132 },
+    maxWidth: { xs: 116, sm: 170, md: 200 },
+    height: { xs: 4, md: 4 },
     borderRadius: 999,
     alignSelf: "center",
     background:
@@ -146,10 +146,10 @@ const SX = {
   },
   summary: {
     mt: 2,
-    maxWidth: 760,
+    maxWidth: 680,
     color: alpha("#243226", 0.84),
-    fontSize: { xs: "0.98rem", md: "1.08rem" },
-    lineHeight: 1.8,
+    fontSize: { xs: "0.98rem", md: "1rem" },
+    lineHeight: 1.7,
   },
   accentRow: {
     mt: 2.25,
@@ -168,7 +168,7 @@ const SX = {
     boxShadow: "0 0 0 5px rgba(28,219,47,0.12)",
   },
   chipWrap: {
-    mt: 3,
+    mt: 2.6,
     display: "flex",
     flexWrap: "wrap",
     gap: 1,
@@ -178,14 +178,14 @@ const SX = {
     color: DARK_GREEN,
     border: `1px solid ${alpha("#1CDB2F", 0.52)}`,
     fontWeight: 700,
-    height: { xs: 30, md: 34 },
+    height: { xs: 30, md: 32 },
     "& .MuiChip-label": {
-      px: { xs: 1.1, md: 1.35 },
-      fontSize: { xs: "0.78rem", md: "0.85rem" },
+      px: { xs: 1.1, md: 1.2 },
+      fontSize: { xs: "0.78rem", md: "0.8rem" },
     },
   },
   ctaRow: {
-    mt: 3.5,
+    mt: 3,
     display: "flex",
     gap: { xs: 1, md: 1.5 },
     flexWrap: "wrap",
@@ -193,11 +193,11 @@ const SX = {
   },
   primaryBtn: {
     borderRadius: 999,
-    px: { xs: 2, md: 2.5 },
-    py: 1.1,
+    px: { xs: 2, md: 2.2 },
+    py: { xs: 1.1, md: 0.95 },
     textTransform: "none",
     fontWeight: 800,
-    fontSize: { xs: "0.92rem", md: "0.96rem" },
+    fontSize: { xs: "0.92rem", md: "0.9rem" },
     color: "#FFFFFF",
     background: "#1CDB2F",
     border: `1.5px solid ${alpha("#1CDB2F", 0.62)}`,
@@ -209,11 +209,11 @@ const SX = {
   },
   secondaryBtn: {
     borderRadius: 999,
-    px: { xs: 1.7, md: 2.2 },
-    py: 1.05,
+    px: { xs: 1.7, md: 1.95 },
+    py: { xs: 1.05, md: 0.9 },
     textTransform: "none",
     fontWeight: 800,
-    fontSize: { xs: "0.88rem", md: "0.94rem" },
+    fontSize: { xs: "0.88rem", md: "0.88rem" },
     color: DARK_GREEN,
     background: "#FFFFFF",
     border: `1.5px solid ${alpha("#1CDB2F", 0.5)}`,
@@ -224,14 +224,14 @@ const SX = {
   sideCard: {
     pointerEvents: "auto",
     borderRadius: 4,
-    p: { xs: 2.25, sm: 3, md: 4 },
+    p: { xs: 2.25, sm: 3, md: 3.2 },
     background:
       "linear-gradient(180deg, rgba(236,249,232,0.94) 0%, rgba(247,255,245,0.96) 100%)",
     border: `1px solid ${BORDER_GREEN}`,
     boxShadow: `inset 0 1px 0 ${alpha("#FFFFFF", 0.9)}, 0 16px 36px ${alpha("#1CDB2F", 0.08)}`,
     display: "flex",
     flexDirection: "column",
-    gap: { xs: 2.25, md: 3 },
+    gap: { xs: 2.25, md: 2.4 },
     alignSelf: "center",
     position: "relative",
     overflow: "hidden",
@@ -257,7 +257,7 @@ const SX = {
     background: "rgba(255,255,255,0.86)",
     border: `1px solid ${alpha("#1CDB2F", 0.24)}`,
     color: "#1A5D23",
-    fontSize: "0.72rem",
+    fontSize: { xs: "0.72rem", md: "0.68rem" },
     fontWeight: 900,
     letterSpacing: "0.12em",
     textTransform: "uppercase",
@@ -270,14 +270,14 @@ const SX = {
     boxShadow: "0 0 0 4px rgba(28,219,47,0.1)",
   },
   sideLabel: {
-    fontSize: 12,
+    fontSize: { xs: 12, md: 11 },
     fontWeight: 900,
     letterSpacing: "0.18em",
     textTransform: "uppercase",
     color: "#1CDB2F",
   },
   contactCard: {
-    p: { xs: 1.4, md: 1.7 },
+    p: { xs: 1.4, md: 1.45 },
     borderRadius: 3.25,
     background: "rgba(255,255,255,0.92)",
     border: `1px solid ${alpha("#1CDB2F", 0.22)}`,
@@ -292,14 +292,14 @@ const SX = {
   },
   contactTitle: {
     color: alpha("#23412A", 0.76),
-    fontSize: "0.75rem",
+    fontSize: { xs: "0.75rem", md: "0.7rem" },
     fontWeight: 800,
     letterSpacing: "0.08em",
     textTransform: "uppercase",
   },
   contactValue: {
     color: DARK_GREEN,
-    fontSize: { xs: "0.76rem", md: "0.84rem" },
+    fontSize: { xs: "0.76rem", md: "0.78rem" },
     fontWeight: 700,
     whiteSpace: "nowrap",
     overflow: "hidden",
@@ -312,7 +312,7 @@ const SX = {
     py: 0.5,
     textTransform: "none",
     fontWeight: 800,
-    fontSize: "0.7rem",
+    fontSize: { xs: "0.7rem", md: "0.66rem" },
     whiteSpace: "nowrap",
     flexShrink: 0,
     color: "#138B21",
@@ -330,10 +330,10 @@ const SX = {
     minWidth: 0,
   },
   inlineCopyBtn: {
-    width: 22,
-    height: 22,
-    minWidth: 22,
-    minHeight: 22,
+    width: { xs: 22, md: 20 },
+    height: { xs: 22, md: 20 },
+    minWidth: { xs: 22, md: 20 },
+    minHeight: { xs: 22, md: 20 },
     borderRadius: 1,
     color: "#1A8A25",
     flexShrink: 0,
@@ -345,7 +345,7 @@ const SX = {
   processList: {
     display: "flex",
     flexDirection: "column",
-    gap: 1.1,
+    gap: { xs: 1.1, md: 0.95 },
   },
   processItem: {
     display: "flex",
@@ -530,7 +530,7 @@ export default function LetsWorkTogether() {
 
               <Box sx={SX.accentRow} data-contact-reveal>
                 <Box sx={SX.availabilityDot} />
-                <Typography sx={{ fontWeight: 800, fontSize: { xs: "0.92rem", md: "1rem" } }}>
+                <Typography sx={{ fontWeight: 800, fontSize: { xs: "0.92rem", md: "0.92rem" } }}>
                   Open for serious builds, product collaborations, and tailored system
                   work.
                 </Typography>
@@ -641,8 +641,8 @@ export default function LetsWorkTogether() {
               <Box sx={{ ...SX.processList, mt: 1.6 }}>
                 {PROCESS.map((item) => (
                   <Box key={item} sx={SX.processItem} data-contact-reveal>
-                    <TaskAltRoundedIcon sx={{ color: "#18A626", fontSize: "1.1rem", mt: 0.15 }} />
-                    <Typography sx={{ fontWeight: 700, fontSize: { xs: "0.94rem", md: "0.98rem" } }}>
+                    <TaskAltRoundedIcon sx={{ color: "#18A626", fontSize: { xs: "1.1rem", md: "1rem" }, mt: 0.15 }} />
+                    <Typography sx={{ fontWeight: 700, fontSize: { xs: "0.94rem", md: "0.9rem" } }}>
                       {item}
                     </Typography>
                   </Box>
