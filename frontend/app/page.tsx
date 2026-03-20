@@ -67,19 +67,27 @@ export default function Home() {
           </Container>
         </Box>
 
-        <Box id="techstacks" sx={sectionSnapSx}>
+        <Box
+          id="techstacks"
+          sx={{
+            ...sectionSnapSx,
+            height: { xs: "auto", md: "100dvh" },
+            minHeight: "100dvh",
+            overflow: { xs: "visible", md: "clip" },
+          }}
+        >
           <Container
             maxWidth="lg"
             sx={{
               flex: 1,
               position: "relative",
               zIndex: 1,
-              py: { xs: 2, md: 0 },
+              py: { xs: 0, md: 0 },
               display: "flex",
-              alignItems: "center",
+              alignItems: { xs: "stretch", md: "center" },
             }}
           >
-            <Stack alignItems="center" spacing={8}>
+            <Stack alignItems="center" spacing={0} sx={{ width: "100%" }}>
               <SkillsShowcase />
             </Stack>
           </Container>
@@ -105,7 +113,15 @@ export default function Home() {
           </Container>
         </Box>
 
-        <Box id="contact" sx={sectionSnapSx}>
+        <Box
+          id="contact"
+          sx={{
+            ...sectionSnapSx,
+            height: { xs: "auto", md: "100dvh" },
+            minHeight: "100dvh",
+            overflow: { xs: "visible", md: "clip" },
+          }}
+        >
           <Container
             maxWidth={false}
             disableGutters
@@ -118,7 +134,7 @@ export default function Home() {
               px: 0,
               py: 0,
               display: "flex",
-              alignItems: "center",
+              alignItems: { xs: "stretch", md: "center" },
             }}
           >
             <Stack alignItems="center" spacing={8} sx={{ width: "100%" }}>

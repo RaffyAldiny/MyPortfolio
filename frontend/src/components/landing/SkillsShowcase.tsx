@@ -161,12 +161,13 @@ export default function SkillsShowcase() {
       ref={rootRef}
       sx={{
         width: "100%",
-        minHeight: "100vh",
+        minHeight: { xs: "auto", md: "calc(100dvh - 96px)" },
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "center",
-        py: { xs: 6, md: 12 },
+        justifyContent: { xs: "flex-start", md: "center" },
+        pt: { xs: 6, md: 4 },
+        pb: { xs: "calc(104px + env(safe-area-inset-bottom))", md: 5 },
         px: { xs: 0, sm: 3 },
         position: "relative",
         overflow: "hidden",
@@ -191,13 +192,13 @@ export default function SkillsShowcase() {
         }}
       />
 
-      <Box sx={{ width: "100%", maxWidth: 1100, zIndex: 1, px: { xs: 2, sm: 0 } }}>
+      <Box sx={{ width: "100%", maxWidth: 1180, zIndex: 1, px: { xs: 2, sm: 0 } }}>
         <Typography
           variant="h2"
           sx={{
             fontWeight: 900,
-            fontSize: { xs: "2.85rem", sm: "3.5rem", md: "5rem" },
-            mb: { xs: 2, md: 1.5 },
+            fontSize: { xs: "2.85rem", sm: "3.5rem", md: "4.7rem" },
+            mb: { xs: 2, md: 1.15 },
             textTransform: "uppercase",
             textAlign: "center",
             color: "#1CDB2F",
@@ -214,7 +215,7 @@ export default function SkillsShowcase() {
             fontWeight: 700,
             color: "#1B4B22",
             letterSpacing: 0.1,
-            mb: { xs: 4, md: 5 },
+            mb: { xs: 4, md: 4 },
             fontSize: { xs: 13.5, md: 14.5 },
             lineHeight: { xs: 1.58, md: 1.5 },
             maxWidth: 680,
@@ -230,7 +231,7 @@ export default function SkillsShowcase() {
           sx={{
             display: "flex",
             justifyContent: { xs: "flex-start", sm: "center" },
-            mb: { xs: 4, md: 6 },
+            mb: { xs: 4, md: 4.25 },
             overflowX: "auto",
             width: "100%",
             pb: 2,
@@ -254,9 +255,9 @@ export default function SkillsShowcase() {
             display: "flex",
             flexWrap: "wrap",
             justifyContent: "center",
-            columnGap: { xs: 0.85, sm: 2 },
-            rowGap: { xs: 1.05, sm: 2 },
-            maxWidth: 1000,
+            columnGap: { xs: 0.85, sm: 1.4, md: 1.55 },
+            rowGap: { xs: 1.05, sm: 1.45, md: 1.55 },
+            maxWidth: 1120,
             width: "100%",
             mx: "auto",
             px: { xs: 0.4, sm: 0 },

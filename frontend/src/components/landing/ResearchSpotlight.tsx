@@ -19,6 +19,7 @@ const ARTICLE_URL =
   "https://journal.ijprse.com/index.php/ijprse/article/view/1126";
 const PDF_URL =
   "https://journal.ijprse.com/index.php/ijprse/article/download/1126/1088/1867";
+const RESEARCH_QR_SRC = "/images/qr/research-study-QR.svg";
 const CELEB_DF_URL = "https://github.com/yuezunli/celeb-deepfakeforensics";
 const EFFICIENTNET_B0_URL =
   "https://keras.io/api/applications/efficientnet/efficientnet_models/#efficientnetb0-function";
@@ -170,8 +171,8 @@ const SX = {
   paperTitle: {
     fontWeight: 800,
     letterSpacing: "-0.015em",
-    fontSize: { xs: "1.32rem", md: "2.1rem" },
-    lineHeight: 1.28,
+    fontSize: { xs: "1.5rem", md: "1.95rem" },
+    lineHeight: { xs: 1.18, md: 1.28 },
     color: "#16391B",
     textAlign: { xs: "left", md: "justify" },
     textJustify: { md: "inter-word" },
@@ -184,14 +185,15 @@ const SX = {
     alignItems: "center",
     columnGap: 0.75,
     rowGap: 0.45,
-    fontSize: { xs: "0.9rem", md: "1rem" },
-    lineHeight: 1.6,
+    fontSize: { xs: "0.78rem", md: "0.92rem" },
+    lineHeight: { xs: 1.45, md: 1.52 },
     color: "#111111",
     maxWidth: 720,
   },
   byPrefix: {
     color: "#111111",
     fontWeight: 500,
+    fontSize: { xs: "0.78rem", md: "0.92rem" },
   },
   authorGroup: {
     display: "inline-flex",
@@ -202,6 +204,7 @@ const SX = {
   authorName: {
     color: "#111111",
     fontWeight: 500,
+    fontSize: { xs: "0.78rem", md: "0.92rem" },
   },
   authorSup: {
     ml: 0.1,
@@ -219,7 +222,7 @@ const SX = {
     textDecoration: "none",
     transition: "color 160ms ease, transform 160ms ease",
     "& .MuiSvgIcon-root": {
-      fontSize: "0.95rem",
+      fontSize: { xs: "0.82rem", md: "0.88rem" },
     },
     "&:hover": {
       color: DARK_GREEN,
@@ -231,8 +234,8 @@ const SX = {
   },
   summary: {
     color: alpha("#243226", 0.82),
-    fontSize: { xs: "0.96rem", md: "1.06rem" },
-    lineHeight: { xs: 1.76, md: 1.85 },
+    fontSize: { xs: "0.88rem", md: "0.98rem" },
+    lineHeight: { xs: 1.64, md: 1.76 },
     textAlign: { xs: "left", md: "justify" },
     textJustify: { md: "inter-word" },
     maxWidth: 760,
@@ -264,7 +267,7 @@ const SX = {
     display: "block",
     fontWeight: 900,
     letterSpacing: "-0.03em",
-    fontSize: { xs: "1.02rem", sm: "1.4rem", md: "1.8rem" },
+    fontSize: { xs: "1.02rem", sm: "1.4rem", md: "1.68rem" },
     color: METRIC_GREEN,
     textShadow: "0 0 10px rgba(28, 219, 47, 0.18)",
     transform: "translateZ(0)",
@@ -272,8 +275,8 @@ const SX = {
   metricLabel: {
     mt: 0.5,
     fontWeight: 600,
-    fontSize: { xs: 9.5, sm: 12 },
-    letterSpacing: { xs: "0.06em", sm: "0.12em" },
+    fontSize: { xs: 9.5, sm: 12, md: 11 },
+    letterSpacing: { xs: "0.06em", sm: "0.12em", md: "0.11em" },
     textTransform: "uppercase",
     color: "#084E10",
     textAlign: "center",
@@ -293,7 +296,7 @@ const SX = {
     minHeight: { xs: "auto", lg: 420 },
   },
   sideLabel: {
-    fontSize: 12,
+    fontSize: { xs: 12, md: 11 },
     fontWeight: 900,
     letterSpacing: "0.18em",
     textTransform: "uppercase",
@@ -301,12 +304,14 @@ const SX = {
   },
   journalTitle: {
     fontWeight: 700,
-    lineHeight: 1.8,
+    fontSize: { xs: "1rem", md: "0.94rem" },
+    lineHeight: { xs: 1.8, md: 1.68 },
     color: DARK_GREEN,
   },
   sideText: {
     fontWeight: 600,
-    lineHeight: 1.8,
+    fontSize: { xs: "1rem", md: "0.92rem" },
+    lineHeight: { xs: 1.8, md: 1.7 },
     color: alpha("#263A2A", 0.84),
   },
   chipWrap: {
@@ -322,7 +327,7 @@ const SX = {
     height: { xs: 28, md: 32 },
     "& .MuiChip-label": {
       px: { xs: 1, md: 1.25 },
-      fontSize: { xs: "0.75rem", md: "0.81rem" },
+      fontSize: { xs: "0.75rem", md: "0.77rem" },
     },
   },
   actions: {
@@ -342,7 +347,7 @@ const SX = {
     minWidth: 0,
     flex: 1,
     px: { xs: 1.35, sm: 2.1 },
-    fontSize: { xs: "0.76rem", sm: "0.88rem" },
+    fontSize: { xs: "0.76rem", sm: "0.88rem", md: "0.82rem" },
     color: "#FFFFFF",
     background: "#1CDB2F",
     border: `1.5px solid ${alpha("#1CDB2F", 0.62)}`,
@@ -367,7 +372,7 @@ const SX = {
     minWidth: 0,
     flex: 1,
     px: { xs: 1.1, sm: 2.1 },
-    fontSize: { xs: "0.76rem", sm: "0.88rem" },
+    fontSize: { xs: "0.76rem", sm: "0.88rem", md: "0.82rem" },
     color: DARK_GREEN,
     background: "#FFFFFF",
     border: `1.5px solid ${alpha("#1CDB2F", 0.58)}`,
@@ -380,6 +385,61 @@ const SX = {
     "&:hover": {
       background: alpha("#1CDB2F", 0.12),
     },
+  },
+  qrLink: {
+    mt: { xs: 1.2, md: 1.4 },
+    display: "grid",
+    gridTemplateColumns: { xs: "1fr auto", sm: "1fr auto" },
+    gap: { xs: 1, md: 1.35 },
+    alignItems: "center",
+    borderRadius: 3,
+    border: `1px solid ${alpha("#1CDB2F", 0.34)}`,
+    background: alpha("#1CDB2F", 0.045),
+    px: { xs: 1.1, md: 1.35 },
+    py: { xs: 1.05, md: 1.2 },
+    color: "inherit",
+    textDecoration: "none",
+    transition: "background-color 160ms ease, border-color 160ms ease, transform 160ms ease",
+    "&:hover": {
+      background: alpha("#1CDB2F", 0.085),
+      borderColor: alpha("#1CDB2F", 0.5),
+      transform: "translateY(-1px)",
+    },
+  },
+  qrCopy: {
+    minWidth: 0,
+  },
+  qrLabel: {
+    fontSize: { xs: "0.67rem", md: "0.64rem" },
+    fontWeight: 900,
+    letterSpacing: "0.16em",
+    textTransform: "uppercase",
+    color: LABEL_GREEN,
+  },
+  qrText: {
+    mt: 0.4,
+    fontSize: { xs: "0.72rem", md: "0.76rem" },
+    lineHeight: { xs: 1.45, md: 1.5 },
+    fontWeight: 600,
+    color: alpha("#263A2A", 0.8),
+  },
+  qrTile: {
+    width: { xs: 62, md: 78 },
+    height: { xs: 62, md: 78 },
+    flexShrink: 0,
+    display: "grid",
+    placeItems: "center",
+    p: 0.8,
+    borderRadius: 2.4,
+    background: "#FFFFFF",
+    border: `1px solid ${alpha("#1CDB2F", 0.32)}`,
+    boxShadow: `0 10px 22px ${alpha("#1CDB2F", 0.1)}`,
+  },
+  qrImage: {
+    display: "block",
+    width: "100%",
+    height: "100%",
+    objectFit: "contain",
   },
 } as const;
 
@@ -593,6 +653,32 @@ export default function ResearchSpotlight() {
                     Download PDF
                   </Button>
                 </HoverLinkTooltip>
+              </Box>
+
+              <Box
+                component="a"
+                href={ARTICLE_URL}
+                target="_blank"
+                rel="noreferrer"
+                sx={SX.qrLink}
+                data-research-reveal
+                aria-label="Open the research study article with the QR code"
+              >
+                <Box sx={SX.qrCopy}>
+                  <Typography sx={SX.qrLabel}>Scan QR</Typography>
+                  <Typography sx={SX.qrText}>
+                    Open the study on your phone without crowding the main actions.
+                  </Typography>
+                </Box>
+
+                <Box sx={SX.qrTile}>
+                  <Box
+                    component="img"
+                    src={RESEARCH_QR_SRC}
+                    alt="QR code for the published research study article"
+                    sx={SX.qrImage}
+                  />
+                </Box>
               </Box>
             </Stack>
           </Box>

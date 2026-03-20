@@ -9,6 +9,7 @@ import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import ArrowOutwardIcon from "@mui/icons-material/ArrowOutward";
 import ContentCopyRoundedIcon from "@mui/icons-material/ContentCopyRounded";
+import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import MailOutlineIcon from "@mui/icons-material/MailOutline";
 import TaskAltRoundedIcon from "@mui/icons-material/TaskAltRounded";
@@ -19,6 +20,8 @@ import { ensureGsap, gsap, ScrollTrigger, useIsomorphicLayoutEffect } from "@/li
 
 const EMAIL = "rafaelagoncillo@gmail.com";
 const GITHUB_URL = "https://github.com/RaffyAldiny";
+const INQUIRY_FORM_URL = "https://forms.gle/hY6Z1aUsNf8jQ4937";
+const INQUIRY_QR_SRC = "/images/qr/system-inquiry-QR.svg";
 const DARK_GREEN = "#113E18";
 const COPY_SUCCESS = "Email copied";
 
@@ -39,12 +42,13 @@ const PROCESS = [
 const SX = {
   section: {
     width: "100%",
-    minHeight: "100dvh",
+    minHeight: { xs: "auto", md: "100dvh" },
     position: "relative",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    py: 0,
+    pt: { xs: "calc(18px + env(safe-area-inset-top))", md: 0 },
+    pb: { xs: "calc(108px + env(safe-area-inset-bottom))", md: 0 },
     px: 0,
     background: "#57bc53",
   },
@@ -60,23 +64,23 @@ const SX = {
     position: "relative",
     zIndex: 1,
     width: "100%",
-    minHeight: "100dvh",
+    minHeight: { xs: "auto", md: "100dvh" },
     maxWidth: 1440,
     display: "flex",
-    alignItems: "center",
+    alignItems: { xs: "stretch", md: "center" },
     justifyContent: "center",
     pointerEvents: "none",
-    px: { xs: 2, md: 4 },
+    px: { xs: 1.15, sm: 2, md: 4 },
   },
   panel: {
-    p: { xs: 1.4, sm: 1.6, md: 2.2 },
+    p: { xs: 1.1, sm: 1.45, md: 2.2 },
     display: "grid",
-    gap: { xs: 2.2, md: 3.2 },
+    gap: { xs: 1.6, md: 3.2 },
     gridTemplateColumns: { xs: "1fr", lg: "minmax(0, 1.04fr) minmax(360px, 0.76fr)" },
-    alignItems: "center",
-    alignContent: "center",
+    alignItems: { xs: "start", md: "center" },
+    alignContent: { xs: "start", md: "center" },
     width: "100%",
-    minHeight: "100dvh",
+    minHeight: { xs: "auto", md: "100dvh" },
     borderRadius: 0,
     background: "transparent",
     border: "none",
@@ -86,8 +90,8 @@ const SX = {
   copyPanel: {
     position: "relative",
     pointerEvents: "auto",
-    px: { xs: 1.2, sm: 1.6, md: 2.1 },
-    py: { xs: 2.4, md: 2.8 },
+    px: { xs: 0.35, sm: 1.2, md: 2.1 },
+    py: { xs: 0.35, md: 2.8 },
     alignSelf: "center",
     justifySelf: "center",
     width: "100%",
@@ -100,8 +104,11 @@ const SX = {
     background: "rgba(237,255,233,0.07)",
     border: "1px solid rgba(237,255,233,0.10)",
     backdropFilter: "blur(12px)",
-    padding: "clamp(1.15rem, 1rem + 0.7vw, 2.1rem)",
-    paddingRight: "clamp(1.4rem, 1.15rem + 1vw, 2.8rem)",
+    padding: "clamp(0.95rem, 0.8rem + 0.8vw, 2.1rem)",
+    paddingRight: {
+      xs: "clamp(0.95rem, 0.8rem + 0.8vw, 1.15rem)",
+      md: "clamp(1.4rem, 1.15rem + 1vw, 2.8rem)",
+    },
   },
   kicker: {
     fontSize: { xs: "0.68rem", md: "0.74rem" },
@@ -141,14 +148,14 @@ const SX = {
     transform: { xs: "translateY(3px)", md: "translateY(5px)" },
   },
   summary: {
-    mt: 2,
+    mt: { xs: 1.5, md: 2 },
     maxWidth: 760,
     color: "rgba(241,255,238,0.86)",
-    fontSize: { xs: "0.92rem", md: "1rem" },
-    lineHeight: 1.8,
+    fontSize: { xs: "0.82rem", md: "1rem" },
+    lineHeight: { xs: 1.66, md: 1.8 },
   },
   accentRow: {
-    mt: 2.25,
+    mt: { xs: 1.65, md: 2.25 },
     display: "grid",
     gridTemplateColumns: "auto 1fr",
     columnGap: 1,
@@ -164,69 +171,90 @@ const SX = {
     boxShadow: "0 0 0 5px rgba(231,255,226,0.10)",
   },
   chipWrap: {
-    mt: 3,
+    mt: { xs: 2.2, md: 3 },
     display: "flex",
     flexWrap: "wrap",
-    gap: 1,
+    gap: { xs: 0.7, md: 1 },
   },
   chip: {
     bgcolor: "rgba(245,255,242,0.14)",
     color: "#F6FFF3",
     border: `1px solid ${alpha("#ECFFE8", 0.2)}`,
     fontWeight: 700,
-    height: { xs: 30, md: 34 },
+    height: { xs: 28, md: 34 },
     "& .MuiChip-label": {
-      px: { xs: 1.1, md: 1.35 },
-      fontSize: { xs: "0.74rem", md: "0.8rem" },
+      px: { xs: 0.95, md: 1.35 },
+      fontSize: { xs: "0.68rem", md: "0.8rem" },
     },
   },
   ctaRow: {
-    mt: 3.5,
-    display: "flex",
-    gap: { xs: 1, md: 1.5 },
-    flexWrap: "wrap",
-    alignItems: "center",
+    mt: { xs: 2.6, md: 3.5 },
+    display: { xs: "grid", md: "flex" },
+    gridTemplateColumns: { xs: "1.45fr 1fr 1.15fr", md: "none" },
+    gap: { xs: 0.7, md: 1.5 },
+    flexWrap: { md: "wrap" },
+    alignItems: "stretch",
   },
   primaryBtn: {
     borderRadius: 999,
-    px: { xs: 2, md: 2.5 },
-    py: 1.1,
+    px: { xs: 0.85, md: 2.5 },
+    py: { xs: 0.85, md: 1.1 },
     textTransform: "none",
     fontWeight: 800,
-    fontSize: { xs: "0.86rem", md: "0.9rem" },
+    fontSize: { xs: "0.68rem", sm: "0.8rem", md: "0.9rem" },
+    lineHeight: 1.18,
+    textAlign: "center",
     background: "#F2FFF0",
     color: "#0E5A18",
     border: `1.5px solid ${alpha("#F2FFF0", 0.56)}`,
     boxShadow: `0 10px 28px ${alpha("#06210A", 0.18)}`,
+    minWidth: 0,
+    minHeight: { xs: 56, md: "auto" },
+    width: { xs: "100%", md: "auto" },
+    whiteSpace: { xs: "normal", md: "nowrap" },
     "&:hover": {
       background: "#E6FFE0",
       boxShadow: `0 12px 30px ${alpha("#06210A", 0.22)}`,
     },
+    "& .MuiButton-endIcon": {
+      ml: { xs: 0, sm: 0.6 },
+      display: { xs: "none", sm: "inline-flex" },
+    },
   },
   secondaryBtn: {
     borderRadius: 999,
-    px: { xs: 1.7, md: 2.2 },
-    py: 1.05,
+    px: { xs: 0.75, md: 2.2 },
+    py: { xs: 0.8, md: 1.05 },
     textTransform: "none",
     fontWeight: 800,
-    fontSize: { xs: "0.82rem", md: "0.88rem" },
+    fontSize: { xs: "0.66rem", sm: "0.78rem", md: "0.88rem" },
+    lineHeight: 1.18,
+    textAlign: "center",
     color: "#F5FFF2",
     background: "rgba(255,255,255,0.06)",
     border: `1.5px solid ${alpha("#ECFFE8", 0.24)}`,
+    minWidth: 0,
+    minHeight: { xs: 56, md: "auto" },
+    width: { xs: "100%", md: "auto" },
+    whiteSpace: { xs: "normal", md: "nowrap" },
     "&:hover": {
       background: "rgba(255,255,255,0.12)",
+    },
+    "& .MuiButton-startIcon": {
+      mr: { xs: 0, sm: 0.6 },
+      display: { xs: "none", sm: "inline-flex" },
     },
   },
   sideCard: {
     pointerEvents: "auto",
     borderRadius: 4,
-    p: { xs: 2.1, sm: 2.7, md: 3.8 },
+    p: { xs: 1.45, sm: 2.4, md: 3.8 },
     background: "#FFFFFF",
     border: `1px solid ${alpha("#1CDB2F", 0.34)}`,
     boxShadow: `inset 0 1px 0 ${alpha("#FFFFFF", 0.9)}, 0 16px 36px ${alpha("#06210A", 0.12)}`,
     display: "flex",
     flexDirection: "column",
-    gap: { xs: 2.05, md: 2.7 },
+    gap: { xs: 1.6, md: 2.7 },
     alignSelf: "center",
     justifySelf: "center",
     width: "100%",
@@ -275,7 +303,7 @@ const SX = {
     color: "#1CDB2F",
   },
   contactCard: {
-    p: { xs: 1.4, md: 1.7 },
+    p: { xs: 1.15, md: 1.7 },
     borderRadius: 3.25,
     background: "rgba(255,255,255,0.92)",
     border: `1px solid ${alpha("#1CDB2F", 0.34)}`,
@@ -297,20 +325,21 @@ const SX = {
   },
   contactValue: {
     color: DARK_GREEN,
-    fontSize: { xs: "0.72rem", md: "0.8rem" },
+    fontSize: { xs: "0.68rem", md: "0.8rem" },
     fontWeight: 700,
-    whiteSpace: "nowrap",
+    whiteSpace: { xs: "normal", md: "nowrap" },
     overflow: "hidden",
     textOverflow: "ellipsis",
+    lineHeight: { xs: 1.35, md: 1.4 },
   },
   contactAction: {
     borderRadius: 999,
     minWidth: 0,
-    px: 1,
-    py: 0.5,
+    px: { xs: 0.9, md: 1 },
+    py: { xs: 0.42, md: 0.5 },
     textTransform: "none",
     fontWeight: 800,
-    fontSize: "0.66rem",
+    fontSize: { xs: "0.62rem", md: "0.66rem" },
     whiteSpace: "nowrap",
     flexShrink: 0,
     color: "#138B21",
@@ -323,8 +352,8 @@ const SX = {
   inlineValueRow: {
     mt: 0.3,
     display: "flex",
-    alignItems: "center",
-    gap: 0.4,
+    alignItems: { xs: "flex-start", md: "center" },
+    gap: { xs: 0.28, md: 0.4 },
     minWidth: 0,
   },
   inlineCopyBtn: {
@@ -340,10 +369,65 @@ const SX = {
       background: alpha("#1CDB2F", 0.08),
     },
   },
+  qrBlock: {
+    mt: 1.25,
+    display: "grid",
+    gridTemplateColumns: { xs: "1fr auto", md: "1fr auto" },
+    gap: { xs: 1, md: 1.2 },
+    alignItems: "center",
+    borderRadius: 3.25,
+    border: `1px solid ${alpha("#1CDB2F", 0.28)}`,
+    background: alpha("#1CDB2F", 0.035),
+    px: { xs: 1.05, md: 1.3 },
+    py: { xs: 1, md: 1.15 },
+    color: "inherit",
+    textDecoration: "none",
+    transition: "background-color 160ms ease, border-color 160ms ease, transform 160ms ease",
+    "&:hover": {
+      background: alpha("#1CDB2F", 0.075),
+      borderColor: alpha("#1CDB2F", 0.42),
+      transform: "translateY(-1px)",
+    },
+  },
+  qrMeta: {
+    minWidth: 0,
+  },
+  qrKicker: {
+    color: "#179123",
+    fontSize: "0.64rem",
+    fontWeight: 900,
+    letterSpacing: "0.16em",
+    textTransform: "uppercase",
+  },
+  qrText: {
+    mt: 0.32,
+    color: alpha("#23412A", 0.8),
+    fontSize: { xs: "0.7rem", md: "0.76rem" },
+    fontWeight: 600,
+    lineHeight: { xs: 1.42, md: 1.5 },
+  },
+  qrTile: {
+    width: { xs: 62, md: 80 },
+    height: { xs: 62, md: 80 },
+    flexShrink: 0,
+    display: "grid",
+    placeItems: "center",
+    p: 0.8,
+    borderRadius: 2.5,
+    background: "#FFFFFF",
+    border: `1px solid ${alpha("#1CDB2F", 0.3)}`,
+    boxShadow: `0 10px 22px ${alpha("#06210A", 0.08)}`,
+  },
+  qrImage: {
+    display: "block",
+    width: "100%",
+    height: "100%",
+    objectFit: "contain",
+  },
   processList: {
     display: "flex",
     flexDirection: "column",
-    gap: 1.1,
+    gap: { xs: 0.85, md: 1.1 },
   },
   processItem: {
     display: "flex",
@@ -659,6 +743,47 @@ export default function LetsWorkTogether() {
                   icon={<GitHubIcon />}
                   actionLabel="Open"
                 />
+
+                <ContactRow
+                  label="Project Inquiry"
+                  value={
+                    <Typography
+                      component="div"
+                      sx={{ ...SX.contactValue, mt: 0.35, whiteSpace: "normal" }}
+                    >
+                      Brief form for serious builds, custom systems, and scoped collaboration requests.
+                    </Typography>
+                  }
+                  href={INQUIRY_FORM_URL}
+                  icon={<DescriptionOutlinedIcon />}
+                  actionLabel="Open Form"
+                />
+
+                <Box
+                  component="a"
+                  href={INQUIRY_FORM_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  sx={SX.qrBlock}
+                  data-contact-reveal
+                  aria-label="Open the project inquiry form with the QR code"
+                >
+                  <Box sx={SX.qrMeta}>
+                    <Typography sx={SX.qrKicker}>Scan QR</Typography>
+                    <Typography sx={SX.qrText}>
+                      Prefer mobile? Scan to open the inquiry form on your phone.
+                    </Typography>
+                  </Box>
+
+                  <Box sx={SX.qrTile}>
+                    <Box
+                      component="img"
+                      src={INQUIRY_QR_SRC}
+                      alt="QR code linking to the project inquiry form"
+                      sx={SX.qrImage}
+                    />
+                  </Box>
+                </Box>
               </Stack>
             </Box>
 
@@ -671,7 +796,7 @@ export default function LetsWorkTogether() {
                 {PROCESS.map((item) => (
                   <Box key={item} sx={SX.processItem} data-contact-reveal>
                     <TaskAltRoundedIcon sx={{ color: "#18A626", fontSize: "1.1rem", mt: 0.15 }} />
-                    <Typography sx={{ fontWeight: 700, fontSize: { xs: "0.94rem", md: "0.98rem" } }}>
+                    <Typography sx={{ fontWeight: 700, fontSize: { xs: "0.84rem", md: "0.98rem" } }}>
                       {item}
                     </Typography>
                   </Box>
