@@ -10,6 +10,9 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
+import GitHubIcon from "@mui/icons-material/GitHub";
+import LinkedInIcon from "@mui/icons-material/LinkedIn";
+import FacebookIcon from "@mui/icons-material/Facebook";
 import KeyboardArrowUpRoundedIcon from "@mui/icons-material/KeyboardArrowUpRounded";
 import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
 import { alpha } from "@mui/material/styles";
@@ -27,6 +30,11 @@ type Props = {
 const ACTIVE_GREEN = "#1CDB2F";
 const ACTIVE_GREEN_DARK = "#0F5E19";
 const SOFT_GREEN = "#79D883";
+const SOCIALS = [
+  { label: "GitHub", Icon: GitHubIcon, href: "https://github.com/RaffyAldiny" },
+  { label: "LinkedIn", Icon: LinkedInIcon, href: "https://linkedin.com/" },
+  { label: "Facebook", Icon: FacebookIcon, href: "https://facebook.com/" },
+] as const;
 
 function Dot({
   active,
@@ -273,6 +281,26 @@ export default function LeftTimelineNav({
     },
   } as const;
 
+  const socialBtnSx = {
+    width: 28,
+    height: 28,
+    minWidth: 28,
+    minHeight: 28,
+    p: 0,
+    borderRadius: "50%",
+    color: isDarkOverlay ? "#D9FFD0" : ACTIVE_GREEN_DARK,
+    bgcolor: "transparent",
+    border: "none",
+    boxShadow: "none",
+    "& .MuiSvgIcon-root": {
+      fontSize: "0.92rem",
+    },
+    "&:hover": {
+      bgcolor: isDarkOverlay ? "rgba(54,72,54,0.32)" : "rgba(235,255,232,0.76)",
+      transform: "translateY(-1px)",
+    },
+  } as const;
+
   const [ctaBottomPx, setCtaBottomPx] = React.useState<number | null>(null);
   const mobileDockRef = React.useRef<HTMLDivElement | null>(null);
 
@@ -425,7 +453,7 @@ export default function LeftTimelineNav({
         pointerEvents: "none",
       }}
     >
-      <Stack spacing={1.1} sx={{ pointerEvents: "auto", filter: shadow, userSelect: "none" }}>
+      <Stack spacing={1.15} sx={{ pointerEvents: "auto", filter: shadow, userSelect: "none" }}>
         <Tooltip title="Previous section" placement="right">
           <IconButton onClick={() => jump(-1)} sx={btnSx}>
             <KeyboardArrowUpRoundedIcon />
@@ -477,6 +505,39 @@ export default function LeftTimelineNav({
               </Box>
             );
           })}
+        </Stack>
+
+        <Stack
+          spacing={0.55}
+          sx={{
+            alignItems: "flex-start",
+            pl: 0.5,
+            pt: 0.15,
+          }}
+        >
+          <Stack
+            direction="row"
+            spacing={0.25}
+            sx={{
+              px: 0.45,
+              py: 0.32,
+              borderRadius: 999,
+              bgcolor: isDarkOverlay ? "rgba(35,35,42,0.88)" : "rgba(248,255,247,0.88)",
+              border: "1px solid",
+              borderColor: border,
+              boxShadow: isDarkOverlay
+                ? "0 0 0 1px rgba(141,255,116,0.05)"
+                : "0 0 0 1px rgba(28,219,47,0.04)",
+            }}
+          >
+            {SOCIALS.map(({ label, Icon, href }) => (
+              <Tooltip key={label} title={label} placement="right">
+                <IconButton component="a" href={href} target="_blank" rel="noreferrer" sx={socialBtnSx}>
+                  <Icon />
+                </IconButton>
+              </Tooltip>
+            ))}
+          </Stack>
         </Stack>
 
         <Tooltip title="Next section" placement="right">
