@@ -14,7 +14,7 @@ import GitHubIcon from "@mui/icons-material/GitHub";
 import MailOutlineIcon from "@mui/icons-material/MailOutline";
 import { alpha } from "@mui/material/styles";
 import usePrefersReducedMotion from "@/hooks/usePrefersReducedMotion";
-import { ensureGsap, gsap, ScrollTrigger, useIsomorphicLayoutEffect } from "@/lib/gsap";
+import { ensureGsap, gsap, useIsomorphicLayoutEffect } from "@/lib/gsap";
 
 const EMAIL = "rafaelagoncillo@gmail.com";
 const GITHUB_URL = "https://github.com/RaffyAldiny";
@@ -34,7 +34,7 @@ const OFFERINGS = [
 const SX = {
   section: {
     width: "100%",
-    minHeight: { xs: "auto", md: "100dvh" },
+    minHeight: { xs: "calc(100dvh + env(safe-area-inset-bottom))", md: "100dvh" },
     position: "relative",
     display: "flex",
     alignItems: "center",
@@ -43,6 +43,17 @@ const SX = {
     pb: { xs: "calc(108px + env(safe-area-inset-bottom))", md: 0 },
     px: 0,
     background: "#57bc53",
+    overflow: "hidden",
+    "&::after": {
+      content: '""',
+      position: "absolute",
+      left: 0,
+      right: 0,
+      bottom: "calc(-1 * env(safe-area-inset-bottom))",
+      height: "calc(32px + env(safe-area-inset-bottom))",
+      background: "#57bc53",
+      pointerEvents: "none",
+    },
   },
   backdrop: {
     position: "absolute",

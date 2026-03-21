@@ -41,12 +41,6 @@ const SOCIALS = [
   { Icon: FacebookIcon, href: "https://facebook.com/" },
 ];
 
-const shimmer = keyframes`
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-`;
-
 const prismPulse = keyframes`
   0% { box-shadow: 0 0 0 0 rgba(28, 219, 47, 0.34); transform: scale(0.95); }
   70% { box-shadow: 0 0 0 10px rgba(28, 219, 47, 0); transform: scale(1); }

@@ -25,7 +25,7 @@ const sectionSnapSx = {
 
 export default function Home() {
   return (
-    <Box sx={{ minHeight: "100dvh", scrollBehavior: "smooth" }}>
+    <Box sx={{ minHeight: "100dvh", scrollBehavior: "smooth", backgroundColor: "#57bc53" }}>
       <GlobalStyles
         styles={{
           html: {
@@ -120,6 +120,7 @@ export default function Home() {
             ...sectionSnapSx,
             height: { xs: "auto", md: "100dvh" },
             minHeight: "100dvh",
+            backgroundColor: "#57bc53",
             overflow: { xs: "visible", md: "clip" },
           }}
         >

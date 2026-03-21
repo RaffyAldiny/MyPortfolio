@@ -3,191 +3,41 @@
 import * as React from "react";
 import { Box } from "@mui/material";
 import { keyframes } from "@emotion/react";
-
-type ShapeType = "heart" | "star" | "frog" | "cloud" | "butterfly";
-const SHAPES: ShapeType[] = ["heart", "star", "butterfly", "frog", "cloud"];
+import {
+  clamp01,
+  easeInOut,
+  getShapeTemplateSet,
+  mulberry32,
+  randomRange,
+  SHAPES,
+  ShapeSetMap,
+  sinLUT,
+  wrapTau,
+} from "@/components/landing/background/math";
+import {
+  BackgroundProfile,
+  detectLowPowerDevice,
+  getBackgroundProfile,
+} from "@/components/landing/background/profile";
+import {
+  getSpriteBundle,
+  HUE_VARIANT_COUNT,
+  SpriteBundle,
+} from "@/components/landing/background/sprites";
 
 const mistA = keyframes`
-  0%   { transform: translate3d(-1.3%, -0.9%, 0) scale(1);    opacity: 0.26; }
-  50%  { transform: translate3d( 1.3%,  0.9%, 0) scale(1.03); opacity: 0.52; }
-  100% { transform: translate3d(-1.3%, -0.9%, 0) scale(1);    opacity: 0.26; }
+  0%   { transform: translate3d(-1.2%, -0.8%, 0) scale(1);    opacity: 0.24; }
+  50%  { transform: translate3d( 1.2%,  0.8%, 0) scale(1.03); opacity: 0.48; }
+  100% { transform: translate3d(-1.2%, -0.8%, 0) scale(1);    opacity: 0.24; }
 `;
 
-const mistB = keyframes`
-  0%   { transform: translate3d( 1.2%,  0.8%, 0) scale(1.02); opacity: 0.20; }
-  50%  { transform: translate3d(-1.2%, -0.8%, 0) scale(1.05); opacity: 0.46; }
-  100% { transform: translate3d( 1.2%,  0.8%, 0) scale(1.02); opacity: 0.20; }
-`;
-
-// deterministic RNG
-function mulberry32(seed: number) {
-  let t = seed >>> 0;
-  return () => {
-    t += 0x6d2b79f5;
-    let x = t;
-    x = Math.imul(x ^ (x >>> 15), x | 1);
-    x ^= x + Math.imul(x ^ (x >>> 7), x | 61);
-    return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
-  };
-}
-const rr = (rng: () => number, min: number, max: number) =>
-  rng() * (max - min) + min;
-
-const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
-const easeInOut = (v: number) =>
-  v < 0.5 ? 2 * v * v : 1 - Math.pow(-2 * v + 2, 2) / 2;
-
-const TAU = Math.PI * 2;
-
-// Sine LUT (fast twinkle)
-const SIN_LUT_SIZE = 4096; // power of 2
-const SIN_LUT_MASK = SIN_LUT_SIZE - 1;
-const SIN_LUT = (() => {
-  const t = new Float32Array(SIN_LUT_SIZE);
-  for (let i = 0; i < SIN_LUT_SIZE; i++) t[i] = Math.sin((i / SIN_LUT_SIZE) * TAU);
-  return t;
-})();
-const sinLUT = (rad: number) => {
-  const idx = Math.floor((rad * SIN_LUT_SIZE) / TAU) & SIN_LUT_MASK;
-  return SIN_LUT[idx];
+type ClusterState = {
+  i: number;
+  n: number;
+  t0: number;
+  every: number;
+  dur: number;
 };
-const wrapTau = (v: number) => {
-  if (v >= TAU) v -= TAU * Math.floor(v / TAU);
-  else if (v < 0) v += TAU * (1 + Math.floor(-v / TAU));
-  return v;
-};
-
-function createShapeSetMap() {
-  return {
-    heart: { xs: new Float32Array(0), ys: new Float32Array(0) },
-    star: { xs: new Float32Array(0), ys: new Float32Array(0) },
-    frog: { xs: new Float32Array(0), ys: new Float32Array(0) },
-    cloud: { xs: new Float32Array(0), ys: new Float32Array(0) },
-    butterfly: { xs: new Float32Array(0), ys: new Float32Array(0) },
-  } satisfies Record<ShapeType, { xs: Float32Array; ys: Float32Array }>;
-}
-
-function shapePoints(type: ShapeType, n: number, seed: number, isMobile: boolean) {
-  const rng = mulberry32(seed);
-  const xs = new Float32Array(n);
-  const ys = new Float32Array(n);
-
-  const scale = isMobile ? 3.0 : 5.8; // Resized for mobile
-  const jitter = () => rr(rng, isMobile ? -3.5 : -6.8, isMobile ? 3.5 : 6.8);
-
-  for (let i = 0; i < n; i++) {
-    const t = (i / n) * TAU;
-    let x = 0;
-    let y = 0;
-
-    switch (type) {
-      case "heart":
-        x = 16 * Math.pow(Math.sin(t), 3);
-        y = -(
-          13 * Math.cos(t) -
-          5 * Math.cos(2 * t) -
-          2 * Math.cos(3 * t) -
-          Math.cos(4 * t)
-        );
-        break;
-
-      case "star": {
-        const seg = Math.PI / 5;
-        const k = Math.floor(t / seg);
-        const radius = k % 2 === 0 ? 22 : 11;
-        x = radius * Math.cos(t);
-        y = radius * Math.sin(t);
-        break;
-      }
-
-      case "butterfly": {
-        const rB =
-          Math.exp(Math.sin(t)) -
-          2 * Math.cos(4 * t) +
-          Math.pow(Math.sin((2 * t - Math.PI) / 24), 5);
-        x = rB * Math.sin(t) * 10;
-        y = -rB * Math.cos(t) * 10;
-        break;
-      }
-
-      case "frog":
-        x = 20 * Math.cos(t) * Math.pow(Math.sin(t), 2);
-        y = -18 * Math.sin(t) + (i < Math.floor(n * 0.14) ? -25 : 0);
-        break;
-
-      case "cloud":
-        x = 25 * Math.cos(t);
-        y = 12 * Math.sin(t) + rr(rng, 0, 10);
-        break;
-    }
-
-    xs[i] = x * scale + jitter();
-    ys[i] = y * scale + jitter();
-  }
-
-  return { xs, ys };
-}
-
-/** Green duotone glow sprite. */
-function makePrismSprite(hue: number, size: number, core: number) {
-  const c = document.createElement("canvas");
-  c.width = size;
-  c.height = size;
-  const ctx = c.getContext("2d");
-  if (!ctx) return c;
-
-  const cx = size / 2;
-  const cy = size / 2;
-  const rOuter = size / 2;
-
-  const h1 = hue;
-  const h2 = Math.min(150, hue + 14);
-  const h3 = Math.min(164, hue + 28);
-
-  const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, rOuter);
-  g.addColorStop(0.0, `hsla(${h1}, 88%, 92%, 0.95)`);
-  g.addColorStop(0.18, `hsla(${h2}, 78%, 74%, 0.64)`);
-  g.addColorStop(0.38, `hsla(${h3}, 62%, 58%, 0.34)`);
-  g.addColorStop(0.62, `hsla(${h2}, 72%, 62%, 0.16)`);
-  g.addColorStop(1.0, `rgba(255,255,255,0)`);
-  ctx.fillStyle = g;
-  ctx.beginPath();
-  ctx.arc(cx, cy, rOuter, 0, TAU);
-  ctx.fill();
-
-  ctx.save();
-  ctx.translate(cx, cy);
-  ctx.strokeStyle = `hsla(${h1}, 100%, 92%, 0.22)`;
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(-size * 0.24, 0);
-  ctx.lineTo(size * 0.24, 0);
-  ctx.moveTo(0, -size * 0.24);
-  ctx.lineTo(0, size * 0.24);
-  ctx.stroke();
-  ctx.restore();
-
-  ctx.fillStyle = `hsla(${h1}, 100%, 94%, 1)`;
-  ctx.beginPath();
-  ctx.arc(cx, cy, Math.max(1, core), 0, TAU);
-  ctx.fill();
-
-  return c;
-}
-
-/** Pre-upscaled bloom sprite. */
-function makeBloomSprite(src: HTMLCanvasElement, scale: number) {
-  const w = Math.max(1, Math.round(src.width * scale));
-  const h = Math.max(1, Math.round(src.height * scale));
-  const c = document.createElement("canvas");
-  c.width = w;
-  c.height = h;
-  const ctx = c.getContext("2d");
-  if (!ctx) return c;
-  ctx.imageSmoothingEnabled = true;
-  ctx.drawImage(src, 0, 0, w, h);
-  return c;
-}
 
 export default function LandingBackground() {
   const rootRef = React.useRef<HTMLDivElement | null>(null);
@@ -204,25 +54,23 @@ export default function LandingBackground() {
 
     const reduceMotion =
       window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ?? false;
-
-    const ctx = canvas.getContext("2d", { alpha: true });
+    const ctx = canvas.getContext("2d", { alpha: true, desynchronized: true });
     if (!ctx) return;
 
     ctx.imageSmoothingEnabled = false;
 
     let raf = 0;
     let last = performance.now();
-
     let w = 0;
     let h = 0;
     let dpr = 1;
 
-    let FLOW = 120;
-    let SHP = 200;
-    let pad = 26;
-    let isMobileViewport = false;
-    let lowPowerDevice = false;
-    const targetFrameMs = 1000 / 60;
+    const lowPowerDevice = detectLowPowerDevice();
+    let profile: BackgroundProfile = getBackgroundProfile(window.innerWidth, lowPowerDevice);
+    let spriteBundle: SpriteBundle = getSpriteBundle(profile.isMobile);
+    let leftSet: ShapeSetMap = getShapeTemplateSet(profile.isMobile, profile.shapeCount, 9001, 101);
+    let rightSet: ShapeSetMap = getShapeTemplateSet(profile.isMobile, profile.shapeCount, 4242, 131);
+    let isProjectsActive = false;
 
     let fx = new Float32Array(0);
     let fy = new Float32Array(0);
@@ -241,32 +89,30 @@ export default function LandingBackground() {
     let shMod7 = new Uint8Array(0);
     let shBloomMask = new Uint8Array(0);
 
-    let mx = new Float32Array(0);
-    let my = new Float32Array(0);
+    const left: ClusterState = {
+      i: 0,
+      n: 1,
+      t0: performance.now(),
+      every: 7000,
+      dur: 2200,
+    };
+    const right: ClusterState = {
+      i: 1,
+      n: 2,
+      t0: performance.now(),
+      every: 9500,
+      dur: 2400,
+    };
 
-    const H = 24;
+    let sectionObserver: IntersectionObserver | null = null;
 
-    let sprBase: HTMLCanvasElement[][] = [];
-    let sprBloom: HTMLCanvasElement[][] = [];
-    let sprHalfW: number[][] = [];
-    let sprHalfH: number[][] = [];
-    let bloomHalfW: number[][] = [];
-    let bloomHalfH: number[][] = [];
+    const resizeCanvas = () => {
+      const prevW = w;
+      const prevH = h;
 
-    const leftSet = createShapeSetMap();
-    const rightSet = createShapeSetMap();
-
-    const left = { i: 0, n: 1, t0: performance.now(), every: 7000, dur: 2200, seed: 9001 };
-    const right = { i: 1, n: 2, t0: performance.now(), every: 9500, dur: 2400, seed: 4242 };
-
-    let inView = true;
-    let io: IntersectionObserver | null = null;
-
-    const build = () => {
-      const rect = root.getBoundingClientRect();
-      w = Math.max(1, Math.floor(rect.width));
-      h = Math.max(1, Math.floor(rect.height));
-      dpr = Math.min(2, window.devicePixelRatio || 1);
+      w = Math.max(1, window.innerWidth);
+      h = Math.max(1, window.innerHeight);
+      dpr = Math.min(profile.maxDpr, window.devicePixelRatio || 1);
 
       canvas.width = Math.floor(w * dpr);
       canvas.height = Math.floor(h * dpr);
@@ -274,251 +120,227 @@ export default function LandingBackground() {
       canvas.style.height = `${h}px`;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-      isMobileViewport = w < 640;
-      const nav = window.navigator as Navigator & { deviceMemory?: number };
-      const cores = nav.hardwareConcurrency ?? 8;
-      const memory = nav.deviceMemory ?? 8;
-      lowPowerDevice = cores <= 6 || memory <= 8;
+      if (prevW > 0 && prevH > 0 && fx.length > 0) {
+        const scaleX = w / prevW;
+        const scaleY = h / prevH;
+        for (let i = 0; i < fx.length; i += 1) {
+          fx[i] *= scaleX;
+          fy[i] *= scaleY;
+        }
+      }
+    };
 
-      // Resizing logic for mobile
-      FLOW = isMobileViewport ? 60 : lowPowerDevice ? 90 : 120;
-      SHP = isMobileViewport ? 100 : lowPowerDevice ? 140 : 200;
-      pad = isMobileViewport ? 18 : 26;
-
-      const sizes = isMobileViewport ? [5, 10, 16] : [8, 13, 20];
-      const coreSizes = isMobileViewport ? [0.8, 1.0, 1.2] : [1.0, 1.2, 1.5];
-
-	      sprBase = Array.from({ length: H }, (_, k) => {
-	        const hue = 96 + Math.round((k * 40) / Math.max(1, H - 1));
-	        return [
-	          makePrismSprite(hue, sizes[0], coreSizes[0]),
-          makePrismSprite(hue, sizes[1], coreSizes[1]),
-          makePrismSprite(hue, sizes[2], coreSizes[2]),
-        ];
-      });
-
-      sprBloom = Array.from({ length: H }, (_, hi) => [
-        makeBloomSprite(sprBase[hi][0], 2.1),
-        makeBloomSprite(sprBase[hi][1], 2.0),
-        makeBloomSprite(sprBase[hi][2], 1.8),
-      ]);
-
-      sprHalfW = Array.from({ length: H }, (_, hi) => [
-        sprBase[hi][0].width * 0.5,
-        sprBase[hi][1].width * 0.5,
-        sprBase[hi][2].width * 0.5,
-      ]);
-      sprHalfH = Array.from({ length: H }, (_, hi) => [
-        sprBase[hi][0].height * 0.5,
-        sprBase[hi][1].height * 0.5,
-        sprBase[hi][2].height * 0.5,
-      ]);
-
-      bloomHalfW = Array.from({ length: H }, (_, hi) => [
-        sprBloom[hi][0].width * 0.5,
-        sprBloom[hi][1].width * 0.5,
-        sprBloom[hi][2].width * 0.5,
-      ]);
-      bloomHalfH = Array.from({ length: H }, (_, hi) => [
-        sprBloom[hi][0].height * 0.5,
-        sprBloom[hi][1].height * 0.5,
-        sprBloom[hi][2].height * 0.5,
-      ]);
-
+    const seedFlowParticles = () => {
       const rng = mulberry32(123456789);
 
-      fx = new Float32Array(FLOW);
-      fy = new Float32Array(FLOW);
-      vx = new Float32Array(FLOW);
-      vy = new Float32Array(FLOW);
-      alp = new Float32Array(FLOW);
-      phase = new Float32Array(FLOW);
-      omega = new Float32Array(FLOW);
-      hueBase = new Uint16Array(FLOW);
-      sizeIdx = new Uint8Array(FLOW);
-      flowBloomMask = new Uint8Array(FLOW);
+      fx = new Float32Array(profile.flowCount);
+      fy = new Float32Array(profile.flowCount);
+      vx = new Float32Array(profile.flowCount);
+      vy = new Float32Array(profile.flowCount);
+      alp = new Float32Array(profile.flowCount);
+      phase = new Float32Array(profile.flowCount);
+      omega = new Float32Array(profile.flowCount);
+      hueBase = new Uint16Array(profile.flowCount);
+      sizeIdx = new Uint8Array(profile.flowCount);
+      flowBloomMask = new Uint8Array(profile.flowCount);
 
-      const baseVx = isMobileViewport ? 12 : 18;
-      const baseVy = isMobileViewport ? -8 : -14;
-
-      for (let i = 0; i < FLOW; i++) {
-        fx[i] = rr(rng, 0, w);
-        fy[i] = rr(rng, 0, h);
-        vx[i] = baseVx + rr(rng, -14, 22);
-        vy[i] = baseVy + rr(rng, -18, 14);
-        alp[i] = isMobileViewport ? rr(rng, 0.50, 0.90) : rr(rng, 0.48, 0.98);
-        phase[i] = rr(rng, 0, TAU);
-        const spd = rr(rng, 0.95, 2.2);
-        omega[i] = 1.6 * spd;
-        hueBase[i] = Math.floor(rr(rng, 0, H));
-        const pick = rr(rng, 0, 1);
+      for (let i = 0; i < profile.flowCount; i += 1) {
+        fx[i] = randomRange(rng, 0, w);
+        fy[i] = randomRange(rng, 0, h);
+        vx[i] = profile.baseVx + randomRange(rng, -14, 22);
+        vy[i] = profile.baseVy + randomRange(rng, -18, 14);
+        alp[i] = profile.isMobile
+          ? randomRange(rng, 0.5, 0.9)
+          : randomRange(rng, 0.48, 0.98);
+        phase[i] = randomRange(rng, 0, Math.PI * 2);
+        omega[i] = 1.6 * randomRange(rng, 0.95, 2.2);
+        hueBase[i] = Math.floor(randomRange(rng, 0, HUE_VARIANT_COUNT));
+        const pick = randomRange(rng, 0, 1);
         sizeIdx[i] = pick < 0.55 ? 0 : pick < 0.85 ? 1 : 2;
-        flowBloomMask[i] = i % 14 === 0 ? 1 : 0;
+        flowBloomMask[i] = i % profile.flowBloomStride === 0 ? 1 : 0;
       }
+    };
 
-      const rngS = mulberry32(246813579);
-      shHue = new Uint16Array(SHP);
-      shSize = new Uint8Array(SHP);
-      shPhase = new Float32Array(SHP);
-      shMod7 = new Uint8Array(SHP);
-      shBloomMask = new Uint8Array(SHP);
+    const seedShapeParticles = () => {
+      const rng = mulberry32(246813579);
 
-      for (let i = 0; i < SHP; i++) {
-        shHue[i] = Math.floor(rr(rngS, 0, H));
-        const pick = rr(rngS, 0, 1);
+      shHue = new Uint16Array(profile.shapeCount);
+      shSize = new Uint8Array(profile.shapeCount);
+      shPhase = new Float32Array(profile.shapeCount);
+      shMod7 = new Uint8Array(profile.shapeCount);
+      shBloomMask = new Uint8Array(profile.shapeCount);
+
+      for (let i = 0; i < profile.shapeCount; i += 1) {
+        shHue[i] = Math.floor(randomRange(rng, 0, HUE_VARIANT_COUNT));
+        const pick = randomRange(rng, 0, 1);
         shSize[i] = pick < 0.4 ? 0 : pick < 0.8 ? 1 : 2;
-        shPhase[i] = rr(rngS, 0, TAU);
+        shPhase[i] = randomRange(rng, 0, Math.PI * 2);
         shMod7[i] = i % 7;
-        shBloomMask[i] = i % 16 === 0 ? 1 : 0;
+        shBloomMask[i] = i % profile.shapeBloomStride === 0 ? 1 : 0;
       }
+    };
 
-      mx = new Float32Array(SHP);
-      my = new Float32Array(SHP);
+    const applyProfile = (force = false) => {
+      const nextProfile = getBackgroundProfile(window.innerWidth, lowPowerDevice);
+      const profileChanged = force || nextProfile.key !== profile.key;
+      profile = nextProfile;
 
-      for (const s of SHAPES) {
-        leftSet[s] = shapePoints(s, SHP, left.seed + s.length * 101, isMobileViewport);
-        rightSet[s] = shapePoints(s, SHP, right.seed + s.length * 131, isMobileViewport);
-      }
+      resizeCanvas();
+
+      if (!profileChanged) return;
+
+      spriteBundle = getSpriteBundle(profile.isMobile);
+      leftSet = getShapeTemplateSet(profile.isMobile, profile.shapeCount, 9001, 101);
+      rightSet = getShapeTemplateSet(profile.isMobile, profile.shapeCount, 4242, 131);
+      seedFlowParticles();
+      seedShapeParticles();
     };
 
     const drawCluster = (
       now: number,
-      cluster: typeof left,
-      set: Record<ShapeType, { xs: Float32Array; ys: Float32Array }>,
-      ax: number,
-      ay: number,
-      hueBias: number
+      cluster: ClusterState,
+      set: ShapeSetMap,
+      anchorX: number,
+      anchorY: number,
+      hueBias: number,
+      allowBloom: boolean
     ) => {
       const elapsed = now - cluster.t0;
       if (elapsed >= cluster.every) {
         cluster.i = cluster.n;
-        cluster.n = (cluster.n + 1) % SHAPES.length;
+        cluster.n = (cluster.n + 1) % 5;
         cluster.t0 = now;
       }
 
-      const t = easeInOut(clamp01((now - cluster.t0) / cluster.dur));
-      const inv = 1 - t;
-
-      const A = set[SHAPES[cluster.i]];
-      const B = set[SHAPES[cluster.n]];
-
+      const morph = easeInOut(clamp01((now - cluster.t0) / cluster.dur));
+      const inv = 1 - morph;
       const driftX = Math.sin(now * 0.00055) * 28 + Math.sin(now * 0.0011) * 10;
       const driftY = Math.cos(now * 0.00048) * 18;
+      const baseX = anchorX + driftX;
+      const baseY = anchorY + driftY;
+      const hueShift = (Math.floor(now / 260) + hueBias) % HUE_VARIANT_COUNT;
+      const activeA = set[SHAPES[cluster.i]];
+      const activeB = set[SHAPES[cluster.n]];
 
-      const baseX = ax + driftX;
-      const baseY = ay + driftY;
+      for (let i = 0; i < profile.shapeCount; i += 1) {
+        const x = baseX + activeA.xs[i] * inv + activeB.xs[i] * morph;
+        const y = baseY + activeA.ys[i] * inv + activeB.ys[i] * morph;
+        const twinkle = 0.68 + 0.32 * sinLUT(shPhase[i]);
 
-      const hueShift = (Math.floor(now / 260) + hueBias) % H;
+        ctx.globalAlpha = 0.36 + twinkle * 0.64;
 
-      for (let i = 0; i < SHP; i++) {
-        mx[i] = A.xs[i] * inv + B.xs[i] * t;
-        my[i] = A.ys[i] * inv + B.ys[i] * t;
-      }
+        let hueIndex = shHue[i] + hueShift + shMod7[i];
+        while (hueIndex >= HUE_VARIANT_COUNT) hueIndex -= HUE_VARIANT_COUNT;
 
-      for (let i = 0; i < SHP; i++) {
-        const x = baseX + mx[i];
-        const y = baseY + my[i];
+        const spriteIndex = shSize[i];
+        ctx.drawImage(
+          spriteBundle.base[hueIndex][spriteIndex],
+          x - spriteBundle.halfW[hueIndex][spriteIndex],
+          y - spriteBundle.halfH[hueIndex][spriteIndex]
+        );
 
-        const tw = 0.68 + 0.32 * sinLUT(shPhase[i]);
-        ctx.globalAlpha = 0.36 + tw * 0.64;
-
-        let hi = shHue[i] + hueShift + shMod7[i];
-        if (hi >= H) hi -= H;
-        if (hi >= H) hi -= H;
-
-        const si = shSize[i];
-        ctx.drawImage(sprBase[hi][si], x - sprHalfW[hi][si], y - sprHalfH[hi][si]);
-
-        if (shBloomMask[i]) {
-          ctx.globalAlpha *= 0.28;
+        if (allowBloom && shBloomMask[i]) {
+          ctx.globalAlpha *= 0.26;
           ctx.drawImage(
-            sprBloom[hi][si],
-            x - bloomHalfW[hi][si],
-            y - bloomHalfH[hi][si]
+            spriteBundle.bloom[hueIndex][spriteIndex],
+            x - spriteBundle.bloomHalfW[hueIndex][spriteIndex],
+            y - spriteBundle.bloomHalfH[hueIndex][spriteIndex]
           );
         }
       }
     };
 
     const frame = (now: number) => {
+      const frameBudget = isProjectsActive ? profile.projectsFrameMs : profile.targetFrameMs;
       const elapsedMs = now - last;
-      if (elapsedMs < targetFrameMs) {
+      if (elapsedMs < frameBudget) {
         raf = requestAnimationFrame(frame);
         return;
       }
+
       const dt = Math.min(0.05, Math.max(0.001, elapsedMs / 1000));
-      last = now - (elapsedMs % targetFrameMs);
+      last = now - (elapsedMs % frameBudget);
 
       ctx.clearRect(0, 0, w, h);
 
-      for (let i = 0; i < FLOW; i++) {
+      for (let i = 0; i < profile.flowCount; i += 1) {
         phase[i] = wrapTau(phase[i] + omega[i] * dt);
       }
-      const shAdv = 2.6 * dt;
-      for (let i = 0; i < SHP; i++) {
-        shPhase[i] = wrapTau(shPhase[i] + shAdv);
+
+      const shapeAdvance = 2.6 * dt;
+      for (let i = 0; i < profile.shapeCount; i += 1) {
+        shPhase[i] = wrapTau(shPhase[i] + shapeAdvance);
       }
 
-      const timeHue = Math.floor(now / 220) % H;
+      const timeHue = Math.floor(now / 220) % HUE_VARIANT_COUNT;
+      const allowBloom = !isProjectsActive;
 
       ctx.save();
       ctx.globalCompositeOperation = "source-over";
 
-      for (let i = 0; i < FLOW; i++) {
+      for (let i = 0; i < profile.flowCount; i += 1) {
         let x = fx[i] + vx[i] * dt;
         let y = fy[i] + vy[i] * dt;
 
-        if (x < -pad) x = w + pad;
-        else if (x > w + pad) x = -pad;
+        if (x < -profile.pad) x = w + profile.pad;
+        else if (x > w + profile.pad) x = -profile.pad;
 
-        if (y < -pad) y = h + pad;
-        else if (y > h + pad) y = -pad;
+        if (y < -profile.pad) y = h + profile.pad;
+        else if (y > h + profile.pad) y = -profile.pad;
 
         fx[i] = x;
         fy[i] = y;
 
-        const tw = 0.7 + 0.3 * sinLUT(phase[i]);
-        ctx.globalAlpha = alp[i] * tw;
+        const twinkle = 0.7 + 0.3 * sinLUT(phase[i]);
+        ctx.globalAlpha = alp[i] * twinkle;
 
-        let hi = hueBase[i] + timeHue;
-        if (hi >= H) hi -= H;
+        let hueIndex = hueBase[i] + timeHue;
+        if (hueIndex >= HUE_VARIANT_COUNT) hueIndex -= HUE_VARIANT_COUNT;
 
-        const si = sizeIdx[i];
-        ctx.drawImage(sprBase[hi][si], x - sprHalfW[hi][si], y - sprHalfH[hi][si]);
+        const spriteIndex = sizeIdx[i];
+        ctx.drawImage(
+          spriteBundle.base[hueIndex][spriteIndex],
+          x - spriteBundle.halfW[hueIndex][spriteIndex],
+          y - spriteBundle.halfH[hueIndex][spriteIndex]
+        );
       }
 
       ctx.restore();
 
+      if (allowBloom) {
+        ctx.save();
+        ctx.globalCompositeOperation = "screen";
+
+        for (let i = 0; i < profile.flowCount; i += 1) {
+          if (!flowBloomMask[i]) continue;
+
+          const twinkle = 0.7 + 0.3 * sinLUT(phase[i]);
+          ctx.globalAlpha = alp[i] * twinkle * 0.3;
+
+          let hueIndex = hueBase[i] + timeHue + 3;
+          while (hueIndex >= HUE_VARIANT_COUNT) hueIndex -= HUE_VARIANT_COUNT;
+
+          const spriteIndex = sizeIdx[i];
+          ctx.drawImage(
+            spriteBundle.bloom[hueIndex][spriteIndex],
+            fx[i] - spriteBundle.bloomHalfW[hueIndex][spriteIndex],
+            fy[i] - spriteBundle.bloomHalfH[hueIndex][spriteIndex]
+          );
+        }
+
+        ctx.restore();
+      }
+
       ctx.save();
       ctx.globalCompositeOperation = "screen";
 
-      for (let i = 0; i < FLOW; i++) {
-        if (!flowBloomMask[i]) continue;
+      const lx = profile.isMobile ? w * 0.18 : w * 0.22;
+      const ly = profile.isMobile ? h * 0.3 : h * 0.36;
+      const rx = profile.isMobile ? w * 0.82 : w * 0.8;
+      const ry = profile.isMobile ? h * 0.65 : h * 0.6;
 
-        const tw = 0.7 + 0.3 * sinLUT(phase[i]);
-        ctx.globalAlpha = alp[i] * tw * 0.34;
-
-        let hi = hueBase[i] + timeHue + 3;
-        if (hi >= H) hi -= H;
-        if (hi >= H) hi -= H;
-
-        const si = sizeIdx[i];
-        const x = fx[i];
-        const y = fy[i];
-        ctx.drawImage(
-          sprBloom[hi][si],
-          x - bloomHalfW[hi][si],
-          y - bloomHalfH[hi][si]
-        );
-      }
-
-      const lx = isMobileViewport ? w * 0.18 : w * 0.22;
-      const ly = isMobileViewport ? h * 0.30 : h * 0.36;
-      const rx = isMobileViewport ? w * 0.82 : w * 0.8;
-      const ry = isMobileViewport ? h * 0.65 : h * 0.6;
-
-      drawCluster(now, left, leftSet, lx, ly, 8);
-      drawCluster(now, right, rightSet, rx, ry, 26);
+      drawCluster(now, left, leftSet, lx, ly, 8, allowBloom);
+      drawCluster(now, right, rightSet, rx, ry, 26, allowBloom);
 
       ctx.restore();
 
@@ -530,45 +352,56 @@ export default function LandingBackground() {
       last = performance.now();
       raf = requestAnimationFrame(frame);
     };
-    const stop = () => cancelAnimationFrame(raf);
 
-    const onVis = () => {
-      if (document.hidden) stop();
-      else if (!reduceMotion && inView) start();
+    const stop = () => {
+      cancelAnimationFrame(raf);
     };
 
-    const onResize = () => {
-      build();
+    const handleVisibility = () => {
+      if (document.hidden) stop();
+      else if (!reduceMotion) start();
+    };
+
+    const handleResize = () => {
+      applyProfile();
       last = performance.now();
-      if (!reduceMotion && inView) start();
+      if (!reduceMotion && !document.hidden) start();
       else frame(performance.now());
     };
 
-    build();
+    const observeProjectsSection = () => {
+      const projectsEl = document.getElementById("projects");
+      if (!projectsEl || !("IntersectionObserver" in window)) return;
 
-    if ("IntersectionObserver" in window) {
-      io = new IntersectionObserver(
+      sectionObserver = new IntersectionObserver(
         (entries) => {
-          inView = entries.some((e) => e.isIntersecting);
-          if (!inView) stop();
-          else if (!reduceMotion && !document.hidden) start();
+          isProjectsActive = entries.some(
+            (entry) => entry.isIntersecting && entry.intersectionRatio >= 0.18
+          );
         },
-        { root: null, threshold: 0.01 }
+        {
+          root: null,
+          threshold: [0, 0.18, 0.35, 0.6],
+          rootMargin: "-10% 0px -10% 0px",
+        }
       );
-      io.observe(root);
-    }
 
-    window.addEventListener("resize", onResize, { passive: true });
-    document.addEventListener("visibilitychange", onVis);
+      sectionObserver.observe(projectsEl);
+    };
+
+    applyProfile(true);
+    observeProjectsSection();
+    window.addEventListener("resize", handleResize, { passive: true });
+    document.addEventListener("visibilitychange", handleVisibility);
 
     if (!reduceMotion) start();
     else frame(performance.now());
 
     return () => {
       stop();
-      window.removeEventListener("resize", onResize);
-      document.removeEventListener("visibilitychange", onVis);
-      if (io) io.disconnect();
+      window.removeEventListener("resize", handleResize);
+      document.removeEventListener("visibilitychange", handleVisibility);
+      sectionObserver?.disconnect();
       startedRef.current = false;
     };
   }, []);
@@ -588,32 +421,32 @@ export default function LandingBackground() {
       <Box
         sx={{
           position: "absolute",
-          inset: "-20%",
+          inset: "-16%",
           pointerEvents: "none",
-          filter: "blur(48px)",
+          filter: "blur(42px)",
           background: `
             radial-gradient(980px 560px at 18% 22%, rgba(28,219,47,0.12), transparent 62%),
             radial-gradient(860px 520px at 78% 18%, rgba(207,250,201,0.12), transparent 64%),
             radial-gradient(820px 560px at 70% 78%, rgba(12,122,25,0.1), transparent 62%),
-            radial-gradient(760px 560px at 26% 78%, rgba(247,251,244,0.18), transparent 64%)
+            radial-gradient(760px 560px at 26% 78%, rgba(247,251,244,0.16), transparent 64%)
           `,
-          animation: `${mistA} 12s ease-in-out infinite`,
+          animation: `${mistA} 14s ease-in-out infinite`,
           mixBlendMode: "soft-light",
         }}
       />
+
       <Box
         sx={{
           position: "absolute",
-          inset: "-20%",
+          inset: "-10%",
           pointerEvents: "none",
-          filter: "blur(54px)",
           background: `
-            radial-gradient(920px 600px at 30% 35%, rgba(247,251,244,0.15), transparent 66%),
-            radial-gradient(820px 560px at 88% 52%, rgba(28,219,47,0.1), transparent 66%),
-            radial-gradient(880px 600px at 52% 92%, rgba(12,122,25,0.1), transparent 68%),
-            radial-gradient(760px 560px at 8% 58%, rgba(207,250,201,0.12), transparent 70%)
+            radial-gradient(920px 600px at 30% 35%, rgba(247,251,244,0.14), transparent 66%),
+            radial-gradient(820px 560px at 88% 52%, rgba(28,219,47,0.08), transparent 66%),
+            radial-gradient(880px 600px at 52% 92%, rgba(12,122,25,0.08), transparent 68%),
+            radial-gradient(760px 560px at 8% 58%, rgba(207,250,201,0.11), transparent 70%)
           `,
-          animation: `${mistB} 16s ease-in-out infinite`,
+          opacity: 0.6,
           mixBlendMode: "overlay",
         }}
       />

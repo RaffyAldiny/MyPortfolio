@@ -279,14 +279,12 @@ function ProfileIntroInner() {
         transformOrigin: "70% 70%",
       });
 
-      gsap.utils.toArray<HTMLElement>('[data-hero="sakura"]').forEach((petal, index) => {
-        gsap.to(petal, {
-          rotation: index % 2 === 0 ? 360 : -360,
-          duration: 6,
-          repeat: -1,
-          ease: "none",
-          transformOrigin: "50% 50%",
-        });
+      gsap.to('[data-hero="sakura"]', {
+        rotation: 360,
+        duration: 6,
+        repeat: -1,
+        ease: "none",
+        transformOrigin: "50% 50%",
       });
 
     }, root);

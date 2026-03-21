@@ -38,11 +38,9 @@ const SOCIALS = [
 
 function Dot({
   active,
-  dark,
   sizePx,
 }: {
   active: boolean;
-  dark: boolean;
   sizePx: number;
 }) {
   const size = `${sizePx}px`;
@@ -63,15 +61,9 @@ function Dot({
         border: `1px solid ${
           active
             ? alpha(ACTIVE_GREEN, 0.5)
-            : dark
-              ? "rgba(200,255,196,0.34)"
-              : alpha(ACTIVE_GREEN_DARK, 0.42)
+            : alpha(ACTIVE_GREEN_DARK, 0.42)
         }`,
-        boxShadow: active
-          ? dark
-            ? "0 0 0 3px rgba(28,219,47,0.14)"
-            : "0 0 0 3px rgba(28,219,47,0.1)"
-          : "none",
+        boxShadow: active ? "0 0 0 3px rgba(28,219,47,0.1)" : "none",
         transform: "translateZ(0)",
         transition: "all 140ms ease",
       }}
@@ -82,7 +74,6 @@ function Dot({
 export default function LeftTimelineNav({
   sections,
   scrollOffsetPx = 0,
-  darkSectionId = "projects",
   wrapAround = true,
 }: Props) {
   const theme = useTheme();
@@ -90,31 +81,18 @@ export default function LeftTimelineNav({
   const effectiveScrollOffsetPx = scrollOffsetPx;
 
   const [activeId, setActiveId] = React.useState(sections[0]?.id ?? "");
-  const [isInsideDarkSection, setIsInsideDarkSection] = React.useState(false);
-
-  const darkSectionIds = React.useMemo(
-    () =>
-      (Array.isArray(darkSectionId) ? darkSectionId : [darkSectionId]).filter(
-        (id): id is string => Boolean(id)
-      ),
-    [darkSectionId]
-  );
 
   const activeIndex = React.useMemo(() => {
     const index = sections.findIndex((section) => section.id === activeId);
     return index >= 0 ? index : 0;
   }, [activeId, sections]);
 
-  const isDarkOverlay = isInsideDarkSection;
-
-  const text = isDarkOverlay ? "rgba(255,255,255,0.92)" : "#1E3A22";
-  const textMuted = isDarkOverlay ? "rgba(220,255,214,0.76)" : alpha(ACTIVE_GREEN_DARK, 0.82);
-  const activeText = isDarkOverlay ? "#8DFF74" : ACTIVE_GREEN;
-  const bg = isDarkOverlay ? "rgba(30,30,40,0.82)" : "rgba(255,255,255,0.85)";
-  const border = isDarkOverlay ? alpha("#8DFF74", 0.28) : alpha(ACTIVE_GREEN, 0.22);
-  const shadow = isDarkOverlay
-    ? "drop-shadow(0 2px 8px rgba(0,0,0,0.42))"
-    : "drop-shadow(0 2px 8px rgba(255,255,255,0.52))";
+  const text = "#1E3A22";
+  const textMuted = alpha(ACTIVE_GREEN_DARK, 0.82);
+  const activeText = ACTIVE_GREEN;
+  const bg = "rgba(255,255,255,0.92)";
+  const border = alpha(ACTIVE_GREEN, 0.22);
+  const shadow = "drop-shadow(0 10px 22px rgba(11,41,15,0.2))";
 
   const scrollToId = React.useCallback(
     (id: string) => {
@@ -191,67 +169,6 @@ export default function LeftTimelineNav({
     };
   }, [effectiveScrollOffsetPx, sections]);
 
-  useIsomorphicLayoutEffect(() => {
-    ensureGsap();
-    if (!darkSectionIds.length) return;
-
-    const syncDarkSection = (triggers: ScrollTrigger[]) => {
-      const nextIsInsideDarkSection = triggers.some((trigger) => trigger.isActive);
-      setIsInsideDarkSection((current) =>
-        current === nextIsInsideDarkSection ? current : nextIsInsideDarkSection
-      );
-    };
-
-    const triggers = darkSectionIds
-      .map((id) => {
-        const el = document.getElementById(id);
-        if (!el) return null;
-
-        const index = sections.findIndex((section) => section.id === id);
-        const nextSectionId = index >= 0 ? sections[index + 1]?.id : undefined;
-        const nextEl = nextSectionId ? document.getElementById(nextSectionId) : null;
-
-        return ScrollTrigger.create({
-          trigger: el,
-          start: "top bottom",
-          ...(nextEl
-            ? {
-                endTrigger: nextEl,
-                end: "top bottom",
-              }
-            : {
-                end: "bottom top",
-              }),
-          onEnter: () => {
-            setIsInsideDarkSection(true);
-          },
-          onEnterBack: () => {
-            setIsInsideDarkSection(true);
-          },
-          onLeave: () => {
-            setIsInsideDarkSection(false);
-          },
-          onLeaveBack: () => {
-            setIsInsideDarkSection(false);
-          },
-        });
-      })
-      .filter((trigger): trigger is ScrollTrigger => Boolean(trigger));
-
-    const refreshDarkSection = () => {
-      syncDarkSection(triggers);
-    };
-
-    ScrollTrigger.addEventListener("refresh", refreshDarkSection);
-    ScrollTrigger.refresh();
-    syncDarkSection(triggers);
-
-    return () => {
-      ScrollTrigger.removeEventListener("refresh", refreshDarkSection);
-      triggers.forEach((trigger) => trigger.kill());
-    };
-  }, [darkSectionIds, sections]);
-
   const circleBtnBase = {
     width: 40,
     height: 40,
@@ -267,17 +184,15 @@ export default function LeftTimelineNav({
 
   const btnSx = {
     ...circleBtnBase,
-    color: isDarkOverlay ? "#D9FFD0" : SOFT_GREEN,
-    bgcolor: isDarkOverlay ? "rgba(35,35,42,0.9)" : "rgba(248,255,247,0.94)",
+    color: SOFT_GREEN,
+    bgcolor: "rgba(248,255,247,0.96)",
     border: "1px solid",
     borderWidth: 1.5,
     borderColor: border,
-    boxShadow: isDarkOverlay
-      ? "0 0 0 1px rgba(141,255,116,0.06)"
-      : "0 0 0 1px rgba(28,219,47,0.05)",
+    boxShadow: "0 0 0 1px rgba(28,219,47,0.05)",
     "&:hover": {
-      bgcolor: isDarkOverlay ? "rgba(54,72,54,0.92)" : "rgba(235,255,232,0.98)",
-      borderColor: isDarkOverlay ? alpha("#8DFF74", 0.4) : alpha(ACTIVE_GREEN, 0.34),
+      bgcolor: "rgba(235,255,232,0.98)",
+      borderColor: alpha(ACTIVE_GREEN, 0.34),
     },
   } as const;
 
@@ -288,7 +203,7 @@ export default function LeftTimelineNav({
     minHeight: 28,
     p: 0,
     borderRadius: "50%",
-    color: isDarkOverlay ? "#D9FFD0" : ACTIVE_GREEN_DARK,
+    color: ACTIVE_GREEN_DARK,
     bgcolor: "transparent",
     border: "none",
     boxShadow: "none",
@@ -296,7 +211,7 @@ export default function LeftTimelineNav({
       fontSize: "0.92rem",
     },
     "&:hover": {
-      bgcolor: isDarkOverlay ? "rgba(54,72,54,0.32)" : "rgba(235,255,232,0.76)",
+      bgcolor: "rgba(235,255,232,0.76)",
       transform: "translateY(-1px)",
     },
   } as const;
@@ -396,7 +311,7 @@ export default function LeftTimelineNav({
             boxShadow: "0 6px 18px rgba(0,0,0,0.12)",
           }}
         >
-          <IconButton size="small" onClick={() => jump(-1)} sx={{ color: isDarkOverlay ? "#D9FFD0" : SOFT_GREEN }}>
+          <IconButton size="small" onClick={() => jump(-1)} sx={{ color: SOFT_GREEN }}>
             <KeyboardArrowUpRoundedIcon sx={{ transform: "rotate(-90deg)", fontSize: "1.15rem" }} />
           </IconButton>
 
@@ -434,12 +349,16 @@ export default function LeftTimelineNav({
             </Typography>
           )}
 
-          <IconButton size="small" onClick={() => jump(1)} sx={{ color: isDarkOverlay ? "#D9FFD0" : SOFT_GREEN }}>
+          <IconButton size="small" onClick={() => jump(1)} sx={{ color: SOFT_GREEN }}>
             <KeyboardArrowDownRoundedIcon sx={{ transform: "rotate(-90deg)", fontSize: "1.15rem" }} />
           </IconButton>
         </Stack>
       </Box>
     );
+  }
+
+  if (activeId === "projects") {
+    return null;
   }
 
   return (
@@ -484,7 +403,7 @@ export default function LeftTimelineNav({
                   "&:hover .label": { opacity: 1, transform: "translateX(2px)" },
                 }}
               >
-                <Dot active={isActive} dark={isDarkOverlay} sizePx={isActive ? 10 : 7} />
+                <Dot active={isActive} sizePx={isActive ? 10 : 7} />
 
                 <Typography
                   className="label"
@@ -522,12 +441,10 @@ export default function LeftTimelineNav({
               px: 0.45,
               py: 0.32,
               borderRadius: 999,
-              bgcolor: isDarkOverlay ? "rgba(35,35,42,0.88)" : "rgba(248,255,247,0.88)",
+              bgcolor: "rgba(248,255,247,0.94)",
               border: "1px solid",
               borderColor: border,
-              boxShadow: isDarkOverlay
-                ? "0 0 0 1px rgba(141,255,116,0.05)"
-                : "0 0 0 1px rgba(28,219,47,0.04)",
+              boxShadow: "0 0 0 1px rgba(28,219,47,0.04)",
             }}
           >
             {SOCIALS.map(({ label, Icon, href }) => (

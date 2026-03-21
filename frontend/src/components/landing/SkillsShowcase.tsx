@@ -244,7 +244,6 @@ export default function SkillsShowcase() {
         >
           <SkillGroupFilter
             active={active}
-            reducedMotion={reducedMotion}
             onChange={setActive}
           />
         </Box>

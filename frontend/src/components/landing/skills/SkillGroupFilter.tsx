@@ -4,15 +4,14 @@ import * as React from "react";
 import ToggleButton from "@mui/material/ToggleButton";
 import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 import { alpha } from "@mui/material/styles";
-import { GROUP_OPTIONS, INK, PRISM_GRADIENT, prismRotate, type GroupKey } from "./skillShowcase.shared";
+import { GROUP_OPTIONS, INK, type GroupKey } from "./skillShowcase.shared";
 
 type Props = {
   active: GroupKey;
-  reducedMotion: boolean;
   onChange: (value: GroupKey) => void;
 };
 
-export default function SkillGroupFilter({ active, reducedMotion, onChange }: Props) {
+export default function SkillGroupFilter({ active, onChange }: Props) {
   return (
     <ToggleButtonGroup
       exclusive
@@ -23,7 +22,7 @@ export default function SkillGroupFilter({ active, reducedMotion, onChange }: Pr
         borderRadius: { xs: 3, sm: 999 },
         p: 0.5,
         backgroundColor: "rgba(249,252,247,0.56)",
-        border: "1px solid rgba(28,219,47,0.16)",
+        border: "1.5px solid rgba(28,219,47,0.32)",
         backdropFilter: "blur(10px)",
         display: "flex",
         flexWrap: "nowrap",
@@ -54,13 +53,7 @@ export default function SkillGroupFilter({ active, reducedMotion, onChange }: Pr
           position: "absolute",
           inset: 0,
           borderRadius: "inherit",
-          padding: "1.5px",
-          background: PRISM_GRADIENT,
-          backgroundSize: "200% 200%",
-          animation: reducedMotion ? "none" : `${prismRotate} 4s linear infinite`,
-          WebkitMask: "linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)",
-          WebkitMaskComposite: "xor",
-          maskComposite: "exclude",
+          border: "1.5px solid rgba(28,219,47,0.34)",
           pointerEvents: "none",
         },
       }}

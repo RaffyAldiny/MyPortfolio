@@ -125,11 +125,29 @@ export const SKILLS: ReadonlyArray<Skill> = [
     groups: ["data"],
   },
   {
-    name: "Shopee API",
-    color: "#FF5722",
-    icon: "/icons/shopee-api.webp",
-    textColor: "#000000",
+    name: "Docker",
+    color: "#2496ED",
+    icon: "/icons/skills/docker.svg",
+    groups: ["backend", "tools"],
+  },
+  {
+    name: "FastAPI",
+    color: "#009688",
+    icon: "/icons/skills/fastapi.svg",
     groups: ["backend"],
+  },
+  {
+    name: "shadcn/ui",
+    color: "#111827",
+    textColor: "#0B0B10",
+    icon: "/icons/skills/shadcn-ui.svg",
+    groups: ["frontend"],
+  },
+  {
+    name: "Svelte",
+    color: "#FF3E00",
+    icon: "/icons/skills/svelte.svg",
+    groups: ["frontend"],
   },
   {
     name: "Amazon Redshift",
