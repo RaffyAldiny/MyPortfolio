@@ -122,12 +122,12 @@ const SX = {
     letterSpacing: "-0.03em",
     fontSize: { xs: "1.95rem", md: "2.7rem" },
     background:
-      "linear-gradient(90deg, #338E3E 0%, #68D873 50%, #338E3E 100%)",
+      "linear-gradient(90deg, #63BC6D 0%, #89E891 50%, #63BC6D 100%)",
     WebkitBackgroundClip: "text",
     WebkitTextFillColor: "transparent",
     pb: 1,
     lineHeight: 1.2,
-    filter: "drop-shadow(0px 1px 1px rgba(51, 142, 62, 0.1))",
+    filter: "drop-shadow(0px 1px 1px rgba(99, 188, 109, 0.1))",
     display: "inline-flex",
     alignItems: "center",
     gap: { xs: 0.8, md: 1.05 },
@@ -174,7 +174,7 @@ const SX = {
   },
   highlight: {
     fontWeight: 700,
-    color: "#1F3222",
+    color: "#1A4721",
     position: "relative",
     whiteSpace: "nowrap",
     backgroundImage:
@@ -279,6 +279,16 @@ function ProfileIntroInner() {
         transformOrigin: "70% 70%",
       });
 
+      gsap.utils.toArray<HTMLElement>('[data-hero="sakura"]').forEach((petal, index) => {
+        gsap.to(petal, {
+          rotation: index % 2 === 0 ? 360 : -360,
+          duration: 6,
+          repeat: -1,
+          ease: "none",
+          transformOrigin: "50% 50%",
+        });
+      });
+
     }, root);
 
     return () => ctx.revert();
@@ -316,11 +326,11 @@ function ProfileIntroInner() {
             I&apos;m
           </Typography>
           <Typography variant="h3" sx={SX.name} data-hero="name">
-            <Box component="span" sx={SX.sakura}>
+            <Box component="span" sx={SX.sakura} data-hero="sakura">
               ✿
             </Box>
             {name}
-            <Box component="span" sx={SX.sakura}>
+            <Box component="span" sx={SX.sakura} data-hero="sakura">
               ✿
             </Box>
           </Typography>

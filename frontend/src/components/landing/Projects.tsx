@@ -49,7 +49,7 @@ const PROJECTS = [
     title: "BRAINWAVE",
     subtitle: "Roblox Quiz Experience",
     desc: "A Roblox trivia-platformer that mixes timed quiz prompts, obstacle progression, and HUD-driven gameplay into a fast-paced multiplayer-friendly learning game loop.",
-    tags: ["Roblox", "Luau", "Game Systems"],
+    tags: ["Roblox", "Luau", "Game Systems", "HUD Systems", "Multiplayer", "Quiz Gameplay"],
     image: "/images/brainwave-game.avif",
     video: {
       desktop: "/videos/projects/webm/Brainwave-Desktop.webm",
@@ -64,7 +64,7 @@ const PROJECTS = [
     title: "POLYLAYER",
     subtitle: "Knowledge Platform",
     desc: "A 3D printer knowledge and catalog platform focused on structured descriptions, searchable product listings, comparison views, and detailed specification browsing for hardware research.",
-    tags: ["Next.js", "Django REST", "PostgreSQL", "Material UI"],
+    tags: ["Next.js", "Django REST", "PostgreSQL", "Material UI", "Catalog Platform", "Comparison Views"],
     image: "/images/polylayer.avif",
     video: {
       desktop: "/videos/projects/webm/Polylayer-Desktop.webm",
@@ -79,7 +79,7 @@ const PROJECTS = [
     title: "ACADEMIC MS",
     subtitle: "Campus Operations Portal",
     desc: "An academic operations portal that brings announcements, calendars, library modules, and student service workflows into one admin-focused system for campus management.",
-    tags: ["Laravel", "Filament", "MySQL"],
+    tags: ["Laravel", "Filament", "MySQL", "Admin Portal", "Campus Workflows", "Web Development"],
     image: "/images/academic-management-system.avif",
     video: {
       desktop: "/videos/projects/webm/AMS%20-%20DESKTOP.webm",
@@ -94,7 +94,7 @@ const PROJECTS = [
     title: "EDUBRIDGE",
     subtitle: "Student / Professional Network",
     desc: "A role-based academic networking platform that connects students and professionals through separate account flows, structured onboarding, and school-to-career interaction paths.",
-    tags: ["Laravel", "MySQL", "Role-Based Auth"],
+    tags: ["Laravel", "MySQL", "Role-Based Auth", "Tailwind CSS", "Blade", "Web Development"],
     image: "/images/edubridge.avif",
     video: {
       desktop: "/videos/projects/webm/Edubridge-Desktop.webm",
@@ -108,8 +108,8 @@ const PROJECTS = [
     id: "paws-and-promises",
     title: "PAWS & PROMISES",
     subtitle: "Adoption Campaign Site",
-    desc: "A pet adoption platform designed to showcase adoptable animals, communicate shelter advocacy clearly, and guide visitors toward adoption, volunteering, and community support actions.",
-    tags: ["Next.js", "Django", "Adoption Platform"],
+    desc: "A team-built pet adoption platform designed to showcase adoptable animals, communicate shelter advocacy clearly, and guide visitors toward adoption, volunteering, and community support actions. My primary role was frontend development, where I built and shaped the user-facing experience.",
+    tags: ["Next.js", "Django", "Adoption Platform", "Frontend Development", "Responsive UI", "Campaign Site"],
     image: "/images/paws-and-promises.avif",
     video: {
       desktop: "/videos/projects/webm/Paws-and-Promises-Desktop.webm",
@@ -310,7 +310,7 @@ const SX = {
   projectTitle: {
     color: "#fff",
     fontWeight: 900,
-    fontSize: { xs: "3rem", md: "8rem" },
+    fontSize: { xs: "3rem", md: "7.4rem" },
     lineHeight: 0.9,
     mb: 3,
     textShadow: "0 6px 16px rgba(12, 72, 22, 0.18)",
@@ -457,7 +457,17 @@ const ProjectSlide = React.memo(function ProjectSlide({
           {project.subtitle}
         </Typography>
 
-        <Typography variant="h1" sx={SX.projectTitle}>
+        <Typography
+          variant="h1"
+          sx={
+            project.id === "paws-and-promises"
+              ? {
+                  ...SX.projectTitle,
+                  fontSize: { xs: SX.projectTitle.fontSize.xs, md: "6.8rem" },
+                }
+              : SX.projectTitle
+          }
+        >
           {project.title}
         </Typography>
 
