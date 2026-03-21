@@ -16,7 +16,6 @@ import FacebookIcon from "@mui/icons-material/Facebook";
 import KeyboardArrowUpRoundedIcon from "@mui/icons-material/KeyboardArrowUpRounded";
 import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
 import { alpha } from "@mui/material/styles";
-import { ensureGsap, ScrollTrigger, useIsomorphicLayoutEffect } from "@/lib/gsap";
 
 type SectionItem = { id: string; label: string };
 
@@ -124,19 +123,27 @@ export default function LeftTimelineNav({
     }
   }, [activeId, sections]);
 
-  useIsomorphicLayoutEffect(() => {
-    ensureGsap();
+  React.useEffect(() => {
     if (!sections.length) return;
 
-    const pickActive = () => {
+    const sectionElements = sections
+      .map((section) => ({
+        id: section.id,
+        el: document.getElementById(section.id),
+      }))
+      .filter((entry): entry is { id: string; el: HTMLElement } => Boolean(entry.el));
+
+    if (!sectionElements.length) return;
+
+    const intersectingIds = new Set<string>();
+    let observer: IntersectionObserver | null = null;
+
+    const pickActiveByLayout = () => {
       const activationY = effectiveScrollOffsetPx + 6;
-      let nextId = sections[0].id;
+      let nextId = sectionElements[0]?.id ?? sections[0].id;
 
-      for (const section of sections) {
-        const el = document.getElementById(section.id);
-        if (!el) continue;
-
-        if (el.getBoundingClientRect().top <= activationY) {
+      for (const section of sectionElements) {
+        if (section.el.getBoundingClientRect().top <= activationY) {
           nextId = section.id;
         }
       }
@@ -144,28 +151,64 @@ export default function LeftTimelineNav({
       setActiveId((current) => (current === nextId ? current : nextId));
     };
 
-    const triggers = sections
-      .map((section) => {
-        const el = document.getElementById(section.id);
-        if (!el) return null;
+    const pickActiveByIntersection = () => {
+      if (!intersectingIds.size) {
+        pickActiveByLayout();
+        return;
+      }
 
-        return ScrollTrigger.create({
-          trigger: el,
-          start: () => `top top+=${effectiveScrollOffsetPx + 6}`,
-          end: () => `bottom top+=${effectiveScrollOffsetPx + 6}`,
-          onEnter: () => setActiveId(section.id),
-          onEnterBack: () => setActiveId(section.id),
-        });
-      })
-      .filter(Boolean);
+      let nextId = sections[0].id;
+      for (const section of sections) {
+        if (intersectingIds.has(section.id)) {
+          nextId = section.id;
+        }
+      }
 
-    ScrollTrigger.addEventListener("refresh", pickActive);
-    ScrollTrigger.refresh();
-    pickActive();
+      setActiveId((current) => (current === nextId ? current : nextId));
+    };
+
+    const connectObserver = () => {
+      observer?.disconnect();
+      intersectingIds.clear();
+
+      const viewportHeight = window.innerHeight;
+      const activationY = Math.min(
+        Math.max(0, effectiveScrollOffsetPx + 6),
+        Math.max(0, viewportHeight - 2)
+      );
+      const bottomInset = Math.max(0, viewportHeight - activationY - 2);
+
+      observer = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            const id = (entry.target as HTMLElement).id;
+            if (entry.isIntersecting) intersectingIds.add(id);
+            else intersectingIds.delete(id);
+          }
+
+          pickActiveByIntersection();
+        },
+        {
+          root: null,
+          threshold: 0,
+          rootMargin: `-${activationY}px 0px -${bottomInset}px 0px`,
+        }
+      );
+
+      sectionElements.forEach((section) => observer?.observe(section.el));
+      pickActiveByLayout();
+    };
+
+    const handleResize = () => {
+      connectObserver();
+    };
+
+    connectObserver();
+    window.addEventListener("resize", handleResize, { passive: true });
 
     return () => {
-      ScrollTrigger.removeEventListener("refresh", pickActive);
-      triggers.forEach((trigger) => trigger?.kill());
+      window.removeEventListener("resize", handleResize);
+      observer?.disconnect();
     };
   }, [effectiveScrollOffsetPx, sections]);
 
@@ -220,16 +263,18 @@ export default function LeftTimelineNav({
   const mobileDockRef = React.useRef<HTMLDivElement | null>(null);
 
   React.useEffect(() => {
-    if (!isMobile) return;
+    if (!isMobile || activeId !== "projects") {
+      setCtaBottomPx(null);
+      return;
+    }
 
     let raf = 0;
+    const ctaNodes = Array.from(
+      document.querySelectorAll<HTMLElement>('[data-project-cta="1"]')
+    );
 
     const findVisibleCtaBottom = () => {
-      const nodes = Array.from(
-        document.querySelectorAll<HTMLElement>('[data-project-cta="1"]')
-      );
-
-      if (!nodes.length) {
+      if (!ctaNodes.length) {
         setCtaBottomPx(null);
         return;
       }
@@ -238,7 +283,7 @@ export default function LeftTimelineNav({
       let best: HTMLElement | null = null;
       let bestBottom = -Infinity;
 
-      for (const el of nodes) {
+      for (const el of ctaNodes) {
         const rect = el.getBoundingClientRect();
         const visible = rect.bottom > 0 && rect.top < viewportHeight;
         if (!visible) continue;
@@ -276,7 +321,7 @@ export default function LeftTimelineNav({
       window.removeEventListener("scroll", onScrollOrResize);
       window.removeEventListener("resize", onScrollOrResize);
     };
-  }, [isMobile]);
+  }, [activeId, isMobile]);
 
   if (isMobile) {
     const inProjects = activeId === "projects";

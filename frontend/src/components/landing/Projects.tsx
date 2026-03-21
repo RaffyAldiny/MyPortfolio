@@ -52,7 +52,7 @@ function ProjectsSection() {
             zIndex={2 + index}
             isPriority={index === 0}
             isMobile={isMobile}
-            shouldRenderVideo={isInsideProjects && Math.abs(activeIndex - (index + 1)) <= 1}
+            shouldRenderVideo={isInsideProjects && activeIndex === index + 1}
           />
         ))}
       </Box>
