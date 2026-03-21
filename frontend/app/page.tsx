@@ -73,6 +73,7 @@ export default function Home() {
             ...sectionSnapSx,
             height: { xs: "auto", md: "100dvh" },
             minHeight: "100dvh",
+            scrollMarginTop: { xs: "72px", md: "80px" },
             overflow: { xs: "visible", md: "clip" },
           }}
         >

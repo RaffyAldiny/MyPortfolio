@@ -79,6 +79,7 @@ export default function LeftTimelineNav({
 }: Props) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const effectiveScrollOffsetPx = isMobile ? 56 : scrollOffsetPx;
 
   const [activeId, setActiveId] = React.useState(sections[0]?.id ?? "");
   const [isInsideDarkSection, setIsInsideDarkSection] = React.useState(false);
@@ -112,10 +113,10 @@ export default function LeftTimelineNav({
       const el = document.getElementById(id);
       if (!el) return;
 
-      const y = window.scrollY + el.getBoundingClientRect().top - scrollOffsetPx;
+      const y = window.scrollY + el.getBoundingClientRect().top - effectiveScrollOffsetPx;
       window.scrollTo({ top: y, behavior: "smooth" });
     },
-    [scrollOffsetPx]
+    [effectiveScrollOffsetPx]
   );
 
   const jump = React.useCallback(
@@ -142,7 +143,7 @@ export default function LeftTimelineNav({
     if (!sections.length) return;
 
     const pickActive = () => {
-      const activationY = scrollOffsetPx + 6;
+      const activationY = effectiveScrollOffsetPx + 6;
       let nextId = sections[0].id;
 
       for (const section of sections) {
@@ -164,8 +165,8 @@ export default function LeftTimelineNav({
 
         return ScrollTrigger.create({
           trigger: el,
-          start: () => `top top+=${scrollOffsetPx + 6}`,
-          end: () => `bottom top+=${scrollOffsetPx + 6}`,
+          start: () => `top top+=${effectiveScrollOffsetPx + 6}`,
+          end: () => `bottom top+=${effectiveScrollOffsetPx + 6}`,
           onEnter: () => setActiveId(section.id),
           onEnterBack: () => setActiveId(section.id),
         });
@@ -180,7 +181,7 @@ export default function LeftTimelineNav({
       ScrollTrigger.removeEventListener("refresh", pickActive);
       triggers.forEach((trigger) => trigger?.kill());
     };
-  }, [sections, scrollOffsetPx]);
+  }, [effectiveScrollOffsetPx, sections]);
 
   useIsomorphicLayoutEffect(() => {
     ensureGsap();
