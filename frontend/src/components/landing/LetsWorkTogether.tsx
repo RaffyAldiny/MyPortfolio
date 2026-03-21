@@ -12,7 +12,6 @@ import ContentCopyRoundedIcon from "@mui/icons-material/ContentCopyRounded";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import MailOutlineIcon from "@mui/icons-material/MailOutline";
-import TaskAltRoundedIcon from "@mui/icons-material/TaskAltRounded";
 import { alpha } from "@mui/material/styles";
 import { useHeaderTheme } from "@/context/HeaderTheme";
 import usePrefersReducedMotion from "@/hooks/usePrefersReducedMotion";
@@ -31,12 +30,6 @@ const OFFERINGS = [
   "Capstone / Thesis Platforms",
   "Full-Stack Web Apps",
   "AI Workflow Integrations",
-] as const;
-
-const PROCESS = [
-  "Clarify scope and workflow first",
-  "Design for real use, not just demos",
-  "Build clean admin-friendly systems",
 ] as const;
 
 const SX = {
@@ -151,12 +144,12 @@ const SX = {
     mt: { xs: 1.5, md: 2 },
     maxWidth: 760,
     color: "rgba(241,255,238,0.86)",
-    fontSize: { xs: "0.82rem", md: "1rem" },
-    lineHeight: { xs: 1.66, md: 1.8 },
+    fontSize: { xs: "0.76rem", md: "1rem" },
+    lineHeight: { xs: 1.58, md: 1.8 },
   },
   accentRow: {
     mt: { xs: 1.65, md: 2.25 },
-    display: "grid",
+    display: { xs: "none", md: "grid" },
     gridTemplateColumns: "auto 1fr",
     columnGap: 1,
     rowGap: 0.35,
@@ -197,11 +190,11 @@ const SX = {
   },
   primaryBtn: {
     borderRadius: 999,
-    px: { xs: 0.85, md: 2.5 },
-    py: { xs: 0.85, md: 1.1 },
+    px: { xs: 0.7, md: 2.5 },
+    py: { xs: 0.72, md: 1.1 },
     textTransform: "none",
     fontWeight: 800,
-    fontSize: { xs: "0.68rem", sm: "0.8rem", md: "0.9rem" },
+    fontSize: { xs: "0.62rem", sm: "0.8rem", md: "0.9rem" },
     lineHeight: 1.18,
     textAlign: "center",
     background: "#F2FFF0",
@@ -209,7 +202,7 @@ const SX = {
     border: `1.5px solid ${alpha("#F2FFF0", 0.56)}`,
     boxShadow: `0 10px 28px ${alpha("#06210A", 0.18)}`,
     minWidth: 0,
-    minHeight: { xs: 56, md: "auto" },
+    minHeight: { xs: 48, md: "auto" },
     width: { xs: "100%", md: "auto" },
     whiteSpace: { xs: "normal", md: "nowrap" },
     "&:hover": {
@@ -217,41 +210,50 @@ const SX = {
       boxShadow: `0 12px 30px ${alpha("#06210A", 0.22)}`,
     },
     "& .MuiButton-endIcon": {
-      ml: { xs: 0, sm: 0.6 },
-      display: { xs: "none", sm: "inline-flex" },
+      ml: { xs: 0.32, sm: 0.6 },
+      display: "inline-flex",
+    },
+    "& .MuiSvgIcon-root": {
+      fontSize: { xs: "0.86rem", sm: "1rem" },
     },
   },
   secondaryBtn: {
     borderRadius: 999,
-    px: { xs: 0.75, md: 2.2 },
-    py: { xs: 0.8, md: 1.05 },
+    px: { xs: 0.62, md: 2.2 },
+    py: { xs: 0.68, md: 1.05 },
     textTransform: "none",
     fontWeight: 800,
-    fontSize: { xs: "0.66rem", sm: "0.78rem", md: "0.88rem" },
+    fontSize: { xs: "0.6rem", sm: "0.78rem", md: "0.88rem" },
     lineHeight: 1.18,
     textAlign: "center",
     color: "#F5FFF2",
     background: "rgba(255,255,255,0.06)",
     border: `1.5px solid ${alpha("#ECFFE8", 0.24)}`,
     minWidth: 0,
-    minHeight: { xs: 56, md: "auto" },
+    minHeight: { xs: 48, md: "auto" },
     width: { xs: "100%", md: "auto" },
     whiteSpace: { xs: "normal", md: "nowrap" },
     "&:hover": {
       background: "rgba(255,255,255,0.12)",
     },
-    "& .MuiButton-startIcon": {
-      mr: { xs: 0, sm: 0.6 },
-      display: { xs: "none", sm: "inline-flex" },
+    "& .MuiButton-endIcon": {
+      ml: { xs: 0.28, sm: 0.6 },
+      display: "inline-flex",
+    },
+    "& .MuiSvgIcon-root": {
+      fontSize: { xs: "0.84rem", sm: "1rem" },
     },
   },
   sideCard: {
     pointerEvents: "auto",
     borderRadius: 4,
     p: { xs: 1.45, sm: 2.4, md: 3.8 },
-    background: "#FFFFFF",
-    border: `1px solid ${alpha("#1CDB2F", 0.34)}`,
-    boxShadow: `inset 0 1px 0 ${alpha("#FFFFFF", 0.9)}, 0 16px 36px ${alpha("#06210A", 0.12)}`,
+    background: { xs: "rgba(237,255,233,0.07)", sm: "#FFFFFF" },
+    border: { xs: "1px solid rgba(237,255,233,0.10)", sm: `1px solid ${alpha("#1CDB2F", 0.34)}` },
+    boxShadow: {
+      xs: "none",
+      sm: `inset 0 1px 0 ${alpha("#FFFFFF", 0.9)}, 0 16px 36px ${alpha("#06210A", 0.12)}`,
+    },
     display: "flex",
     flexDirection: "column",
     gap: { xs: 1.6, md: 2.7 },
@@ -260,8 +262,8 @@ const SX = {
     width: "100%",
     maxWidth: 460,
     position: "relative",
-    overflow: "hidden",
-    backdropFilter: "blur(6px)",
+    overflow: { xs: "hidden", sm: "hidden" },
+    backdropFilter: { xs: "blur(12px)", sm: "blur(6px)" },
     "&::before": {
       content: '""',
       position: "absolute",
@@ -269,6 +271,7 @@ const SX = {
       height: 54,
       background:
         "linear-gradient(90deg, rgba(28,219,47,0.08) 0%, rgba(255,255,255,0) 85%)",
+      opacity: { xs: 0.28, sm: 1 },
       pointerEvents: "none",
     },
   },
@@ -280,10 +283,10 @@ const SX = {
     px: 1.15,
     py: 0.65,
     borderRadius: 999,
-    background: "rgba(255,255,255,0.86)",
-    border: `1px solid ${alpha("#1CDB2F", 0.24)}`,
-    color: "#1A5D23",
-    fontSize: "0.72rem",
+    background: { xs: "rgba(237,255,233,0.06)", sm: "rgba(255,255,255,0.86)" },
+    border: { xs: "1px solid rgba(237,255,233,0.14)", sm: `1px solid ${alpha("#1CDB2F", 0.24)}` },
+    color: { xs: "#EAFEE5", sm: "#1A5D23" },
+    fontSize: { xs: "0.66rem", sm: "0.72rem" },
     fontWeight: 900,
     letterSpacing: "0.12em",
     textTransform: "uppercase",
@@ -292,21 +295,15 @@ const SX = {
     width: 7,
     height: 7,
     borderRadius: "50%",
-    bgcolor: "#1CDB2F",
-    boxShadow: "0 0 0 4px rgba(28,219,47,0.1)",
-  },
-  sideLabel: {
-    fontSize: 11,
-    fontWeight: 900,
-    letterSpacing: "0.18em",
-    textTransform: "uppercase",
-    color: "#1CDB2F",
+    bgcolor: { xs: "#1CDB2F", sm: "#1CDB2F" },
+    boxShadow: { xs: "0 0 0 4px rgba(28,219,47,0.14)", sm: "0 0 0 4px rgba(28,219,47,0.1)" },
   },
   contactCard: {
     p: { xs: 1.15, md: 1.7 },
     borderRadius: 3.25,
-    background: "rgba(255,255,255,0.92)",
-    border: `1px solid ${alpha("#1CDB2F", 0.34)}`,
+    background: { xs: "rgba(237,255,233,0.06)", sm: "rgba(255,255,255,0.92)" },
+    border: { xs: "1px solid rgba(237,255,233,0.14)", sm: `1px solid ${alpha("#1CDB2F", 0.34)}` },
+    backdropFilter: { xs: "blur(12px)", sm: "none" },
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
@@ -317,14 +314,14 @@ const SX = {
     flex: 1,
   },
   contactTitle: {
-    color: alpha("#23412A", 0.76),
+    color: { xs: alpha("#F0FFEC", 0.7), sm: alpha("#23412A", 0.76) },
     fontSize: "0.7rem",
     fontWeight: 800,
     letterSpacing: "0.08em",
     textTransform: "uppercase",
   },
   contactValue: {
-    color: DARK_GREEN,
+    color: { xs: "#F5FFF2", md: DARK_GREEN },
     fontSize: { xs: "0.68rem", md: "0.8rem" },
     fontWeight: 700,
     whiteSpace: { xs: "normal", md: "nowrap" },
@@ -342,17 +339,18 @@ const SX = {
     fontSize: { xs: "0.62rem", md: "0.66rem" },
     whiteSpace: "nowrap",
     flexShrink: 0,
-    color: "#138B21",
-    borderColor: alpha("#1CDB2F", 0.44),
+    color: { xs: "#0E5A18", sm: "#138B21" },
+    borderColor: { xs: alpha("#F2FFF0", 0.56), sm: alpha("#1CDB2F", 0.44) },
+    background: { xs: "#F2FFF0", sm: "transparent" },
     "&:hover": {
-      borderColor: alpha("#1CDB2F", 0.58),
-      background: alpha("#1CDB2F", 0.08),
+      borderColor: { xs: alpha("#F2FFF0", 0.72), sm: alpha("#1CDB2F", 0.58) },
+      background: { xs: "#E6FFE0", sm: alpha("#1CDB2F", 0.08) },
     },
   },
   inlineValueRow: {
     mt: 0.3,
     display: "flex",
-    alignItems: { xs: "flex-start", md: "center" },
+    alignItems: "center",
     gap: { xs: 0.28, md: 0.4 },
     minWidth: 0,
   },
@@ -362,80 +360,70 @@ const SX = {
     minWidth: 22,
     minHeight: 22,
     borderRadius: 1,
-    color: "#1A8A25",
+    color: { xs: "#DDFED7", sm: "#1A8A25" },
     flexShrink: 0,
     p: 0,
+    alignSelf: "center",
     "&:hover": {
-      background: alpha("#1CDB2F", 0.08),
+      background: { xs: "rgba(237,255,233,0.08)", sm: alpha("#1CDB2F", 0.08) },
     },
   },
   qrBlock: {
     mt: 1.25,
-    display: "grid",
-    gridTemplateColumns: { xs: "1fr auto", md: "1fr auto" },
-    gap: { xs: 1, md: 1.2 },
+    display: { xs: "none", sm: "flex" },
+    justifyContent: "center",
+    gap: { xs: 0.8, md: 1.1 },
     alignItems: "center",
-    borderRadius: 3.25,
-    border: `1px solid ${alpha("#1CDB2F", 0.28)}`,
-    background: alpha("#1CDB2F", 0.035),
-    px: { xs: 1.05, md: 1.3 },
-    py: { xs: 1, md: 1.15 },
+    width: "fit-content",
+    maxWidth: "100%",
+    alignSelf: "center",
+    mx: "auto",
+    px: 0,
+    py: { xs: 0.35, md: 0.45 },
     color: "inherit",
     textDecoration: "none",
-    transition: "background-color 160ms ease, border-color 160ms ease, transform 160ms ease",
+    transition: "transform 160ms ease",
     "&:hover": {
-      background: alpha("#1CDB2F", 0.075),
-      borderColor: alpha("#1CDB2F", 0.42),
       transform: "translateY(-1px)",
     },
   },
   qrMeta: {
     minWidth: 0,
+    display: "flex",
+    flexDirection: "column",
+    gap: 0.35,
+    maxWidth: { xs: 170, md: 190 },
+    transform: { xs: "translateY(8px)", md: "translateY(10px)" },
   },
-  qrKicker: {
+  qrLead: {
     color: "#179123",
-    fontSize: "0.64rem",
-    fontWeight: 900,
-    letterSpacing: "0.16em",
-    textTransform: "uppercase",
+    fontSize: { xs: "0.9rem", md: "1rem" },
+    fontWeight: 800,
+    lineHeight: 1.35,
   },
   qrText: {
-    mt: 0.32,
-    color: alpha("#23412A", 0.8),
-    fontSize: { xs: "0.7rem", md: "0.76rem" },
-    fontWeight: 600,
+    color: alpha("#23412A", 0.72),
+    fontSize: { xs: "0.66rem", md: "0.72rem" },
+    fontWeight: 500,
     lineHeight: { xs: 1.42, md: 1.5 },
   },
   qrTile: {
-    width: { xs: 62, md: 80 },
-    height: { xs: 62, md: 80 },
+    width: { xs: 116, md: 138 },
+    height: { xs: 116, md: 138 },
     flexShrink: 0,
     display: "grid",
     placeItems: "center",
-    p: 0.8,
-    borderRadius: 2.5,
-    background: "#FFFFFF",
-    border: `1px solid ${alpha("#1CDB2F", 0.3)}`,
-    boxShadow: `0 10px 22px ${alpha("#06210A", 0.08)}`,
+    p: 0,
+    borderRadius: 0,
+    background: "transparent",
+    border: "none",
+    boxShadow: "none",
   },
   qrImage: {
     display: "block",
     width: "100%",
     height: "100%",
     objectFit: "contain",
-  },
-  processList: {
-    display: "flex",
-    flexDirection: "column",
-    gap: { xs: 0.85, md: 1.1 },
-  },
-  processItem: {
-    display: "flex",
-    alignItems: "flex-start",
-    gap: 1,
-    color: alpha("#1E3423", 0.86),
-    fontWeight: 600,
-    lineHeight: 1.6,
   },
 } as const;
 
@@ -459,7 +447,15 @@ function ContactRow({
   return (
     <Box sx={SX.contactCard} data-contact-reveal>
       <Stack direction="row" spacing={1.2} sx={{ minWidth: 0, alignItems: "center", flex: 1 }}>
-        <Box sx={{ color: "#179123", display: "inline-flex", alignItems: "center" }}>{icon}</Box>
+        <Box
+          sx={{
+            color: { xs: "#DDFED7", sm: "#179123" },
+            display: "inline-flex",
+            alignItems: "center",
+          }}
+        >
+          {icon}
+        </Box>
         <Box sx={SX.contactMeta}>
           <Typography sx={SX.contactTitle}>{label}</Typography>
           {typeof value === "string" ? (
@@ -668,7 +664,7 @@ export default function LetsWorkTogether() {
                   href={GITHUB_URL}
                   target="_blank"
                   rel="noreferrer"
-                  startIcon={<GitHubIcon />}
+                  endIcon={<GitHubIcon />}
                   sx={SX.secondaryBtn}
                 >
                   View GitHub
@@ -677,7 +673,7 @@ export default function LetsWorkTogether() {
                 <Button
                   href="/#projects"
                   onClick={handleRevisitProjects}
-                  startIcon={<ArrowOutwardIcon />}
+                  endIcon={<ArrowOutwardIcon />}
                   sx={SX.secondaryBtn}
                 >
                   Revisit Projects
@@ -693,11 +689,7 @@ export default function LetsWorkTogether() {
             </Box>
 
             <Box>
-              <Typography sx={SX.sideLabel} data-contact-reveal>
-                Contact
-              </Typography>
-
-              <Stack spacing={1.15} sx={{ mt: 1.5 }}>
+              <Stack spacing={1.15}>
                 <ContactRow
                   label="Email"
                   value={
@@ -751,7 +743,7 @@ export default function LetsWorkTogether() {
                       component="div"
                       sx={{ ...SX.contactValue, mt: 0.35, whiteSpace: "normal" }}
                     >
-                      Brief form for serious builds, custom systems, and scoped collaboration requests.
+                      Short form for project inquiries.
                     </Typography>
                   }
                   href={INQUIRY_FORM_URL}
@@ -769,9 +761,9 @@ export default function LetsWorkTogether() {
                   aria-label="Open the project inquiry form with the QR code"
                 >
                   <Box sx={SX.qrMeta}>
-                    <Typography sx={SX.qrKicker}>Scan QR</Typography>
+                    <Typography sx={SX.qrLead}>Prefer mobile?</Typography>
                     <Typography sx={SX.qrText}>
-                      Prefer mobile? Scan to open the inquiry form on your phone.
+                      Scan to open the inquiry form on your phone.
                     </Typography>
                   </Box>
 
@@ -785,23 +777,6 @@ export default function LetsWorkTogether() {
                   </Box>
                 </Box>
               </Stack>
-            </Box>
-
-            <Box>
-              <Typography sx={SX.sideLabel} data-contact-reveal>
-                Working Style
-              </Typography>
-
-              <Box sx={{ ...SX.processList, mt: 1.6 }}>
-                {PROCESS.map((item) => (
-                  <Box key={item} sx={SX.processItem} data-contact-reveal>
-                    <TaskAltRoundedIcon sx={{ color: "#18A626", fontSize: "1.1rem", mt: 0.15 }} />
-                    <Typography sx={{ fontWeight: 700, fontSize: { xs: "0.84rem", md: "0.98rem" } }}>
-                      {item}
-                    </Typography>
-                  </Box>
-                ))}
-              </Box>
             </Box>
           </Box>
         </Box>

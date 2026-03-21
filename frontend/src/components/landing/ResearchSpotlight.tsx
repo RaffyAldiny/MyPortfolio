@@ -161,7 +161,7 @@ const SX = {
     alignItems: { xs: "stretch", lg: "center" },
   },
   thesisLabel: {
-    fontSize: { xs: "0.72rem", md: "0.78rem" },
+    fontSize: { xs: "0.66rem", md: "0.78rem" },
     fontWeight: 800,
     letterSpacing: "0.08em",
     color: "#0E4E13",
@@ -171,11 +171,10 @@ const SX = {
   paperTitle: {
     fontWeight: 800,
     letterSpacing: "-0.015em",
-    fontSize: { xs: "1.5rem", md: "1.95rem" },
-    lineHeight: { xs: 1.18, md: 1.28 },
+    fontSize: { xs: "1.36rem", md: "1.82rem" },
+    lineHeight: { xs: 1.16, md: 1.24 },
     color: "#16391B",
-    textAlign: { xs: "left", md: "justify" },
-    textJustify: { md: "inter-word" },
+    textAlign: "left",
     maxWidth: 720,
   },
   authors: {
@@ -185,15 +184,15 @@ const SX = {
     alignItems: "center",
     columnGap: 0.75,
     rowGap: 0.45,
-    fontSize: { xs: "0.78rem", md: "0.92rem" },
-    lineHeight: { xs: 1.45, md: 1.52 },
+    fontSize: { xs: "0.72rem", md: "0.78rem" },
+    lineHeight: { xs: 1.4, md: 1.42 },
     color: "#111111",
     maxWidth: 720,
   },
   byPrefix: {
     color: "#111111",
     fontWeight: 500,
-    fontSize: { xs: "0.78rem", md: "0.92rem" },
+    fontSize: { xs: "0.72rem", md: "0.78rem" },
   },
   authorGroup: {
     display: "inline-flex",
@@ -204,7 +203,7 @@ const SX = {
   authorName: {
     color: "#111111",
     fontWeight: 500,
-    fontSize: { xs: "0.78rem", md: "0.92rem" },
+    fontSize: { xs: "0.72rem", md: "0.78rem" },
   },
   authorSup: {
     ml: 0.1,
@@ -234,10 +233,10 @@ const SX = {
   },
   summary: {
     color: alpha("#243226", 0.82),
-    fontSize: { xs: "0.88rem", md: "0.98rem" },
-    lineHeight: { xs: 1.64, md: 1.76 },
-    textAlign: { xs: "left", md: "justify" },
-    textJustify: { md: "inter-word" },
+    fontSize: { xs: "0.82rem", md: "0.9rem" },
+    lineHeight: { xs: 1.58, md: 1.68 },
+    textAlign: "justify",
+    textJustify: "inter-word",
     maxWidth: 760,
   },
   summaryAccent: {
@@ -267,7 +266,7 @@ const SX = {
     display: "block",
     fontWeight: 900,
     letterSpacing: "-0.03em",
-    fontSize: { xs: "1.02rem", sm: "1.4rem", md: "1.68rem" },
+    fontSize: { xs: "1.02rem", sm: "1.4rem", md: "1.54rem" },
     color: METRIC_GREEN,
     textShadow: "0 0 10px rgba(28, 219, 47, 0.18)",
     transform: "translateZ(0)",
@@ -275,7 +274,7 @@ const SX = {
   metricLabel: {
     mt: 0.5,
     fontWeight: 600,
-    fontSize: { xs: 9.5, sm: 12, md: 11 },
+    fontSize: { xs: 9.5, sm: 12, md: 10 },
     letterSpacing: { xs: "0.06em", sm: "0.12em", md: "0.11em" },
     textTransform: "uppercase",
     color: "#084E10",
@@ -304,15 +303,9 @@ const SX = {
   },
   journalTitle: {
     fontWeight: 700,
-    fontSize: { xs: "1rem", md: "0.94rem" },
-    lineHeight: { xs: 1.8, md: 1.68 },
+    fontSize: { xs: "0.92rem", md: "0.86rem" },
+    lineHeight: { xs: 1.68, md: 1.56 },
     color: DARK_GREEN,
-  },
-  sideText: {
-    fontWeight: 600,
-    fontSize: { xs: "1rem", md: "0.92rem" },
-    lineHeight: { xs: 1.8, md: 1.7 },
-    color: alpha("#263A2A", 0.84),
   },
   chipWrap: {
     display: "flex",
@@ -327,7 +320,7 @@ const SX = {
     height: { xs: 28, md: 32 },
     "& .MuiChip-label": {
       px: { xs: 1, md: 1.25 },
-      fontSize: { xs: "0.75rem", md: "0.77rem" },
+      fontSize: { xs: "0.72rem", md: "0.73rem" },
     },
   },
   actions: {
@@ -340,14 +333,14 @@ const SX = {
   primaryBtn: {
     position: "relative",
     borderRadius: 999,
-    py: 1,
+    py: 0.82,
     textTransform: "none",
     fontWeight: 700,
     whiteSpace: "nowrap",
     minWidth: 0,
     flex: 1,
-    px: { xs: 1.35, sm: 2.1 },
-    fontSize: { xs: "0.76rem", sm: "0.88rem", md: "0.82rem" },
+    px: { xs: 1.2, sm: 1.8 },
+    fontSize: { xs: "0.71rem", sm: "0.8rem", md: "0.76rem" },
     color: "#FFFFFF",
     background: "#1CDB2F",
     border: `1.5px solid ${alpha("#1CDB2F", 0.62)}`,
@@ -365,14 +358,14 @@ const SX = {
   },
   secondaryBtn: {
     borderRadius: 999,
-    py: 1,
+    py: 0.82,
     textTransform: "none",
     fontWeight: 700,
     whiteSpace: "nowrap",
     minWidth: 0,
     flex: 1,
-    px: { xs: 1.1, sm: 2.1 },
-    fontSize: { xs: "0.76rem", sm: "0.88rem", md: "0.82rem" },
+    px: { xs: 1, sm: 1.8 },
+    fontSize: { xs: "0.71rem", sm: "0.8rem", md: "0.76rem" },
     color: DARK_GREEN,
     background: "#FFFFFF",
     border: `1.5px solid ${alpha("#1CDB2F", 0.58)}`,
@@ -387,53 +380,56 @@ const SX = {
     },
   },
   qrLink: {
-    mt: { xs: 1.2, md: 1.4 },
-    display: "grid",
-    gridTemplateColumns: { xs: "1fr auto", sm: "1fr auto" },
-    gap: { xs: 1, md: 1.35 },
+    mt: { xs: 1.7, md: 2.1 },
+    display: { xs: "none", sm: "flex" },
+    justifyContent: "center",
+    gap: { xs: 0.55, md: 0.75 },
     alignItems: "center",
-    borderRadius: 3,
-    border: `1px solid ${alpha("#1CDB2F", 0.34)}`,
-    background: alpha("#1CDB2F", 0.045),
-    px: { xs: 1.1, md: 1.35 },
-    py: { xs: 1.05, md: 1.2 },
+    width: "fit-content",
+    maxWidth: "100%",
+    alignSelf: "center",
+    mx: "auto",
+    borderRadius: 0,
+    border: "none",
+    background: "transparent",
+    px: 0,
+    py: 0,
     color: "inherit",
     textDecoration: "none",
-    transition: "background-color 160ms ease, border-color 160ms ease, transform 160ms ease",
+    transition: "transform 160ms ease",
     "&:hover": {
-      background: alpha("#1CDB2F", 0.085),
-      borderColor: alpha("#1CDB2F", 0.5),
       transform: "translateY(-1px)",
     },
   },
   qrCopy: {
     minWidth: 0,
+    maxWidth: { xs: 145, md: 160 },
+    transform: { xs: "translateY(8px)", md: "translateY(10px)" },
   },
-  qrLabel: {
-    fontSize: { xs: "0.67rem", md: "0.64rem" },
-    fontWeight: 900,
-    letterSpacing: "0.16em",
-    textTransform: "uppercase",
-    color: LABEL_GREEN,
+  qrLead: {
+    color: "#179123",
+    fontSize: { xs: "0.9rem", md: "0.96rem" },
+    fontWeight: 800,
+    lineHeight: 1.35,
   },
   qrText: {
-    mt: 0.4,
-    fontSize: { xs: "0.72rem", md: "0.76rem" },
-    lineHeight: { xs: 1.45, md: 1.5 },
-    fontWeight: 600,
+    mt: 0.28,
+    fontSize: { xs: "0.66rem", md: "0.68rem" },
+    lineHeight: { xs: 1.38, md: 1.42 },
+    fontWeight: 500,
     color: alpha("#263A2A", 0.8),
   },
   qrTile: {
-    width: { xs: 62, md: 78 },
-    height: { xs: 62, md: 78 },
+    width: { xs: 92, md: 114 },
+    height: { xs: 92, md: 114 },
     flexShrink: 0,
     display: "grid",
     placeItems: "center",
-    p: 0.8,
-    borderRadius: 2.4,
-    background: "#FFFFFF",
-    border: `1px solid ${alpha("#1CDB2F", 0.32)}`,
-    boxShadow: `0 10px 22px ${alpha("#1CDB2F", 0.1)}`,
+    p: 0,
+    borderRadius: 0,
+    background: "transparent",
+    border: "none",
+    boxShadow: "none",
   },
   qrImage: {
     display: "block",
@@ -606,19 +602,17 @@ export default function ResearchSpotlight() {
           </Box>
 
           <Box sx={SX.sideCard} data-research-reveal>
-            <Box sx={{ display: { xs: "none", sm: "block" } }}>
+            <Box>
               <Typography sx={SX.sideLabel}>Journal</Typography>
               <Typography sx={{ ...SX.journalTitle, mt: 1 }}>
                 International Journal of Progressive Research in Science and Engineering
               </Typography>
 
-              <Typography sx={{ ...SX.sideLabel, mt: 3 }}>Focus</Typography>
-              <Typography sx={{ ...SX.sideText, mt: 1 }}>
-                Media integrity, manipulated-content detection, and stronger
-                spatiotemporal modeling for deepfake analysis.
+              <Typography sx={{ ...SX.sideLabel, mt: 2.4, display: { xs: "none", sm: "block" } }}>
+                Focus
               </Typography>
 
-              <Box sx={{ ...SX.chipWrap, mt: 3 }}>
+              <Box sx={{ ...SX.chipWrap, mt: 1, display: { xs: "none", sm: "flex" } }}>
                 {BADGES.map((badge) => (
                   <Chip key={badge} label={badge} size="small" sx={SX.chip} />
                 ))}
@@ -665,9 +659,9 @@ export default function ResearchSpotlight() {
                 aria-label="Open the research study article with the QR code"
               >
                 <Box sx={SX.qrCopy}>
-                  <Typography sx={SX.qrLabel}>Scan QR</Typography>
+                  <Typography sx={SX.qrLead}>Prefer mobile?</Typography>
                   <Typography sx={SX.qrText}>
-                    Open the study on your phone without crowding the main actions.
+                    Scan to open the study on your phone.
                   </Typography>
                 </Box>
 

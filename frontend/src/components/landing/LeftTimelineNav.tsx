@@ -335,7 +335,7 @@ export default function LeftTimelineNav({
   }, [isMobile]);
 
   if (isMobile) {
-    const inProjects = isDarkOverlay;
+    const inProjects = activeId === "projects";
     const bottom = inProjects ? (ctaBottomPx ?? 18) : 18;
     const dockRight = inProjects;
 
