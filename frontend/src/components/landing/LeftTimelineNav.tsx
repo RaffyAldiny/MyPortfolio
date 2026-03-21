@@ -79,7 +79,7 @@ export default function LeftTimelineNav({
 }: Props) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const effectiveScrollOffsetPx = isMobile ? 56 : scrollOffsetPx;
+  const effectiveScrollOffsetPx = scrollOffsetPx;
 
   const [activeId, setActiveId] = React.useState(sections[0]?.id ?? "");
   const [isInsideDarkSection, setIsInsideDarkSection] = React.useState(false);

@@ -127,7 +127,7 @@ function ReferenceLink({
 const SX = {
   section: {
     width: "100%",
-    minHeight: { xs: "auto", md: "calc(100dvh - 80px)" },
+    minHeight: { xs: "auto", md: "100dvh" },
     position: "relative",
     display: "flex",
     alignItems: "center",

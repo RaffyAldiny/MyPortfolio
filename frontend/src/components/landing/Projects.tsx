@@ -12,7 +12,6 @@ import GitHubIcon from "@mui/icons-material/GitHub";
 import ArrowOutwardIcon from "@mui/icons-material/ArrowOutward";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { keyframes } from "@emotion/react";
-import { useHeaderTheme } from "@/context/HeaderTheme";
 import ProjectProgressRail from "@/components/landing/ProjectProgressRail";
 import usePrefersReducedMotion from "@/hooks/usePrefersReducedMotion";
 import { ensureGsap, gsap, ScrollTrigger, useIsomorphicLayoutEffect } from "@/lib/gsap";
@@ -589,7 +588,6 @@ const ProjectSlide = React.memo(function ProjectSlide({
 function ProjectsSection() {
   const reducedMotion = usePrefersReducedMotion();
   const containerRef = React.useRef<HTMLDivElement>(null);
-  const { setHeaderVisible } = useHeaderTheme();
 
   const totalSlides = PROJECTS.length + 1;
 
@@ -854,33 +852,6 @@ function ProjectsSection() {
         setActiveIndex((current) => (current === nextIndex ? current : nextIndex));
       };
 
-      const nextSection = document.getElementById("research");
-
-      const headerTrigger = ScrollTrigger.create({
-        trigger: container,
-        start: "top bottom",
-        ...(nextSection
-          ? {
-              endTrigger: nextSection,
-              end: "top bottom",
-            }
-          : {
-              end: "bottom top",
-            }),
-        onEnter: () => {
-          setHeaderVisible(false);
-        },
-        onEnterBack: () => {
-          setHeaderVisible(false);
-        },
-        onLeave: () => {
-          setHeaderVisible(true);
-        },
-        onLeaveBack: () => {
-          setHeaderVisible(true);
-        },
-      });
-
       const sectionTrigger = ScrollTrigger.create({
         trigger: container,
         start: "top top",
@@ -902,15 +873,13 @@ function ProjectsSection() {
 
       const active = sectionTrigger.isActive;
       setIsInsideProjects(active);
-      setHeaderVisible(!headerTrigger.isActive);
       syncProgress(sectionTrigger);
     }, container);
 
     return () => {
-      setHeaderVisible(true);
       ctx.revert();
     };
-  }, [reducedMotion, setHeaderVisible, totalSlides]);
+  }, [reducedMotion, totalSlides]);
 
   const introFade = reducedMotion ? 0 : Math.min(1, progress * 3);
   const introScale = reducedMotion ? 1 : 1 - introFade * 0.1;

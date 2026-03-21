@@ -13,7 +13,6 @@ import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import GitHubIcon from "@mui/icons-material/GitHub";
 import MailOutlineIcon from "@mui/icons-material/MailOutline";
 import { alpha } from "@mui/material/styles";
-import { useHeaderTheme } from "@/context/HeaderTheme";
 import usePrefersReducedMotion from "@/hooks/usePrefersReducedMotion";
 import { ensureGsap, gsap, ScrollTrigger, useIsomorphicLayoutEffect } from "@/lib/gsap";
 
@@ -490,7 +489,6 @@ function ContactRow({
 export default function LetsWorkTogether() {
   const reducedMotion = usePrefersReducedMotion();
   const rootRef = React.useRef<HTMLDivElement>(null);
-  const { setHeaderVisible } = useHeaderTheme();
   const [copied, setCopied] = React.useState(false);
   const copyResetRef = React.useRef<number | null>(null);
 
@@ -500,8 +498,7 @@ export default function LetsWorkTogether() {
     const target = document.getElementById("projects");
     if (!target) return;
 
-    const headerOffset = window.innerWidth >= 900 ? 80 : 56;
-    const y = window.scrollY + target.getBoundingClientRect().top - headerOffset;
+    const y = window.scrollY + target.getBoundingClientRect().top;
     window.history.replaceState(null, "", "/#projects");
     window.scrollTo({ top: y, behavior: "smooth" });
   }, []);
@@ -583,30 +580,6 @@ export default function LetsWorkTogether() {
 
     return () => ctx.revert();
   }, [reducedMotion]);
-
-  useIsomorphicLayoutEffect(() => {
-    ensureGsap();
-
-    const root = rootRef.current;
-    if (!root) return;
-
-    const trigger = ScrollTrigger.create({
-      trigger: root,
-      start: "top top",
-      end: "bottom top",
-      onEnter: () => setHeaderVisible(false),
-      onEnterBack: () => setHeaderVisible(false),
-      onLeave: () => setHeaderVisible(true),
-      onLeaveBack: () => setHeaderVisible(true),
-    });
-
-    setHeaderVisible(!trigger.isActive);
-
-    return () => {
-      trigger.kill();
-      setHeaderVisible(true);
-    };
-  }, [setHeaderVisible]);
 
   return (
     <Box ref={rootRef} sx={SX.section}>

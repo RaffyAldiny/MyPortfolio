@@ -17,7 +17,7 @@ const sectionSnapSx = {
   height: "100dvh",
   scrollSnapAlign: "start" as const,
   scrollSnapStop: "always" as const,
-  scrollMarginTop: { xs: "56px", md: "80px" },
+  scrollMarginTop: 0,
   display: "flex",
   alignItems: "stretch",
   overflow: "clip",
@@ -43,7 +43,7 @@ export default function Home() {
 
       <LeftTimelineNav
         sections={TIMELINE_SECTIONS}
-        scrollOffsetPx={80}
+        scrollOffsetPx={0}
         darkSectionId={["projects", "contact"]}
         wrapAround
       />
@@ -73,7 +73,7 @@ export default function Home() {
             ...sectionSnapSx,
             height: { xs: "auto", md: "100dvh" },
             minHeight: "100dvh",
-            scrollMarginTop: { xs: "72px", md: "80px" },
+            scrollMarginTop: 0,
             overflow: { xs: "visible", md: "clip" },
           }}
         >

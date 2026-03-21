@@ -6,8 +6,6 @@ import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import theme from "@/theme";
-import SiteHeader from "@/components/SiteHeader";
-import { HeaderThemeProvider } from "@/context/HeaderTheme"; // <--- IMPORT
 
 const poppins = Poppins({
   weight: ["300", "400", "500", "600", "700", "800"],
@@ -30,13 +28,7 @@ export default function RootLayout({
         <AppRouterCacheProvider>
           <ThemeProvider theme={theme}>
             <CssBaseline />
-            
-            {/* WRAP APP IN PROVIDER */}
-            <HeaderThemeProvider>
-               <SiteHeader />
-               <main>{children}</main>
-            </HeaderThemeProvider>
-
+            <main>{children}</main>
           </ThemeProvider>
         </AppRouterCacheProvider>
       </body>

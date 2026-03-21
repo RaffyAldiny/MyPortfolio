@@ -161,7 +161,7 @@ export default function SkillsShowcase() {
       ref={rootRef}
       sx={{
         width: "100%",
-        minHeight: { xs: "auto", md: "calc(100dvh - 96px)" },
+        minHeight: { xs: "auto", md: "100dvh" },
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
