@@ -270,6 +270,7 @@ function ProfileIntroInner() {
         .from('[data-hero="eyebrow"]', { y: 18, autoAlpha: 0, duration: 0.55 }, "-=0.38")
         .from('[data-hero="name"]', { y: 26, autoAlpha: 0 }, "-=0.3")
         .from('[data-hero="title"]', { y: 16, autoAlpha: 0, duration: 0.55 }, "-=0.4")
+        .from('[data-hero="socials"]', { y: 14, autoAlpha: 0, duration: 0.48 }, "-=0.3")
         .from(
           '[data-hero="glass"]',
           { y: 24, autoAlpha: 0, scale: 0.97, duration: 0.7 },
@@ -409,7 +410,7 @@ function ProfileIntroInner() {
           {title}
         </Typography>
 
-        <Box sx={SX.socialRow}>
+        <Box sx={SX.socialRow} data-hero="socials">
           {SOCIAL_LINKS.map(({ label, href, Icon }) => (
             <IconButton
               key={label}
