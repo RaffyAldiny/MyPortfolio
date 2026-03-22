@@ -46,7 +46,7 @@ const SX = {
     fontSize: { xs: "2.02rem", sm: "2.7rem", md: "3.35rem" },
     lineHeight: 1.1,
     mb: 0,
-    mt: { xs: -1, md: 0 },
+    mt: { xs: -0.6, md: 0 },
     color: "#1CDB2F",
     filter: "drop-shadow(0px 2px 8px rgba(28, 219, 47, 0.12))",
     display: "flex",
@@ -122,7 +122,7 @@ const SX = {
     textTransform: "none",
     letterSpacing: "0.04em",
     fontSize: { xs: "1rem", md: "1.05rem" },
-    mt: { xs: 1, md: 0 },
+    mt: { xs: 2.4, md: 0 },
     mb: -0.5,
   },
   name: {
@@ -321,7 +321,7 @@ function ProfileIntroInner() {
   }, [isMobile, reducedMotion]);
 
   return (
-    <Stack ref={rootRef} spacing={{ xs: 2.15, md: 4 }} sx={SX.root}>
+    <Stack ref={rootRef} spacing={{ xs: 2.7, md: 4 }} sx={SX.root}>
       <Typography variant="h1" sx={SX.hook} data-hero="hook">
         HELLO THERE!
         <Box component="span" sx={SX.waveEmoji} data-hero="wave">

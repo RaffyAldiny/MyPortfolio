@@ -25,7 +25,7 @@ export function getBackgroundProfile(width: number, lowPowerDevice: boolean): Ba
     return {
       key: "mobile",
       isMobile: true,
-      flowCount: 28,
+      flowCount: 40,
       shapeCount: 0,
       pad: 18,
       baseVx: 5,

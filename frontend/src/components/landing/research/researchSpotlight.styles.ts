@@ -70,7 +70,7 @@ export const SX = {
     },
   },
   thesisLabel: {
-    fontSize: { xs: "0.6rem", md: "0.78rem" },
+    fontSize: { xs: "0.68rem", md: "0.78rem" },
     fontWeight: 800,
     letterSpacing: "0.08em",
     color: "#0E4E13",
@@ -80,7 +80,7 @@ export const SX = {
   paperTitle: {
     fontWeight: 800,
     letterSpacing: "-0.015em",
-    fontSize: { xs: "1.08rem", md: "1.82rem" },
+    fontSize: { xs: "1.18rem", md: "1.82rem" },
     lineHeight: { xs: 1.12, md: 1.24 },
     color: "#16391B",
     textAlign: "left",

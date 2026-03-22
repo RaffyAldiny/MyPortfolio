@@ -192,7 +192,7 @@ export default function SkillsShowcase() {
           variant="h2"
           sx={{
             fontWeight: 900,
-            fontSize: { xs: "2.18rem", sm: "3.5rem", md: "4.7rem" },
+            fontSize: { xs: "2.38rem", sm: "3.5rem", md: "4.7rem" },
             mb: { xs: 1.2, md: 1.15 },
             textTransform: "uppercase",
             textAlign: "center",
