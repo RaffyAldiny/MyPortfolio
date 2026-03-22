@@ -18,28 +18,32 @@ const PROFILE = {
 const PRISM_GRADIENT =
   "linear-gradient(135deg, #F3FFF0 0%, #CFFAC9 24%, #8EF587 46%, #1CDB2F 62%, #159E22 82%, #0B5A14 100%)";
 
-const AVATAR_SIZE = { xs: 130, md: 160 } as const;
+const AVATAR_SIZE = { xs: 116, md: 160 } as const;
 
 const SX = {
   root: {
     height: "100%",
     minHeight: "100%",
     display: "flex",
-    justifyContent: "center",
+    justifyContent: { xs: "flex-start", md: "center" },
     alignItems: "center",
     textAlign: "center",
     width: "100%",
     maxWidth: 860,
     mx: "auto",
-    py: { xs: 3, md: 6 },
-    overflow: "hidden",
+    py: { xs: 0, md: 6 },
+    pt: { xs: "calc(16px + env(safe-area-inset-top))", md: 6 },
+    pb: { xs: "calc(86px + env(safe-area-inset-bottom))", md: 6 },
+    overflow: { xs: "auto", md: "hidden" },
+    scrollbarWidth: "none",
+    "&::-webkit-scrollbar": { display: "none" },
     position: "relative",
   },
   hook: {
     fontWeight: 900,
     letterSpacing: "0.02em",
     textTransform: "uppercase",
-    fontSize: { xs: "2.35rem", sm: "2.7rem", md: "3.35rem" },
+    fontSize: { xs: "2.02rem", sm: "2.7rem", md: "3.35rem" },
     lineHeight: 1.1,
     mb: 0,
     color: "#1CDB2F",
@@ -122,7 +126,7 @@ const SX = {
   name: {
     fontWeight: 800,
     letterSpacing: "-0.03em",
-    fontSize: { xs: "1.95rem", md: "2.7rem" },
+    fontSize: { xs: "1.8rem", md: "2.7rem" },
     background:
       "linear-gradient(90deg, #63BC6D 0%, #89E891 50%, #63BC6D 100%)",
     WebkitBackgroundClip: "text",
@@ -151,15 +155,15 @@ const SX = {
     letterSpacing: -0.5,
     mb: { xs: 3, md: 3.4 },
     opacity: 0.8,
-    fontSize: { xs: "1.1rem", md: "1.4rem" },
+    fontSize: { xs: "1rem", md: "1.4rem" },
     textAlign: "center",
   },
   glass: {
     maxWidth: "760px",
     mx: "auto",
     width: "100%",
-    px: { xs: 2.5, md: 5 },
-    py: { xs: 2.2, md: 3 },
+    px: { xs: 2.1, md: 5 },
+    py: { xs: 1.8, md: 3 },
     borderRadius: { xs: "28px", md: "40px" },
     backgroundColor: "rgba(250, 255, 249, 0.9)",
     backdropFilter: "blur(8px)",
@@ -168,8 +172,8 @@ const SX = {
       "0 0 0 1px rgba(28, 219, 47, 0.08), 0 0 26px rgba(28, 219, 47, 0.14), 0 18px 40px rgba(28, 219, 47, 0.08)",
   },
   bio: {
-    fontSize: { xs: "0.76rem", md: "0.95rem" },
-    lineHeight: 1.8,
+    fontSize: { xs: "0.72rem", md: "0.95rem" },
+    lineHeight: { xs: 1.68, md: 1.8 },
     color: "#465546",
     fontWeight: 500,
     textAlign: "center",
@@ -315,7 +319,7 @@ function ProfileIntroInner() {
   }, [isMobile, reducedMotion]);
 
   return (
-    <Stack ref={rootRef} spacing={{ xs: 3.2, md: 4 }} sx={SX.root}>
+    <Stack ref={rootRef} spacing={{ xs: 2.15, md: 4 }} sx={SX.root}>
       <Typography variant="h1" sx={SX.hook} data-hero="hook">
         HELLO THERE!
         <Box component="span" sx={SX.waveEmoji} data-hero="wave">
