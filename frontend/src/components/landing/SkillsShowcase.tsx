@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { SKILLS } from "@/constants/skills";
 import SkillGroupFilter from "@/components/landing/skills/SkillGroupFilter";
 import SkillPill from "@/components/landing/skills/SkillPill";
@@ -13,6 +13,8 @@ import usePrefersReducedMotion from "@/hooks/usePrefersReducedMotion";
 import { ensureGsap, gsap, useIsomorphicLayoutEffect } from "@/lib/gsap";
 
 export default function SkillsShowcase() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const reducedMotion = usePrefersReducedMotion();
   const [active, setActive] = React.useState<GroupKey>("all");
   const [hasEntered, setHasEntered] = React.useState(reducedMotion);
@@ -259,7 +261,7 @@ export default function SkillsShowcase() {
             <SkillPill
               key={skill.name}
               skill={skill}
-              animate={!reducedMotion && hasEntered}
+              animate={!isMobile && !reducedMotion && hasEntered}
               index={hopIndexByName.get(skill.name) ?? 0}
               totalCount={filtered.length}
             />

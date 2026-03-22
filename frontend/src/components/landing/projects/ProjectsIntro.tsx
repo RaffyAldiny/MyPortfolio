@@ -2,6 +2,7 @@
 
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import { useMediaQuery, useTheme } from "@mui/material";
 import { archivePulse, prismDrift, PROJECTS_SX } from "@/components/landing/projects/projects.styles";
 
 type Props = {
@@ -12,6 +13,9 @@ type Props = {
 };
 
 export default function ProjectsIntro({ reducedMotion, introFade, introScale, fitParent = false }: Props) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+
   return (
     <Box
       id="projects-archive"
@@ -31,7 +35,7 @@ export default function ProjectsIntro({ reducedMotion, introFade, introScale, fi
         sx={{
           ...PROJECTS_SX.introSheen,
           backgroundSize: "200% 200%",
-          animation: reducedMotion ? "none" : `${prismDrift} 8s ease-in-out infinite`,
+          animation: reducedMotion || isMobile ? "none" : `${prismDrift} 8s ease-in-out infinite`,
         }}
       />
 
@@ -46,7 +50,10 @@ export default function ProjectsIntro({ reducedMotion, introFade, introScale, fi
         <Typography
           sx={{
             ...PROJECTS_SX.introTitle,
-            animation: reducedMotion ? "none" : `${archivePulse} 5.8s cubic-bezier(0.37, 0, 0.22, 1) infinite`,
+            animation:
+              reducedMotion || isMobile
+                ? "none"
+                : `${archivePulse} 5.8s cubic-bezier(0.37, 0, 0.22, 1) infinite`,
           }}
           component="div"
         >

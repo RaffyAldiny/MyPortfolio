@@ -451,15 +451,16 @@ export default function LandingBackground() {
           position: "absolute",
           inset: "-16%",
           pointerEvents: "none",
-          filter: "blur(42px)",
+          filter: { xs: "blur(26px)", md: "blur(42px)" },
           background: `
             radial-gradient(980px 560px at 18% 22%, rgba(28,219,47,0.12), transparent 62%),
             radial-gradient(860px 520px at 78% 18%, rgba(207,250,201,0.12), transparent 64%),
             radial-gradient(820px 560px at 70% 78%, rgba(12,122,25,0.1), transparent 62%),
             radial-gradient(760px 560px at 26% 78%, rgba(247,251,244,0.16), transparent 64%)
           `,
-          animation: `${mistA} 14s ease-in-out infinite`,
+          animation: { xs: "none", md: `${mistA} 14s ease-in-out infinite` },
           mixBlendMode: "soft-light",
+          opacity: { xs: 0.78, md: 1 },
         }}
       />
 
@@ -474,7 +475,7 @@ export default function LandingBackground() {
             radial-gradient(880px 600px at 52% 92%, rgba(12,122,25,0.08), transparent 68%),
             radial-gradient(760px 560px at 8% 58%, rgba(207,250,201,0.11), transparent 70%)
           `,
-          opacity: 0.6,
+          opacity: { xs: 0.36, md: 0.6 },
           mixBlendMode: "overlay",
         }}
       />
@@ -488,6 +489,7 @@ export default function LandingBackground() {
           width: "100%",
           height: "100%",
           pointerEvents: "none",
+          opacity: { xs: 0.72, md: 1 },
         }}
       />
 

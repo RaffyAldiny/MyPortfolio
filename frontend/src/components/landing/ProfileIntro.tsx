@@ -5,6 +5,7 @@ import Image from "next/image";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import { useMediaQuery, useTheme } from "@mui/material";
 import usePrefersReducedMotion from "@/hooks/usePrefersReducedMotion";
 import { ensureGsap, gsap, useIsomorphicLayoutEffect } from "@/lib/gsap";
 
@@ -201,6 +202,8 @@ const Highlight = React.memo(function Highlight({
 
 function ProfileIntroInner() {
   const { name, title, imageSrc } = PROFILE;
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const reducedMotion = usePrefersReducedMotion();
   const rootRef = React.useRef<HTMLDivElement>(null);
 
@@ -237,61 +240,79 @@ function ProfileIntroInner() {
         '[data-hero="glass"]',
       ];
 
-      gsap.set(FLOAT_TARGETS, { willChange: "transform" });
+      if (!isMobile) {
+        gsap.set(FLOAT_TARGETS, { willChange: "transform" });
+      }
 
       introTl.eventCallback("onComplete", () => {
-        FLOAT_TARGETS.forEach((target, index) => {
-          gsap.to(target, {
-            y: -14,
-            duration: 2.6,
+        if (!isMobile) {
+          FLOAT_TARGETS.forEach((target, index) => {
+            gsap.to(target, {
+              y: -14,
+              duration: 2.6,
+              repeat: -1,
+              yoyo: true,
+              ease: "sine.inOut",
+              delay: index * 0.14,
+              force3D: true,
+              overwrite: "auto",
+            });
+          });
+        }
+
+        gsap.to('[data-hero="ring-outer"]', {
+          rotation: -360,
+          duration: isMobile ? 72 : 24,
+          repeat: -1,
+          ease: "none",
+          transformOrigin: "50% 50%",
+        });
+
+        if (!isMobile) {
+          gsap.to('[data-hero="ring-inner"]', {
+            rotation: 360,
+            duration: 10,
+            repeat: -1,
+            ease: "none",
+            transformOrigin: "50% 50%",
+          });
+
+          gsap.to('[data-hero="sakura"]', {
+            rotation: 360,
+            duration: 6,
+            repeat: -1,
+            ease: "none",
+            transformOrigin: "50% 50%",
+          });
+        }
+
+        if (isMobile) {
+          gsap.to('[data-hero="wave"]', {
+            rotation: 10,
+            duration: 0.8,
+            repeat: 3,
+            yoyo: true,
+            ease: "sine.inOut",
+            repeatDelay: 0.7,
+            transformOrigin: "70% 70%",
+          });
+        } else {
+          gsap.to('[data-hero="wave"]', {
+            rotation: 18,
+            duration: 0.7,
             repeat: -1,
             yoyo: true,
             ease: "sine.inOut",
-            delay: index * 0.14,
-            force3D: true,
-            overwrite: "auto",
+            repeatDelay: 1.2,
+            transformOrigin: "70% 70%",
           });
-        });
-      });
-
-      gsap.to('[data-hero="ring-outer"]', {
-        rotation: -360,
-        duration: 24,
-        repeat: -1,
-        ease: "none",
-        transformOrigin: "50% 50%",
-      });
-
-      gsap.to('[data-hero="ring-inner"]', {
-        rotation: 360,
-        duration: 10,
-        repeat: -1,
-        ease: "none",
-        transformOrigin: "50% 50%",
-      });
-
-      gsap.to('[data-hero="wave"]', {
-        rotation: 18,
-        duration: 0.7,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-        repeatDelay: 1.2,
-        transformOrigin: "70% 70%",
-      });
-
-      gsap.to('[data-hero="sakura"]', {
-        rotation: 360,
-        duration: 6,
-        repeat: -1,
-        ease: "none",
-        transformOrigin: "50% 50%",
+        }
       });
 
     }, root);
 
     return () => ctx.revert();
-  }, [reducedMotion]);
+  }, [isMobile, reducedMotion]);
 
   return (
     <Stack ref={rootRef} spacing={{ xs: 3.2, md: 4 }} sx={SX.root}>
