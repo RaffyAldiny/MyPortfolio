@@ -15,7 +15,7 @@ import ProjectSlide from "@/components/landing/projects/ProjectSlide";
 import { MobileProjectPanel } from "@/components/landing/projects/MobileProjectsViewer";
 import { PROJECTS } from "@/components/landing/projects/projects.data";
 import usePrefersReducedMotion from "@/hooks/usePrefersReducedMotion";
-import { TIMELINE_SECTIONS } from "@/constants/navigation";
+import { NAV_SECTIONS, SNAP_PANEL_REGISTRY } from "@/constants/snapPanels";
 import { SNAP_SHELL_ID, scrollSnapShellToPanel } from "@/lib/snapShell";
 
 const PANEL_SX = {
@@ -125,6 +125,7 @@ export default function Home() {
       sx={{
         height: "100svh",
         backgroundColor: "#57bc53",
+        position: "relative",
       }}
     >
       <GlobalStyles
@@ -144,7 +145,7 @@ export default function Home() {
       <LandingBackground />
 
       <LeftTimelineNav
-        sections={TIMELINE_SECTIONS}
+        sections={NAV_SECTIONS}
         activeId={activeNavId}
         onSelect={handleSelectSection}
         hidden={activeNavId === "projects"}
@@ -216,33 +217,52 @@ export default function Home() {
           <Box />
         </Box>
 
-        <Box id="projects" data-snap-panel="true" data-nav-section="projects" sx={PANEL_SX}>
-          <ProjectsIntro reducedMotion={reducedMotion} introFade={0} introScale={1} />
+        <Box id="projects" data-snap-panel="true" data-nav-section="projects" sx={FRAMED_PANEL_SX}>
+          <Box />
+          <Box sx={PANEL_BODY_SX}>
+            <ProjectsIntro reducedMotion={reducedMotion} introFade={0} introScale={1} fitParent />
+          </Box>
+          <Box />
         </Box>
 
-        {PROJECTS.map((project, index) =>
-          isMobile ? (
-            <MobileProjectPanel
-              key={project.id}
-              id={project.id}
-              project={project}
-              isActive={activePanelId === project.id}
-              isPriority={index === 0}
-              navSectionId="projects"
-            />
-          ) : (
-            <ProjectSlide
-              key={project.id}
-              panelId={project.id}
-              navSectionId="projects"
-              project={project}
-              zIndex={2 + index}
-              isPriority={index === 0}
-              isMobile={false}
-              isActive={activePanelId === project.id}
-            />
-          )
-        )}
+        {SNAP_PANEL_REGISTRY.filter((panel) => panel.type === "project").map((panel, index) => {
+          const project = PROJECTS.find((item) => item.id === panel.id);
+          if (!project) return null;
+
+          return (
+            <Box
+              key={panel.id}
+              id={panel.id}
+              data-snap-panel="true"
+              data-nav-section={panel.navSection}
+              sx={FRAMED_PANEL_SX}
+            >
+              <Box />
+              <Box sx={PANEL_BODY_SX}>
+                {isMobile ? (
+                  <MobileProjectPanel
+                    project={project}
+                    isActive={activePanelId === panel.id}
+                    isPriority={index === 0}
+                    navSectionId={panel.navSection}
+                    fitParent
+                  />
+                ) : (
+                  <ProjectSlide
+                    navSectionId={panel.navSection}
+                    project={project}
+                    zIndex={2 + index}
+                    isPriority={index === 0}
+                    isMobile={false}
+                    isActive={activePanelId === panel.id}
+                    fitParent
+                  />
+                )}
+              </Box>
+              <Box />
+            </Box>
+          );
+        })}
 
         <Box id="research" data-snap-panel="true" data-nav-section="research" sx={FRAMED_PANEL_SX}>
           <Box />

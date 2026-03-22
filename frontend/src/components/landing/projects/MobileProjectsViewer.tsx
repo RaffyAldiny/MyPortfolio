@@ -23,6 +23,7 @@ type MobileProjectSlideProps = {
   isPriority: boolean;
   setRef?: (node: HTMLDivElement | null) => void;
   navSectionId?: string;
+  fitParent?: boolean;
 };
 
 export function MobileProjectPanel({
@@ -32,6 +33,7 @@ export function MobileProjectPanel({
   isPriority,
   setRef,
   navSectionId,
+  fitParent = false,
 }: MobileProjectSlideProps) {
   const videoRef = React.useRef<HTMLVideoElement | null>(null);
   const [videoReady, setVideoReady] = React.useState(false);
@@ -71,8 +73,8 @@ export function MobileProjectPanel({
       sx={{
         position: "relative",
         width: "100%",
-        minHeight: "100svh",
-        height: "100svh",
+        minHeight: fitParent ? "100%" : "100svh",
+        height: fitParent ? "100%" : "100svh",
         overflow: "hidden",
         backgroundColor: "#000",
         scrollSnapAlign: "start",
@@ -138,6 +140,30 @@ export function MobileProjectPanel({
             "linear-gradient(to top, rgba(3,14,5,0.92) 0%, rgba(3,14,5,0.74) 34%, rgba(3,14,5,0.24) 62%, rgba(0,0,0,0.04) 100%)",
         }}
       />
+
+      {!videoReady && isActive ? (
+        <Box
+          sx={{
+            position: "absolute",
+            top: 14,
+            right: 14,
+            zIndex: 4,
+            px: 0.95,
+            py: 0.5,
+            borderRadius: 999,
+            bgcolor: "rgba(0,0,0,0.42)",
+            border: "1px solid rgba(255,255,255,0.12)",
+            color: "rgba(255,255,255,0.84)",
+            fontSize: "0.62rem",
+            fontWeight: 800,
+            letterSpacing: "0.06em",
+            textTransform: "uppercase",
+            backdropFilter: "blur(8px)",
+          }}
+        >
+          Loading Preview
+        </Box>
+      ) : null}
 
       <Box
         sx={{

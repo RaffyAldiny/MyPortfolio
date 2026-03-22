@@ -96,7 +96,7 @@ export default function LeftTimelineNav({
     return (
       <Box
         sx={{
-          position: "fixed",
+          position: "absolute",
           zIndex: 9999,
           bottom: "calc(18px + env(safe-area-inset-bottom))",
           left: "50%",
@@ -166,7 +166,7 @@ export default function LeftTimelineNav({
   return (
     <Box
       sx={{
-        position: "fixed",
+        position: "absolute",
         left: 18,
         top: "50%",
         transform: "translateY(-50%)",

@@ -8,11 +8,23 @@ type Props = {
   reducedMotion: boolean;
   introFade: number;
   introScale: number;
+  fitParent?: boolean;
 };
 
-export default function ProjectsIntro({ reducedMotion, introFade, introScale }: Props) {
+export default function ProjectsIntro({ reducedMotion, introFade, introScale, fitParent = false }: Props) {
   return (
-    <Box id="projects-archive" sx={PROJECTS_SX.introSlide}>
+    <Box
+      id="projects-archive"
+      sx={{
+        ...PROJECTS_SX.introSlide,
+        ...(fitParent
+          ? {
+              height: "100%",
+              minHeight: "100%",
+            }
+          : null),
+      }}
+    >
       <Box sx={PROJECTS_SX.introVignette} />
       <Box
         aria-hidden

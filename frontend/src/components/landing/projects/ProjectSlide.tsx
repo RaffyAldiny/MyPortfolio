@@ -24,6 +24,7 @@ type Props = {
   isMobile: boolean;
   panelId?: string;
   navSectionId?: string;
+  fitParent?: boolean;
 };
 
 function ProjectSlide({
@@ -34,6 +35,7 @@ function ProjectSlide({
   isMobile,
   panelId,
   navSectionId,
+  fitParent = false,
 }: Props) {
   const videoRef = React.useRef<HTMLVideoElement | null>(null);
   const videoSrc = isMobile ? project.video.mobile : project.video.desktop;
@@ -90,6 +92,12 @@ function ProjectSlide({
       id={panelId ?? project.id}
       sx={{
         ...PROJECTS_SX.stickySlide,
+        ...(fitParent
+          ? {
+              height: "100%",
+              minHeight: "100%",
+            }
+          : null),
         zIndex,
         bgcolor: "#000",
         boxShadow: `0 -10px 24px ${DARK_GREEN_SHADOW}`,
@@ -158,6 +166,30 @@ function ProjectSlide({
       </Box>
 
       <Box sx={PROJECTS_SX.gradientOverlay} />
+
+      {!videoReady && isActive ? (
+        <Box
+          sx={{
+            position: "absolute",
+            top: { xs: 14, md: 24 },
+            right: { xs: 14, md: 24 },
+            zIndex: 4,
+            px: 1.1,
+            py: 0.55,
+            borderRadius: 999,
+            bgcolor: "rgba(0,0,0,0.42)",
+            border: "1px solid rgba(255,255,255,0.12)",
+            color: "rgba(255,255,255,0.84)",
+            fontSize: { xs: "0.66rem", md: "0.72rem" },
+            fontWeight: 800,
+            letterSpacing: "0.06em",
+            textTransform: "uppercase",
+            backdropFilter: "blur(8px)",
+          }}
+        >
+          Loading Preview
+        </Box>
+      ) : null}
 
       <Box sx={PROJECTS_SX.contentBox} data-project-content>
         <Typography sx={PROJECTS_SX.projectSubtitle}>

@@ -42,9 +42,9 @@ const SkillPill = React.memo(function SkillPill({ skill, animate, index, totalCo
         sx={{
           display: "inline-flex",
           alignItems: "center",
-          gap: { xs: 0.95, sm: 1.35 },
-          px: { xs: 1.2, sm: 2 },
-          py: { xs: 0.76, sm: 1.15 },
+          gap: { xs: 0.72, sm: 1.35 },
+          px: { xs: 0.98, sm: 2 },
+          py: { xs: 0.62, sm: 1.15 },
           borderRadius: { xs: 2.5, sm: 3 },
           position: "relative",
           backgroundColor: "rgba(249, 252, 247, 0.62)",
@@ -66,10 +66,10 @@ const SkillPill = React.memo(function SkillPill({ skill, animate, index, totalCo
           alt={name}
           variant="rounded"
           sx={{
-            width: { xs: 18, sm: 26 },
-            height: { xs: 18, sm: 26 },
+            width: { xs: 16, sm: 26 },
+            height: { xs: 16, sm: 26 },
             bgcolor: "rgba(249,252,247,0.86)",
-            p: { xs: 0.38, sm: 0.45 },
+            p: { xs: 0.3, sm: 0.45 },
             borderRadius: 1,
             flexShrink: 0,
           }}
@@ -77,9 +77,9 @@ const SkillPill = React.memo(function SkillPill({ skill, animate, index, totalCo
         />
         <Typography
           sx={{
-            fontSize: { xs: 10.3, sm: 13 },
+            fontSize: { xs: 9.5, sm: 13 },
             fontWeight: 900,
-            letterSpacing: { xs: 0.28, sm: 0.4 },
+            letterSpacing: { xs: 0.2, sm: 0.4 },
             textTransform: "uppercase",
             color: textColor ?? "#2D2D3A",
             lineHeight: 1.15,

@@ -190,7 +190,7 @@ export default function SkillsShowcase() {
           variant="h2"
           sx={{
             fontWeight: 900,
-            fontSize: { xs: "2.45rem", sm: "3.5rem", md: "4.7rem" },
+            fontSize: { xs: "2.18rem", sm: "3.5rem", md: "4.7rem" },
             mb: { xs: 1.2, md: 1.15 },
             textTransform: "uppercase",
             textAlign: "center",
@@ -209,8 +209,8 @@ export default function SkillsShowcase() {
             color: "#1B4B22",
             letterSpacing: 0.1,
             mb: { xs: 2.2, md: 4 },
-            fontSize: { xs: 12.25, md: 14.5 },
-            lineHeight: { xs: 1.48, md: 1.5 },
+            fontSize: { xs: 11.1, md: 14.5 },
+            lineHeight: { xs: 1.42, md: 1.5 },
             maxWidth: 680,
             mx: "auto",
           }}
@@ -248,11 +248,11 @@ export default function SkillsShowcase() {
             flexWrap: "wrap",
             justifyContent: "center",
             columnGap: { xs: 0.65, sm: 1.4, md: 1.55 },
-            rowGap: { xs: 0.8, sm: 1.45, md: 1.55 },
+            rowGap: { xs: 0.66, sm: 1.45, md: 1.55 },
             maxWidth: 1120,
             width: "100%",
             mx: "auto",
-            px: { xs: 0.4, sm: 0 },
+            px: { xs: 0.2, sm: 0 },
           }}
         >
           {filtered.map((skill) => (
