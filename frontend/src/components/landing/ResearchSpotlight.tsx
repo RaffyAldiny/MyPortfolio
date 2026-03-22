@@ -148,7 +148,7 @@ export default function ResearchSpotlight() {
               </Box>
             </Box>
 
-            <Typography sx={{ ...SX.summary, mt: 2 }} data-research-reveal>
+            <Typography sx={{ ...SX.summary, mt: 2, mb: { xs: 1.05, md: 1.35 } }} data-research-reveal>
               My published thesis study proposes a deepfake detection framework that
               combines{" "}
               <ReferenceLink href={EFFICIENTNET_B0_URL}>EfficientNet-B0</ReferenceLink>{" "}

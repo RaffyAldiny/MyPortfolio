@@ -143,7 +143,7 @@ export const SX = {
   summary: {
     color: alpha("#243226", 0.82),
     fontSize: { xs: "0.72rem", md: "0.9rem" },
-    lineHeight: { xs: 1.42, md: 1.68 },
+    lineHeight: { xs: 1.5, md: 1.76 },
     textAlign: "justify",
     textJustify: "inter-word",
     maxWidth: 760,

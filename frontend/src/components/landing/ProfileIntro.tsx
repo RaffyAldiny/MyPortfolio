@@ -126,7 +126,7 @@ const SX = {
     textTransform: "none",
     letterSpacing: "0.04em",
     fontSize: { xs: "1rem", md: "1.05rem" },
-    mt: { xs: 2.4, md: 0 },
+    mt: { xs: 1.8, md: 0 },
     mb: -0.5,
   },
   name: {
