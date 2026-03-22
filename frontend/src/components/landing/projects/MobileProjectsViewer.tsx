@@ -36,6 +36,12 @@ export function MobileProjectPanel({
   fitParent = false,
 }: MobileProjectSlideProps) {
   const videoRef = React.useRef<HTMLVideoElement | null>(null);
+  const preventContextMenu = React.useCallback((event: React.MouseEvent) => {
+    event.preventDefault();
+  }, []);
+  const preventDrag = React.useCallback((event: React.DragEvent) => {
+    event.preventDefault();
+  }, []);
   const [videoReady, setVideoReady] = React.useState(false);
   const [hasLoadedOnce, setHasLoadedOnce] = React.useState(false);
 
@@ -83,9 +89,18 @@ export function MobileProjectPanel({
       data-snap-panel="true"
       data-nav-section={navSectionId}
     >
-      <Box sx={PROJECTS_SX.projectImageFrame}>
+      <Box
+        sx={{
+          ...PROJECTS_SX.projectImageFrame,
+          userSelect: "none",
+          WebkitUserSelect: "none",
+          WebkitUserDrag: "none",
+        }}
+        onContextMenu={preventContextMenu}
+        onDragStart={preventDrag}
+      >
         <Box sx={PROJECTS_SX.projectImageInner}>
-          <Box sx={PROJECTS_SX.projectPosterLayer}>
+          <Box sx={PROJECTS_SX.projectPosterLayer} onContextMenu={preventContextMenu}>
             <Image
               src={project.image}
               alt={`${project.title} poster`}
@@ -93,6 +108,7 @@ export function MobileProjectPanel({
               sizes="100vw"
               quality={82}
               priority={isPriority}
+              draggable={false}
               style={{ objectFit: "cover" }}
             />
           </Box>
@@ -110,11 +126,17 @@ export function MobileProjectPanel({
                 poster={project.image}
                 aria-label={`${project.title} preview video`}
                 disablePictureInPicture
+                controlsList="nodownload noplaybackrate nofullscreen"
+                onContextMenu={preventContextMenu}
+                onDragStart={preventDrag}
                 onLoadedData={() => setVideoReady(true)}
                 onCanPlay={() => setVideoReady(true)}
                 onError={() => setVideoReady(false)}
                 sx={{
                   ...PROJECTS_SX.projectVideoLayer,
+                  userSelect: "none",
+                  WebkitUserSelect: "none",
+                  WebkitUserDrag: "none",
                   opacity: videoReady && isActive ? 1 : 0,
                   transition: "opacity 380ms ease",
                   backgroundColor: "#000",
@@ -139,6 +161,21 @@ export function MobileProjectPanel({
           background:
             "linear-gradient(to top, rgba(3,14,5,0.92) 0%, rgba(3,14,5,0.74) 34%, rgba(3,14,5,0.24) 62%, rgba(0,0,0,0.04) 100%)",
         }}
+      />
+
+      <Box
+        sx={{
+          position: "absolute",
+          inset: 0,
+          zIndex: 2,
+          background: "transparent",
+          userSelect: "none",
+          WebkitUserSelect: "none",
+          WebkitUserDrag: "none",
+        }}
+        aria-hidden
+        onContextMenu={preventContextMenu}
+        onDragStart={preventDrag}
       />
 
       {!videoReady && isActive ? (

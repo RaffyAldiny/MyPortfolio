@@ -113,6 +113,38 @@ export default function Home() {
     };
   }, []);
 
+  React.useEffect(() => {
+    const isEditableTarget = (target: EventTarget | null) => {
+      if (!(target instanceof HTMLElement)) return false;
+      const tagName = target.tagName;
+      return (
+        target.isContentEditable ||
+        tagName === "INPUT" ||
+        tagName === "TEXTAREA" ||
+        tagName === "SELECT"
+      );
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (isEditableTarget(event.target)) return;
+
+      const key = event.key.toLowerCase();
+      const saveCombo = (event.ctrlKey || event.metaKey) && key === "s";
+      const viewSourceCombo = (event.ctrlKey || event.metaKey) && key === "u";
+      const devtoolsKey = key === "f12";
+
+      if (!saveCombo && !viewSourceCombo && !devtoolsKey) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+    };
+
+    document.addEventListener("keydown", handleKeyDown, true);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown, true);
+    };
+  }, []);
+
   const handleSelectSection = React.useCallback(
     (id: string) => {
       scrollSnapShellToPanel(id, isMobile ? "auto" : "smooth");

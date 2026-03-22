@@ -38,6 +38,12 @@ function ProjectSlide({
   fitParent = false,
 }: Props) {
   const videoRef = React.useRef<HTMLVideoElement | null>(null);
+  const preventContextMenu = React.useCallback((event: React.MouseEvent) => {
+    event.preventDefault();
+  }, []);
+  const preventDrag = React.useCallback((event: React.DragEvent) => {
+    event.preventDefault();
+  }, []);
   const videoSrc = isMobile ? project.video.mobile : project.video.desktop;
   const [videoReady, setVideoReady] = React.useState(false);
   const [hasLoadedOnce, setHasLoadedOnce] = React.useState(false);
@@ -107,9 +113,19 @@ function ProjectSlide({
       data-project-slide
       data-project-id={project.id}
     >
-      <Box sx={PROJECTS_SX.projectImageFrame} data-project-image>
+      <Box
+        sx={{
+          ...PROJECTS_SX.projectImageFrame,
+          userSelect: "none",
+          WebkitUserSelect: "none",
+          WebkitUserDrag: "none",
+        }}
+        data-project-image
+        onContextMenu={preventContextMenu}
+        onDragStart={preventDrag}
+      >
         <Box sx={PROJECTS_SX.projectImageInner}>
-          <Box sx={PROJECTS_SX.projectPosterLayer}>
+          <Box sx={PROJECTS_SX.projectPosterLayer} onContextMenu={preventContextMenu}>
             <Image
               src={project.image}
               alt={`${project.title} poster`}
@@ -117,6 +133,7 @@ function ProjectSlide({
               sizes="100vw"
               quality={82}
               priority={isPriority}
+              draggable={false}
               style={{ objectFit: "cover" }}
             />
           </Box>
@@ -134,6 +151,9 @@ function ProjectSlide({
                 poster={project.image}
                 aria-label={`${project.title} preview video`}
                 disablePictureInPicture
+                controlsList="nodownload noplaybackrate nofullscreen"
+                onContextMenu={preventContextMenu}
+                onDragStart={preventDrag}
                 onLoadedData={() => setVideoReady(true)}
                 onCanPlay={() => setVideoReady(true)}
                 onError={() => setVideoReady(false)}
@@ -144,6 +164,9 @@ function ProjectSlide({
                   willChange: "transform, opacity",
                   backgroundColor: "#000",
                   filter: "blur(0px)",
+                  userSelect: "none",
+                  WebkitUserSelect: "none",
+                  WebkitUserDrag: "none",
                   opacity: videoReady && isActive ? 1 : 0,
                   transform: videoReady && isActive
                     ? "translate3d(0,0,0) scale(1)"
@@ -166,6 +189,21 @@ function ProjectSlide({
       </Box>
 
       <Box sx={PROJECTS_SX.gradientOverlay} />
+
+      <Box
+        sx={{
+          position: "absolute",
+          inset: 0,
+          zIndex: 2,
+          background: "transparent",
+          userSelect: "none",
+          WebkitUserSelect: "none",
+          WebkitUserDrag: "none",
+        }}
+        aria-hidden
+        onContextMenu={preventContextMenu}
+        onDragStart={preventDrag}
+      />
 
       {!videoReady && isActive ? (
         <Box
