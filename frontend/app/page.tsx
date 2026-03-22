@@ -34,7 +34,7 @@ const FRAMED_PANEL_SX = {
   ...PANEL_SX,
   display: "grid",
   gridTemplateRows: {
-    xs: "max(12px, env(safe-area-inset-top)) minmax(0, 1fr) calc(78px + env(safe-area-inset-bottom))",
+    xs: "max(12px, env(safe-area-inset-top)) minmax(0, 1fr) 0px",
     md: "0px minmax(0, 1fr) 0px",
   },
 } as const;

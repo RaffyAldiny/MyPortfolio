@@ -19,7 +19,8 @@ export const SX = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    py: { xs: "calc(16px + env(safe-area-inset-top))", md: 2 },
+    pt: { xs: "calc(12px + env(safe-area-inset-top))", md: 2 },
+    pb: { xs: "calc(82px + env(safe-area-inset-bottom))", md: 2 },
   },
   aura: {
     position: "absolute",
@@ -41,7 +42,10 @@ export const SX = {
     background: "#FFFFFF",
     border: `1px solid ${BORDER_GREEN}`,
     boxShadow: "0 14px 34px rgba(15, 23, 42, 0.06)",
-    maxHeight: { xs: "calc(100svh - 132px - env(safe-area-inset-top) - env(safe-area-inset-bottom))", md: "none" },
+    maxHeight: {
+      xs: "calc(100svh - 102px - env(safe-area-inset-top) - env(safe-area-inset-bottom))",
+      md: "none",
+    },
   },
   panel: {
     p: { xs: 1.4, sm: 3, md: 5 },
