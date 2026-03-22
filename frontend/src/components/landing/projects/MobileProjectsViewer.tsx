@@ -151,11 +151,14 @@ function MobileProjectSlide({
           sx={{
             width: "100%",
             maxHeight: "100%",
-            overflowY: "auto",
-            overscrollBehaviorY: "contain",
-            WebkitOverflowScrolling: "touch",
-            scrollbarWidth: "none",
-            "&::-webkit-scrollbar": { display: "none" },
+            overflowY: "hidden",
+            "@media (hover: none) and (pointer: coarse)": {
+              overflowY: "auto",
+              overscrollBehaviorY: "contain",
+              WebkitOverflowScrolling: "touch",
+              scrollbarWidth: "none",
+              "&::-webkit-scrollbar": { display: "none" },
+            },
           }}
         >
           <Typography sx={{ ...PROJECTS_SX.projectSubtitle, mb: 0.75 }}>

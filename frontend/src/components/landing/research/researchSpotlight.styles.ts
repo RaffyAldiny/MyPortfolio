@@ -52,10 +52,13 @@ export const SX = {
     minHeight: 0,
     maxHeight: "100%",
     overflowX: "hidden",
-    overflowY: { xs: "auto", md: "hidden" },
-    overscrollBehaviorY: "contain",
-    WebkitOverflowScrolling: "touch",
-    scrollbarWidth: "thin",
+    overflowY: "hidden",
+    "@media (hover: none) and (pointer: coarse)": {
+      overflowY: "auto",
+      overscrollBehaviorY: "contain",
+      WebkitOverflowScrolling: "touch",
+      scrollbarWidth: "thin",
+    },
   },
   thesisLabel: {
     fontSize: { xs: "0.6rem", md: "0.78rem" },
