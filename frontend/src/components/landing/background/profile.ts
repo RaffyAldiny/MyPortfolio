@@ -25,15 +25,15 @@ export function getBackgroundProfile(width: number, lowPowerDevice: boolean): Ba
     return {
       key: "mobile",
       isMobile: true,
-      flowCount: 12,
-      shapeCount: 18,
-      pad: 16,
-      baseVx: 6,
-      baseVy: -4,
+      flowCount: 28,
+      shapeCount: 0,
+      pad: 18,
+      baseVx: 5,
+      baseVy: -3,
       flowBloomStride: 999,
       shapeBloomStride: 999,
-      targetFrameMs: 1000 / 14,
-      projectsFrameMs: 1000 / 8,
+      targetFrameMs: 1000 / 16,
+      projectsFrameMs: 1000 / 10,
       maxDpr: 1,
     };
   }

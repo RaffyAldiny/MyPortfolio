@@ -69,8 +69,12 @@ export default function LandingBackground() {
     const lowPowerDevice = detectLowPowerDevice();
     let profile: BackgroundProfile = getBackgroundProfile(window.innerWidth, lowPowerDevice);
     let spriteBundle: SpriteBundle = getSpriteBundle(profile.isMobile);
-    let leftSet: ShapeSetMap = getShapeTemplateSet(profile.isMobile, profile.shapeCount, 9001, 101);
-    let rightSet: ShapeSetMap = getShapeTemplateSet(profile.isMobile, profile.shapeCount, 4242, 131);
+    let leftSet: ShapeSetMap | null = profile.shapeCount
+      ? getShapeTemplateSet(profile.isMobile, profile.shapeCount, 9001, 101)
+      : null;
+    let rightSet: ShapeSetMap | null = profile.shapeCount
+      ? getShapeTemplateSet(profile.isMobile, profile.shapeCount, 4242, 131)
+      : null;
     let isProjectsActive = false;
     let isScrollActive = false;
     let scrollIdleTimer = 0;
@@ -194,8 +198,12 @@ export default function LandingBackground() {
       if (!profileChanged) return;
 
       spriteBundle = getSpriteBundle(profile.isMobile);
-      leftSet = getShapeTemplateSet(profile.isMobile, profile.shapeCount, 9001, 101);
-      rightSet = getShapeTemplateSet(profile.isMobile, profile.shapeCount, 4242, 131);
+      leftSet = profile.shapeCount
+        ? getShapeTemplateSet(profile.isMobile, profile.shapeCount, 9001, 101)
+        : null;
+      rightSet = profile.shapeCount
+        ? getShapeTemplateSet(profile.isMobile, profile.shapeCount, 4242, 131)
+        : null;
       seedFlowParticles();
       seedShapeParticles();
     };
@@ -203,13 +211,15 @@ export default function LandingBackground() {
     const drawCluster = (
       now: number,
       cluster: ClusterState,
-      set: ShapeSetMap,
+      set: ShapeSetMap | null,
       anchorX: number,
       anchorY: number,
       hueBias: number,
       allowBloom: boolean,
       alphaScale: number
     ) => {
+      if (!set || profile.shapeCount === 0) return;
+
       const elapsed = now - cluster.t0;
       if (elapsed >= cluster.every) {
         cluster.i = cluster.n;
@@ -273,9 +283,11 @@ export default function LandingBackground() {
         phase[i] = wrapTau(phase[i] + omega[i] * dt);
       }
 
-      const shapeAdvance = 2.6 * dt;
-      for (let i = 0; i < profile.shapeCount; i += 1) {
-        shPhase[i] = wrapTau(shPhase[i] + shapeAdvance);
+      if (profile.shapeCount > 0) {
+        const shapeAdvance = 2.6 * dt;
+        for (let i = 0; i < profile.shapeCount; i += 1) {
+          shPhase[i] = wrapTau(shPhase[i] + shapeAdvance);
+        }
       }
 
       const timeHue = Math.floor(now / 220) % HUE_VARIANT_COUNT;
@@ -339,18 +351,20 @@ export default function LandingBackground() {
         ctx.restore();
       }
 
-      ctx.save();
-      ctx.globalCompositeOperation = "screen";
+      if (profile.shapeCount > 0 && leftSet && rightSet) {
+        ctx.save();
+        ctx.globalCompositeOperation = "screen";
 
-      const lx = profile.isMobile ? w * 0.18 : w * 0.22;
-      const ly = profile.isMobile ? h * 0.3 : h * 0.36;
-      const rx = profile.isMobile ? w * 0.82 : w * 0.8;
-      const ry = profile.isMobile ? h * 0.65 : h * 0.6;
+        const lx = profile.isMobile ? w * 0.18 : w * 0.22;
+        const ly = profile.isMobile ? h * 0.3 : h * 0.36;
+        const rx = profile.isMobile ? w * 0.82 : w * 0.8;
+        const ry = profile.isMobile ? h * 0.65 : h * 0.6;
 
-      drawCluster(now, left, leftSet, lx, ly, 8, allowBloom, clusterAlphaScale);
-      drawCluster(now, right, rightSet, rx, ry, 26, allowBloom, clusterAlphaScale);
+        drawCluster(now, left, leftSet, lx, ly, 8, allowBloom, clusterAlphaScale);
+        drawCluster(now, right, rightSet, rx, ry, 26, allowBloom, clusterAlphaScale);
 
-      ctx.restore();
+        ctx.restore();
+      }
 
       raf = requestAnimationFrame(frame);
     };

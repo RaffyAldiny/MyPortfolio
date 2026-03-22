@@ -46,6 +46,7 @@ const SX = {
     fontSize: { xs: "2.02rem", sm: "2.7rem", md: "3.35rem" },
     lineHeight: 1.1,
     mb: 0,
+    mt: { xs: -1, md: 0 },
     color: "#1CDB2F",
     filter: "drop-shadow(0px 2px 8px rgba(28, 219, 47, 0.12))",
     display: "flex",
@@ -121,6 +122,7 @@ const SX = {
     textTransform: "none",
     letterSpacing: "0.04em",
     fontSize: { xs: "1rem", md: "1.05rem" },
+    mt: { xs: 1, md: 0 },
     mb: -0.5,
   },
   name: {
