@@ -2,7 +2,11 @@
 
 import * as React from "react";
 import Image from "next/image";
+import FacebookRoundedIcon from "@mui/icons-material/FacebookRounded";
+import GitHubIcon from "@mui/icons-material/GitHub";
+import LinkedInIcon from "@mui/icons-material/LinkedIn";
 import Box from "@mui/material/Box";
+import IconButton from "@mui/material/IconButton";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { useMediaQuery, useTheme } from "@mui/material";
@@ -14,6 +18,12 @@ const PROFILE = {
   title: "Computer Science Graduate / Full-Stack Developer",
   imageSrc: "/resources/my-portfolio-picture.avif",
 } as const;
+
+const SOCIAL_LINKS = [
+  { label: "GitHub", href: "https://github.com/RaffyAldiny", Icon: GitHubIcon },
+  { label: "LinkedIn", href: "https://www.linkedin.com/", Icon: LinkedInIcon },
+  { label: "Facebook", href: "https://www.facebook.com/", Icon: FacebookRoundedIcon },
+] as const;
 
 const PRISM_GRADIENT =
   "linear-gradient(135deg, #F3FFF0 0%, #CFFAC9 24%, #8EF587 46%, #1CDB2F 62%, #159E22 82%, #0B5A14 100%)";
@@ -126,7 +136,7 @@ const SX = {
     textTransform: "none",
     letterSpacing: "0.04em",
     fontSize: { xs: "1rem", md: "1.05rem" },
-    mt: { xs: 1.8, md: 0 },
+    mt: { xs: 1.1, md: 0 },
     mb: -0.5,
   },
   name: {
@@ -160,10 +170,34 @@ const SX = {
     color: "text.secondary",
     letterSpacing: -0.5,
     mt: { xs: -0.45, md: -0.18 },
-    mb: { xs: 3, md: 3.4 },
+    mb: { xs: 1.15, md: 1.55 },
     opacity: 0.8,
     fontSize: { xs: "1rem", md: "1.4rem" },
     textAlign: "center",
+  },
+  socialRow: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: { xs: 1.15, md: 1.45 },
+    mb: { xs: 2.1, md: 3 },
+  },
+  socialBtn: {
+    width: { xs: 34, md: 40 },
+    height: { xs: 34, md: 40 },
+    borderRadius: "999px",
+    border: "1px solid rgba(28, 219, 47, 0.2)",
+    backgroundColor: "rgba(250, 255, 249, 0.72)",
+    color: "#1A4721",
+    boxShadow: "0 6px 16px rgba(28, 219, 47, 0.08)",
+    backdropFilter: "blur(8px)",
+    transition: "transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease",
+    "&:hover": {
+      backgroundColor: "rgba(250, 255, 249, 0.92)",
+      borderColor: "rgba(28, 219, 47, 0.34)",
+      boxShadow: "0 10px 18px rgba(28, 219, 47, 0.12)",
+      transform: "translateY(-1px)",
+    },
   },
   glass: {
     maxWidth: "760px",
@@ -374,6 +408,22 @@ function ProfileIntroInner() {
         <Typography variant="h6" sx={SX.title} data-hero="title">
           {title}
         </Typography>
+
+        <Box sx={SX.socialRow}>
+          {SOCIAL_LINKS.map(({ label, href, Icon }) => (
+            <IconButton
+              key={label}
+              component="a"
+              href={href}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={label}
+              sx={SX.socialBtn}
+            >
+              <Icon sx={{ fontSize: { xs: "1.02rem", md: "1.14rem" } }} />
+            </IconButton>
+          ))}
+        </Box>
 
         <Box sx={SX.glass} data-hero="glass">
           <Typography sx={SX.bio}>

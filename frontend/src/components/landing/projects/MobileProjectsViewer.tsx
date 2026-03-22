@@ -214,10 +214,6 @@ export function MobileProjectPanel({
               fontSize: project.mobileDescOverride?.fontSize ?? "0.86rem",
               lineHeight: project.mobileDescOverride?.lineHeight ?? 1.46,
               mb: 1.5,
-              display: "-webkit-box",
-              WebkitBoxOrient: "vertical",
-              WebkitLineClamp: 4,
-              overflow: "hidden",
               maxWidth: "100%",
             }}
           >
