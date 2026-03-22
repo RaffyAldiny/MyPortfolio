@@ -259,20 +259,19 @@ export default function LeftTimelineNav({
   } as const;
 
   if (isMobile) {
-    const dockRight = activeId === "projects";
-    const bottomOffset = dockRight
-      ? "calc(54px + env(safe-area-inset-bottom))"
-      : "calc(18px + env(safe-area-inset-bottom))";
+    if (activeId === "projects") {
+      return null;
+    }
 
     return (
       <Box
         sx={{
           position: "fixed",
           zIndex: 9999,
-          bottom: bottomOffset,
-          left: dockRight ? "auto" : "50%",
-          right: dockRight ? 14 : "auto",
-          transform: dockRight ? "none" : "translateX(-50%)",
+          bottom: "calc(18px + env(safe-area-inset-bottom))",
+          left: "50%",
+          right: "auto",
+          transform: "translateX(-50%)",
         }}
       >
         <Stack
@@ -311,21 +310,19 @@ export default function LeftTimelineNav({
             );
           })}
 
-          {!dockRight && (
-            <Typography
-              sx={{
-                minWidth: 78,
-                fontSize: 10,
-                fontWeight: 900,
-                letterSpacing: 1,
-                textTransform: "uppercase",
-                textAlign: "center",
-                color: text,
-              }}
-            >
-              {sections[activeIndex]?.label}
-            </Typography>
-          )}
+          <Typography
+            sx={{
+              minWidth: 78,
+              fontSize: 10,
+              fontWeight: 900,
+              letterSpacing: 1,
+              textTransform: "uppercase",
+              textAlign: "center",
+              color: text,
+            }}
+          >
+            {sections[activeIndex]?.label}
+          </Typography>
 
           <IconButton size="small" onClick={() => jump(1)} sx={{ color: SOFT_GREEN }}>
             <KeyboardArrowDownRoundedIcon sx={{ transform: "rotate(-90deg)", fontSize: "1.15rem" }} />
