@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Poppins } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
@@ -7,9 +7,15 @@ import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import theme from "@/theme";
 
-const poppins = Poppins({
-  weight: ["300", "400", "500", "600", "700", "800"],
-  subsets: ["latin"],
+const poppins = localFont({
+  src: [
+    { path: "../public/fonts/Poppins-Regular.woff2", weight: "400", style: "normal" },
+    { path: "../public/fonts/Poppins-Medium.woff2", weight: "500", style: "normal" },
+    { path: "../public/fonts/Poppins-SemiBold.woff2", weight: "600", style: "normal" },
+    { path: "../public/fonts/Poppins-Bold.woff2", weight: "700", style: "normal" },
+    { path: "../public/fonts/Poppins-ExtraBold.woff2", weight: "800", style: "normal" },
+    { path: "../public/fonts/Poppins-Black.woff2", weight: "900", style: "normal" },
+  ],
   display: "swap",
   variable: "--font-poppins",
 });

@@ -12,7 +12,7 @@ const METRICS = [
 
 export default function ResearchMetrics() {
   return (
-    <Box sx={{ ...SX.metricGrid, mt: 3 }} data-research-reveal>
+    <Box sx={{ ...SX.metricGrid, mt: { xs: 1.1, md: 3 } }} data-research-reveal>
       {METRICS.map((metric) => (
         <Box key={metric.label} sx={SX.metricCard}>
           <Typography className="research-metric-value" sx={SX.metricValue}>

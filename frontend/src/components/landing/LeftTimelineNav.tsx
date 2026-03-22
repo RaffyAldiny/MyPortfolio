@@ -91,7 +91,6 @@ export default function LeftTimelineNav({
   const activeText = ACTIVE_GREEN;
   const bg = "rgba(255,255,255,0.92)";
   const border = alpha(ACTIVE_GREEN, 0.22);
-  const shadow = "drop-shadow(0 10px 22px rgba(11,41,15,0.2))";
 
   const scrollToId = React.useCallback(
     (id: string) => {
@@ -259,87 +258,21 @@ export default function LeftTimelineNav({
     },
   } as const;
 
-  const [ctaBottomPx, setCtaBottomPx] = React.useState<number | null>(null);
-  const mobileDockRef = React.useRef<HTMLDivElement | null>(null);
-
-  React.useEffect(() => {
-    if (!isMobile || activeId !== "projects") {
-      setCtaBottomPx(null);
-      return;
-    }
-
-    let raf = 0;
-    const ctaNodes = Array.from(
-      document.querySelectorAll<HTMLElement>('[data-project-cta="1"]')
-    );
-
-    const findVisibleCtaBottom = () => {
-      if (!ctaNodes.length) {
-        setCtaBottomPx(null);
-        return;
-      }
-
-      const viewportHeight = window.innerHeight;
-      let best: HTMLElement | null = null;
-      let bestBottom = -Infinity;
-
-      for (const el of ctaNodes) {
-        const rect = el.getBoundingClientRect();
-        const visible = rect.bottom > 0 && rect.top < viewportHeight;
-        if (!visible) continue;
-
-        if (rect.bottom > bestBottom) {
-          bestBottom = rect.bottom;
-          best = el;
-        }
-      }
-
-      if (!best) {
-        setCtaBottomPx(null);
-        return;
-      }
-
-      const rect = best.getBoundingClientRect();
-      const distanceFromBottom = viewportHeight - rect.bottom;
-      const dockHeight = mobileDockRef.current?.getBoundingClientRect().height ?? rect.height;
-      const centeredBottom = distanceFromBottom + (rect.height - dockHeight) / 2;
-      const clamped = Math.min(Math.max(Math.round(centeredBottom), 8), 140);
-      setCtaBottomPx(clamped);
-    };
-
-    const onScrollOrResize = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(findVisibleCtaBottom);
-    };
-
-    window.addEventListener("scroll", onScrollOrResize, { passive: true });
-    window.addEventListener("resize", onScrollOrResize, { passive: true });
-    findVisibleCtaBottom();
-
-    return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener("scroll", onScrollOrResize);
-      window.removeEventListener("resize", onScrollOrResize);
-    };
-  }, [activeId, isMobile]);
-
   if (isMobile) {
-    const inProjects = activeId === "projects";
-    const bottom = inProjects ? (ctaBottomPx ?? 18) : 18;
-    const dockRight = inProjects;
+    const dockRight = activeId === "projects";
+    const bottomOffset = dockRight
+      ? "calc(54px + env(safe-area-inset-bottom))"
+      : "calc(18px + env(safe-area-inset-bottom))";
 
     return (
       <Box
-        ref={mobileDockRef}
         sx={{
           position: "fixed",
           zIndex: 9999,
-          filter: shadow,
-          bottom: `calc(${bottom}px + env(safe-area-inset-bottom))`,
+          bottom: bottomOffset,
           left: dockRight ? "auto" : "50%",
           right: dockRight ? 14 : "auto",
           transform: dockRight ? "none" : "translateX(-50%)",
-          transition: "bottom 220ms ease, right 220ms ease, left 220ms ease, transform 220ms ease",
         }}
       >
         <Stack
@@ -353,7 +286,7 @@ export default function LeftTimelineNav({
             bgcolor: bg,
             border: "1px solid",
             borderColor: border,
-            boxShadow: "0 6px 18px rgba(0,0,0,0.12)",
+            boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
           }}
         >
           <IconButton size="small" onClick={() => jump(-1)} sx={{ color: SOFT_GREEN }}>
@@ -417,7 +350,7 @@ export default function LeftTimelineNav({
         pointerEvents: "none",
       }}
     >
-      <Stack spacing={1.15} sx={{ pointerEvents: "auto", filter: shadow, userSelect: "none" }}>
+      <Stack spacing={1.15} sx={{ pointerEvents: "auto", userSelect: "none" }}>
         <Tooltip title="Previous section" placement="right">
           <IconButton onClick={() => jump(-1)} sx={btnSx}>
             <KeyboardArrowUpRoundedIcon />

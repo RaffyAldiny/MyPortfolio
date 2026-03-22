@@ -21,7 +21,7 @@ const AVATAR_SIZE = { xs: 130, md: 160 } as const;
 
 const SX = {
   root: {
-    minHeight: "100dvh",
+    minHeight: { xs: "100svh", md: "100dvh" },
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
@@ -149,7 +149,7 @@ const SX = {
     letterSpacing: -0.5,
     mb: { xs: 3, md: 3.4 },
     opacity: 0.8,
-    fontSize: { xs: "1.2rem", md: "1.4rem" },
+    fontSize: { xs: "1.1rem", md: "1.4rem" },
     textAlign: "center",
   },
   glass: {
@@ -166,7 +166,7 @@ const SX = {
       "0 0 0 1px rgba(28, 219, 47, 0.08), 0 0 26px rgba(28, 219, 47, 0.14), 0 18px 40px rgba(28, 219, 47, 0.08)",
   },
   bio: {
-    fontSize: { xs: "0.88rem", md: "0.95rem" },
+    fontSize: { xs: "0.76rem", md: "0.95rem" },
     lineHeight: 1.8,
     color: "#465546",
     fontWeight: 500,

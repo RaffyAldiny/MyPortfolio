@@ -14,10 +14,6 @@ export type ProjectItem = {
   accent: string;
   link: string | null;
   repo: string | null;
-  mobileSubtitleOverride?: {
-    fontSize: string;
-    letterSpacing: string;
-  };
   mobileDescOverride?: {
     fontSize: string;
     lineHeight: number;
@@ -68,10 +64,6 @@ export const PROJECTS: readonly ProjectItem[] = [
     accent: "#0C7A19",
     link: "https://www.roblox.com/games/14363008084/Brainwave",
     repo: null,
-    mobileSubtitleOverride: {
-      fontSize: "0.72rem",
-      letterSpacing: "0.14em",
-    },
   },
   {
     id: "polylayer",
@@ -117,10 +109,6 @@ export const PROJECTS: readonly ProjectItem[] = [
     accent: "#2CCF3D",
     link: null,
     repo: null,
-    mobileSubtitleOverride: {
-      fontSize: "0.76rem",
-      letterSpacing: "0.16em",
-    },
   },
   {
     id: "paws-and-promises",
@@ -136,10 +124,6 @@ export const PROJECTS: readonly ProjectItem[] = [
     accent: "#9AF58E",
     link: null,
     repo: null,
-    mobileSubtitleOverride: {
-      fontSize: "0.76rem",
-      letterSpacing: "0.16em",
-    },
     mobileDescOverride: {
       fontSize: "0.92rem",
       lineHeight: 1.55,

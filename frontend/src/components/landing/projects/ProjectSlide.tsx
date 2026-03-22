@@ -20,7 +20,7 @@ type Props = {
   project: ProjectItem;
   zIndex: number;
   isPriority: boolean;
-  shouldRenderVideo: boolean;
+  isActive: boolean;
   isMobile: boolean;
 };
 
@@ -28,27 +28,40 @@ function ProjectSlide({
   project,
   zIndex,
   isPriority,
-  shouldRenderVideo,
+  isActive,
   isMobile,
 }: Props) {
-  const activeVideoSrc = shouldRenderVideo
-    ? isMobile
-      ? project.video.mobile
-      : project.video.desktop
-    : null;
+  const videoRef = React.useRef<HTMLVideoElement | null>(null);
+  const videoSrc = isMobile ? project.video.mobile : project.video.desktop;
   const [videoReady, setVideoReady] = React.useState(false);
+  const [hasLoadedOnce, setHasLoadedOnce] = React.useState(false);
+
+  React.useEffect(() => {
+    if (isActive) {
+      setHasLoadedOnce(true);
+    }
+  }, [isActive]);
 
   React.useEffect(() => {
     setVideoReady(false);
-  }, [activeVideoSrc]);
+  }, [videoSrc]);
 
-  const subtitleOverride =
-    isMobile && project.mobileSubtitleOverride
-      ? {
-          fontSize: project.mobileSubtitleOverride.fontSize,
-          letterSpacing: project.mobileSubtitleOverride.letterSpacing,
-        }
-      : undefined;
+  React.useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !hasLoadedOnce) return;
+
+    if (isActive) {
+      const playPromise = video.play();
+      if (playPromise && typeof playPromise.catch === "function") {
+        playPromise.catch(() => {
+          setVideoReady(false);
+        });
+      }
+      return;
+    }
+
+    video.pause();
+  }, [hasLoadedOnce, isActive, videoSrc]);
 
   const descOverride =
     isMobile && project.mobileDescOverride
@@ -82,29 +95,28 @@ function ProjectSlide({
     >
       <Box sx={PROJECTS_SX.projectImageFrame} data-project-image>
         <Box sx={PROJECTS_SX.projectImageInner}>
-          {activeVideoSrc ? (
-            <>
-              <Box sx={PROJECTS_SX.projectPosterLayer}>
-                <Image
-                  src={project.image}
-                  alt={`${project.title} poster`}
-                  fill
-                  sizes="100vw"
-                  quality={82}
-                  priority={isPriority}
-                  style={{ objectFit: "cover" }}
-                />
-              </Box>
+          <Box sx={PROJECTS_SX.projectPosterLayer}>
+            <Image
+              src={project.image}
+              alt={`${project.title} poster`}
+              fill
+              sizes="100vw"
+              quality={82}
+              priority={isPriority}
+              style={{ objectFit: "cover" }}
+            />
+          </Box>
 
+          {hasLoadedOnce ? (
+            <>
               <Box
                 component="video"
-                key={activeVideoSrc}
-                src={activeVideoSrc}
-                autoPlay
+                ref={videoRef}
+                src={videoSrc}
                 muted
                 loop
                 playsInline
-                preload={isPriority ? "auto" : "metadata"}
+                preload={isActive && isPriority ? "auto" : "metadata"}
                 poster={project.image}
                 aria-label={`${project.title} preview video`}
                 disablePictureInPicture
@@ -118,8 +130,8 @@ function ProjectSlide({
                   willChange: "transform, opacity",
                   backgroundColor: "#000",
                   filter: "blur(0px)",
-                  opacity: videoReady ? 1 : 0,
-                  transform: videoReady
+                  opacity: videoReady && isActive ? 1 : 0,
+                  transform: videoReady && isActive
                     ? "translate3d(0,0,0) scale(1)"
                     : "translate3d(0,0,0) scale(1.02)",
                   transition:
@@ -130,22 +142,12 @@ function ProjectSlide({
               <Box
                 sx={{
                   ...PROJECTS_SX.projectVideoVeil,
-                  opacity: videoReady ? 0.18 : 0.34,
+                  opacity: videoReady && isActive ? 0.18 : 0.34,
                   transition: "opacity 420ms ease",
                 }}
               />
             </>
-          ) : (
-            <Image
-              src={project.image}
-              alt={`${project.title} preview`}
-              fill
-              sizes="100vw"
-              quality={82}
-              priority={isPriority}
-              style={{ objectFit: "cover" }}
-            />
-          )}
+          ) : null}
         </Box>
       </Box>
 
@@ -154,7 +156,7 @@ function ProjectSlide({
       <Box sx={PROJECTS_SX.contentBox} data-project-content>
         <Typography sx={PROJECTS_SX.projectSubtitle}>
           <Box component="span" sx={PROJECTS_SX.projectLine} data-project-line />
-          <Box component="span" sx={subtitleOverride}>
+          <Box component="span">
             {project.subtitle}
           </Box>
         </Typography>

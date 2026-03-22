@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import * as React from "react";
-import { Box, Container, Stack } from "@mui/material";
+import { Box, Container, Stack, useMediaQuery, useTheme } from "@mui/material";
 import GlobalStyles from "@mui/material/GlobalStyles";
 
 import LandingBackground from "@/components/landing/LandingBackground";
@@ -13,28 +13,41 @@ import LetsWorkTogether from "@/components/landing/LetsWorkTogether";
 import LeftTimelineNav from "@/components/landing/LeftTimelineNav";
 import { TIMELINE_SECTIONS } from "@/constants/navigation";
 
-const sectionSnapSx = {
-  height: "100dvh",
-  scrollSnapAlign: "start" as const,
-  scrollSnapStop: "always" as const,
-  scrollMarginTop: 0,
-  display: "flex",
-  alignItems: "stretch",
-  overflow: "clip",
-};
-
 export default function Home() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const pageSnapType = "y mandatory";
+  const pageScrollBehavior = isMobile ? "auto" : "smooth";
+  const sectionSnapSx = {
+    height: { xs: "100svh", md: "100dvh" },
+    minHeight: { xs: "100svh", md: "100dvh" },
+    scrollSnapAlign: "start" as const,
+    scrollSnapStop: "always" as const,
+    scrollMarginTop: 0,
+    display: "flex",
+    alignItems: "stretch",
+    overflow: "clip",
+  };
+
   return (
-    <Box sx={{ minHeight: "100dvh", scrollBehavior: "smooth", backgroundColor: "#57bc53" }}>
+    <Box
+      sx={{
+        minHeight: { xs: "100svh", md: "100dvh" },
+        scrollBehavior: pageScrollBehavior,
+        backgroundColor: "#57bc53",
+      }}
+    >
       <GlobalStyles
         styles={{
           html: {
-            scrollSnapType: "y mandatory",
-            scrollBehavior: "smooth",
-            scrollPaddingTop: "0px",
+            scrollSnapType: pageSnapType,
+            scrollBehavior: pageScrollBehavior,
+            scrollPaddingTop: "env(safe-area-inset-top)",
+            overscrollBehaviorY: "auto",
           },
           body: {
-            scrollSnapType: "y mandatory",
+            scrollSnapType: pageSnapType,
+            overscrollBehaviorY: "auto",
           },
         }}
       />
@@ -48,7 +61,7 @@ export default function Home() {
         wrapAround
       />
 
-      <Box sx={{ scrollSnapType: "y mandatory" }}>
+      <Box sx={{ scrollSnapType: pageSnapType }}>
         <Box id="intro" sx={sectionSnapSx}>
           <Container
             maxWidth="lg"
@@ -71,10 +84,8 @@ export default function Home() {
           id="techstacks"
           sx={{
             ...sectionSnapSx,
-            height: { xs: "auto", md: "100dvh" },
-            minHeight: "100dvh",
+            minHeight: { xs: "100svh", md: "100dvh" },
             scrollMarginTop: 0,
-            overflow: { xs: "visible", md: "clip" },
           }}
         >
           <Container
@@ -85,7 +96,7 @@ export default function Home() {
               zIndex: 1,
               py: { xs: 0, md: 0 },
               display: "flex",
-              alignItems: { xs: "stretch", md: "center" },
+              alignItems: "center",
             }}
           >
             <Stack alignItems="center" spacing={0} sx={{ width: "100%" }}>
@@ -118,10 +129,8 @@ export default function Home() {
           id="contact"
           sx={{
             ...sectionSnapSx,
-            height: { xs: "auto", md: "100dvh" },
-            minHeight: "100dvh",
+            minHeight: { xs: "100svh", md: "100dvh" },
             backgroundColor: "#57bc53",
-            overflow: { xs: "visible", md: "clip" },
           }}
         >
           <Container
@@ -136,7 +145,7 @@ export default function Home() {
               px: 0,
               py: 0,
               display: "flex",
-              alignItems: { xs: "stretch", md: "center" },
+              alignItems: "center",
             }}
           >
             <Stack alignItems="center" spacing={8} sx={{ width: "100%" }}>
