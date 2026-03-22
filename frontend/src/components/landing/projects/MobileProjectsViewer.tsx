@@ -8,7 +8,6 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
-import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import type { ProjectItem } from "@/components/landing/projects/projects.data";
 import { PROJECTS_SX } from "@/components/landing/projects/projects.styles";
@@ -148,7 +147,17 @@ function MobileProjectSlide({
           pb: "calc(28px + env(safe-area-inset-bottom))",
         }}
       >
-        <Box sx={{ width: "100%" }}>
+        <Box
+          sx={{
+            width: "100%",
+            maxHeight: "100%",
+            overflowY: "auto",
+            overscrollBehaviorY: "contain",
+            WebkitOverflowScrolling: "touch",
+            scrollbarWidth: "none",
+            "&::-webkit-scrollbar": { display: "none" },
+          }}
+        >
           <Typography sx={{ ...PROJECTS_SX.projectSubtitle, mb: 0.75 }}>
             <Box component="span" sx={{ ...PROJECTS_SX.projectLine, width: 34 }} />
             <Box component="span">{project.subtitle}</Box>
@@ -185,12 +194,11 @@ function MobileProjectSlide({
           <Box
             sx={{
               display: "flex",
+              flexWrap: "wrap",
               gap: 0.75,
-              overflowX: "auto",
-              pb: 0.45,
-              mb: 1.55,
-              scrollbarWidth: "none",
-              "&::-webkit-scrollbar": { display: "none" },
+              pb: 0.2,
+              mb: 1.35,
+              maxWidth: "100%",
             }}
           >
             {project.tags.map((tag) => (
@@ -211,7 +219,14 @@ function MobileProjectSlide({
             ))}
           </Box>
 
-          <Stack direction="row" spacing={1.1} sx={{ width: "100%" }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 1.1,
+              width: "100%",
+            }}
+          >
             {project.link ? (
               <Button
                 variant="contained"
@@ -225,11 +240,11 @@ function MobileProjectSlide({
                 }}
                 href={project.link}
                 target="_blank"
-              >
-                View Project Live
-              </Button>
-            ) : (
-              <Button
+                >
+                  View Project Live
+                </Button>
+              ) : (
+                <Button
                 variant="contained"
                 disabled
                 startIcon={<LockOutlinedIcon />}
@@ -240,10 +255,10 @@ function MobileProjectSlide({
                   px: 2.2,
                   flexShrink: 0,
                 }}
-              >
-                Private Build
-              </Button>
-            )}
+                >
+                  Private Build
+                </Button>
+              )}
 
             {project.repo ? (
               <Button
@@ -263,11 +278,11 @@ function MobileProjectSlide({
                 }}
                 href={project.repo}
                 target="_blank"
-              >
-                Source
-              </Button>
-            ) : null}
-          </Stack>
+                >
+                  Source
+                </Button>
+              ) : null}
+          </Box>
         </Box>
       </Box>
     </Box>

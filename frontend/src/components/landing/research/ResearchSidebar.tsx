@@ -33,11 +33,11 @@ export default function ResearchSidebar({ articleUrl, pdfUrl, qrSrc }: Props) {
           International Journal of Progressive Research in Science and Engineering
         </Typography>
 
-        <Typography sx={{ ...SX.sideLabel, mt: 2.4, display: { xs: "none", sm: "block" } }}>
+        <Typography sx={{ ...SX.sideLabel, mt: { xs: 1.8, md: 2.4 } }}>
           Focus
         </Typography>
 
-        <Box sx={{ ...SX.chipWrap, mt: 1, display: { xs: "none", sm: "flex" } }}>
+        <Box sx={{ ...SX.chipWrap, mt: 0.85 }}>
           {BADGES.map((badge) => (
             <Chip key={badge} label={badge} size="small" sx={SX.chip} />
           ))}

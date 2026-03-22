@@ -71,6 +71,8 @@ export default function LandingBackground() {
     let leftSet: ShapeSetMap = getShapeTemplateSet(profile.isMobile, profile.shapeCount, 9001, 101);
     let rightSet: ShapeSetMap = getShapeTemplateSet(profile.isMobile, profile.shapeCount, 4242, 131);
     let isProjectsActive = false;
+    let isScrollActive = false;
+    let scrollIdleTimer = 0;
 
     let fx = new Float32Array(0);
     let fy = new Float32Array(0);
@@ -203,7 +205,8 @@ export default function LandingBackground() {
       anchorX: number,
       anchorY: number,
       hueBias: number,
-      allowBloom: boolean
+      allowBloom: boolean,
+      alphaScale: number
     ) => {
       const elapsed = now - cluster.t0;
       if (elapsed >= cluster.every) {
@@ -227,7 +230,7 @@ export default function LandingBackground() {
         const y = baseY + activeA.ys[i] * inv + activeB.ys[i] * morph;
         const twinkle = 0.68 + 0.32 * sinLUT(shPhase[i]);
 
-        ctx.globalAlpha = 0.36 + twinkle * 0.64;
+        ctx.globalAlpha = (0.36 + twinkle * 0.64) * alphaScale;
 
         let hueIndex = shHue[i] + hueShift + shMod7[i];
         while (hueIndex >= HUE_VARIANT_COUNT) hueIndex -= HUE_VARIANT_COUNT;
@@ -251,7 +254,8 @@ export default function LandingBackground() {
     };
 
     const frame = (now: number) => {
-      const frameBudget = isProjectsActive ? profile.projectsFrameMs : profile.targetFrameMs;
+      const isBusy = isProjectsActive || isScrollActive;
+      const frameBudget = isBusy ? profile.projectsFrameMs : profile.targetFrameMs;
       const elapsedMs = now - last;
       if (elapsedMs < frameBudget) {
         raf = requestAnimationFrame(frame);
@@ -273,7 +277,9 @@ export default function LandingBackground() {
       }
 
       const timeHue = Math.floor(now / 220) % HUE_VARIANT_COUNT;
-      const allowBloom = !isProjectsActive;
+      const allowBloom = !isBusy;
+      const flowAlphaScale = isScrollActive ? 0.64 : 1;
+      const clusterAlphaScale = isScrollActive ? 0.52 : 1;
 
       ctx.save();
       ctx.globalCompositeOperation = "source-over";
@@ -292,7 +298,7 @@ export default function LandingBackground() {
         fy[i] = y;
 
         const twinkle = 0.7 + 0.3 * sinLUT(phase[i]);
-        ctx.globalAlpha = alp[i] * twinkle;
+        ctx.globalAlpha = alp[i] * twinkle * flowAlphaScale;
 
         let hueIndex = hueBase[i] + timeHue;
         if (hueIndex >= HUE_VARIANT_COUNT) hueIndex -= HUE_VARIANT_COUNT;
@@ -339,8 +345,8 @@ export default function LandingBackground() {
       const rx = profile.isMobile ? w * 0.82 : w * 0.8;
       const ry = profile.isMobile ? h * 0.65 : h * 0.6;
 
-      drawCluster(now, left, leftSet, lx, ly, 8, allowBloom);
-      drawCluster(now, right, rightSet, rx, ry, 26, allowBloom);
+      drawCluster(now, left, leftSet, lx, ly, 8, allowBloom, clusterAlphaScale);
+      drawCluster(now, right, rightSet, rx, ry, 26, allowBloom, clusterAlphaScale);
 
       ctx.restore();
 
@@ -369,6 +375,17 @@ export default function LandingBackground() {
       else frame(performance.now());
     };
 
+    const handleScrollActivity = () => {
+      isScrollActive = true;
+      if (scrollIdleTimer) {
+        window.clearTimeout(scrollIdleTimer);
+      }
+      scrollIdleTimer = window.setTimeout(() => {
+        isScrollActive = false;
+        scrollIdleTimer = 0;
+      }, 140);
+    };
+
     const observeProjectsSection = () => {
       const projectsEl = document.getElementById("projects");
       if (!projectsEl || !("IntersectionObserver" in window)) return;
@@ -391,6 +408,8 @@ export default function LandingBackground() {
 
     applyProfile(true);
     observeProjectsSection();
+    window.addEventListener("scroll", handleScrollActivity, { passive: true });
+    window.addEventListener("touchmove", handleScrollActivity, { passive: true });
     window.addEventListener("resize", handleResize, { passive: true });
     document.addEventListener("visibilitychange", handleVisibility);
 
@@ -399,6 +418,11 @@ export default function LandingBackground() {
 
     return () => {
       stop();
+      if (scrollIdleTimer) {
+        window.clearTimeout(scrollIdleTimer);
+      }
+      window.removeEventListener("scroll", handleScrollActivity);
+      window.removeEventListener("touchmove", handleScrollActivity);
       window.removeEventListener("resize", handleResize);
       document.removeEventListener("visibilitychange", handleVisibility);
       sectionObserver?.disconnect();

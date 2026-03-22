@@ -24,6 +24,9 @@ export default function Home() {
     scrollSnapAlign: "start" as const,
     scrollSnapStop: "always" as const,
     scrollMarginTop: 0,
+    position: "relative",
+    isolation: "isolate" as const,
+    contain: "paint" as const,
     display: "flex",
     alignItems: "stretch",
     overflow: "clip",
@@ -43,11 +46,11 @@ export default function Home() {
             scrollSnapType: pageSnapType,
             scrollBehavior: pageScrollBehavior,
             scrollPaddingTop: "env(safe-area-inset-top)",
-            overscrollBehaviorY: "auto",
+            overscrollBehaviorY: "contain",
           },
           body: {
             scrollSnapType: pageSnapType,
-            overscrollBehaviorY: "auto",
+            overscrollBehaviorY: "contain",
           },
         }}
       />

@@ -80,6 +80,11 @@ export default function LeftTimelineNav({
   const effectiveScrollOffsetPx = scrollOffsetPx;
 
   const [activeId, setActiveId] = React.useState(sections[0]?.id ?? "");
+  const activeIdRef = React.useRef(activeId);
+
+  React.useEffect(() => {
+    activeIdRef.current = activeId;
+  }, [activeId]);
 
   const activeIndex = React.useMemo(() => {
     const index = sections.findIndex((section) => section.id === activeId);
@@ -134,11 +139,20 @@ export default function LeftTimelineNav({
 
     if (!sectionElements.length) return;
 
-    const intersectingIds = new Set<string>();
-    let observer: IntersectionObserver | null = null;
+    let rafId = 0;
+    let settleTimer = 0;
 
-    const pickActiveByLayout = () => {
-      const activationY = effectiveScrollOffsetPx + 6;
+    const commitActiveId = (nextId: string) => {
+      activeIdRef.current = nextId;
+      setActiveId((current) => (current === nextId ? current : nextId));
+    };
+
+    const pickActiveSection = () => {
+      const viewportHeight = window.innerHeight;
+      const activationY = Math.min(
+        Math.max(viewportHeight * 0.5, effectiveScrollOffsetPx + 6),
+        Math.max(0, viewportHeight - 2)
+      );
       let nextId = sectionElements[0]?.id ?? sections[0].id;
 
       for (const section of sectionElements) {
@@ -147,69 +161,52 @@ export default function LeftTimelineNav({
         }
       }
 
-      setActiveId((current) => (current === nextId ? current : nextId));
-    };
+      const currentId = activeIdRef.current;
+      const shouldApplyImmediately =
+        !isMobile || nextId === "projects" || currentId === "projects";
 
-    const pickActiveByIntersection = () => {
-      if (!intersectingIds.size) {
-        pickActiveByLayout();
+      if (settleTimer) {
+        window.clearTimeout(settleTimer);
+        settleTimer = 0;
+      }
+
+      if (shouldApplyImmediately) {
+        commitActiveId(nextId);
         return;
       }
 
-      let nextId = sections[0].id;
-      for (const section of sections) {
-        if (intersectingIds.has(section.id)) {
-          nextId = section.id;
-        }
-      }
-
-      setActiveId((current) => (current === nextId ? current : nextId));
+      settleTimer = window.setTimeout(() => {
+        commitActiveId(nextId);
+        settleTimer = 0;
+      }, 90);
     };
 
-    const connectObserver = () => {
-      observer?.disconnect();
-      intersectingIds.clear();
+    const schedulePick = () => {
+      if (rafId) return;
 
-      const viewportHeight = window.innerHeight;
-      const activationY = Math.min(
-        Math.max(0, effectiveScrollOffsetPx + 6),
-        Math.max(0, viewportHeight - 2)
-      );
-      const bottomInset = Math.max(0, viewportHeight - activationY - 2);
-
-      observer = new IntersectionObserver(
-        (entries) => {
-          for (const entry of entries) {
-            const id = (entry.target as HTMLElement).id;
-            if (entry.isIntersecting) intersectingIds.add(id);
-            else intersectingIds.delete(id);
-          }
-
-          pickActiveByIntersection();
-        },
-        {
-          root: null,
-          threshold: 0,
-          rootMargin: `-${activationY}px 0px -${bottomInset}px 0px`,
-        }
-      );
-
-      sectionElements.forEach((section) => observer?.observe(section.el));
-      pickActiveByLayout();
+      rafId = window.requestAnimationFrame(() => {
+        rafId = 0;
+        pickActiveSection();
+      });
     };
 
-    const handleResize = () => {
-      connectObserver();
-    };
-
-    connectObserver();
-    window.addEventListener("resize", handleResize, { passive: true });
+    pickActiveSection();
+    window.addEventListener("scroll", schedulePick, { passive: true });
+    window.addEventListener("resize", schedulePick, { passive: true });
+    window.addEventListener("orientationchange", schedulePick, { passive: true });
 
     return () => {
-      window.removeEventListener("resize", handleResize);
-      observer?.disconnect();
+      if (rafId) {
+        window.cancelAnimationFrame(rafId);
+      }
+      if (settleTimer) {
+        window.clearTimeout(settleTimer);
+      }
+      window.removeEventListener("scroll", schedulePick);
+      window.removeEventListener("resize", schedulePick);
+      window.removeEventListener("orientationchange", schedulePick);
     };
-  }, [effectiveScrollOffsetPx, sections]);
+  }, [effectiveScrollOffsetPx, isMobile, sections]);
 
   const circleBtnBase = {
     width: 40,
@@ -303,7 +300,7 @@ export default function LeftTimelineNav({
                   height: 7,
                   borderRadius: 3.5,
                   background: isActive ? ACTIVE_GREEN : alpha(text, 0.25),
-                  transition: "all 0.35s cubic-bezier(0.4,0,0.2,1)",
+                  transition: "all 0.18s ease",
                   cursor: "pointer",
                 }}
               />
