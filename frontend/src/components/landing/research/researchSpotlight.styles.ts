@@ -13,7 +13,8 @@ export const TOOLTIP_FG = "#E7FFE3";
 export const SX = {
   section: {
     width: "100%",
-    minHeight: { xs: "100svh", md: "100dvh" },
+    height: "100%",
+    minHeight: "100%",
     position: "relative",
     display: "flex",
     alignItems: "center",

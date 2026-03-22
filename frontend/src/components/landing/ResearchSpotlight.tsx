@@ -36,41 +36,38 @@ export default function ResearchSpotlight() {
     const root = rootRef.current;
     if (!root || reducedMotion) return;
 
+    let observer: IntersectionObserver | null = null;
+
     const ctx = gsap.context(() => {
       const reveal = gsap.utils.toArray<HTMLElement>("[data-research-reveal]");
 
       gsap.set(reveal, { autoAlpha: 0, y: 24 });
-      gsap.to(reveal, {
-        autoAlpha: 1,
-        y: 0,
-        duration: 0.72,
-        ease: "power3.out",
-        stagger: 0.08,
-        scrollTrigger: {
-          trigger: root,
-          start: "top 74%",
-          once: true,
-        },
-      });
 
-      gsap.fromTo(
-        "[data-research-card]",
-        { y: 12, rotateX: 1.5 },
-        {
-          y: -4,
-          rotateX: 0,
-          ease: "none",
-          scrollTrigger: {
-            trigger: root,
-            start: "top bottom",
-            end: "bottom top",
-            scrub: true,
-          },
-        }
+      observer = new IntersectionObserver(
+        (entries) => {
+          if (!entries.some((entry) => entry.isIntersecting)) return;
+
+          observer?.disconnect();
+          observer = null;
+
+          gsap.to(reveal, {
+            autoAlpha: 1,
+            y: 0,
+            duration: 0.72,
+            ease: "power3.out",
+            stagger: 0.08,
+          });
+        },
+        { threshold: 0.24 }
       );
+
+      observer.observe(root);
     }, root);
 
-    return () => ctx.revert();
+    return () => {
+      observer?.disconnect();
+      ctx.revert();
+    };
   }, [reducedMotion]);
 
   return (

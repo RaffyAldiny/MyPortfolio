@@ -7,6 +7,7 @@ import ContactReachCard from "@/components/landing/contact/ContactReachCard";
 import { SX } from "@/components/landing/contact/letsWorkTogether.styles";
 import usePrefersReducedMotion from "@/hooks/usePrefersReducedMotion";
 import { ensureGsap, gsap, useIsomorphicLayoutEffect } from "@/lib/gsap";
+import { scrollSnapShellToPanel } from "@/lib/snapShell";
 
 const EMAIL = "rafaelagoncillo@gmail.com";
 const GITHUB_URL = "https://github.com/RaffyAldiny";
@@ -30,13 +31,8 @@ export default function LetsWorkTogether() {
 
   const handleRevisitProjects = React.useCallback((event: React.MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
-
-    const target = document.getElementById("projects");
-    if (!target) return;
-
-    const y = window.scrollY + target.getBoundingClientRect().top;
     window.history.replaceState(null, "", "/#projects");
-    window.scrollTo({ top: y, behavior: "smooth" });
+    scrollSnapShellToPanel("projects", "smooth");
   }, []);
 
   const handleCopy = React.useCallback(async () => {
@@ -75,52 +71,60 @@ export default function LetsWorkTogether() {
     const root = rootRef.current;
     if (!root || reducedMotion) return;
 
+    let observer: IntersectionObserver | null = null;
+
     const ctx = gsap.context(() => {
       const reveal = gsap.utils.toArray<HTMLElement>("[data-contact-reveal]");
       const titleLines = gsap.utils.toArray<HTMLElement>("[data-contact-title-line]");
 
-      const tl = gsap.timeline({
-        defaults: { ease: "power3.out" },
-        scrollTrigger: {
-          trigger: root,
-          start: "top 74%",
-          once: true,
-        },
+      gsap.set(titleLines, {
+        autoAlpha: 0,
+        yPercent: 110,
+        rotateX: -60,
+        transformOrigin: "50% 100%",
+      });
+      gsap.set(reveal, {
+        autoAlpha: 0,
+        y: 26,
       });
 
-      tl.fromTo(
-        titleLines,
-        {
-          autoAlpha: 0,
-          yPercent: 110,
-          rotateX: -60,
-          transformOrigin: "50% 100%",
+      observer = new IntersectionObserver(
+        (entries) => {
+          if (!entries.some((entry) => entry.isIntersecting)) return;
+
+          observer?.disconnect();
+          observer = null;
+
+          gsap.timeline({ defaults: { ease: "power3.out" } })
+            .to(titleLines, {
+              autoAlpha: 1,
+              yPercent: 0,
+              rotateX: 0,
+              duration: 0.95,
+              stagger: 0.1,
+              ease: "expo.out",
+            })
+            .to(
+              reveal,
+              {
+                autoAlpha: 1,
+                y: 0,
+                duration: 0.68,
+                stagger: 0.08,
+              },
+              "-=0.45"
+            );
         },
-        {
-          autoAlpha: 1,
-          yPercent: 0,
-          rotateX: 0,
-          duration: 0.95,
-          stagger: 0.1,
-          ease: "expo.out",
-        }
-      ).fromTo(
-        reveal,
-        {
-          autoAlpha: 0,
-          y: 26,
-        },
-        {
-          autoAlpha: 1,
-          y: 0,
-          duration: 0.68,
-          stagger: 0.08,
-        },
-        "-=0.45"
+        { threshold: 0.24 }
       );
+
+      observer.observe(root);
     }, root);
 
-    return () => ctx.revert();
+    return () => {
+      observer?.disconnect();
+      ctx.revert();
+    };
   }, [reducedMotion]);
 
   return (

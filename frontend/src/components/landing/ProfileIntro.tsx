@@ -21,7 +21,8 @@ const AVATAR_SIZE = { xs: 130, md: 160 } as const;
 
 const SX = {
   root: {
-    minHeight: { xs: "100svh", md: "100dvh" },
+    height: "100%",
+    minHeight: "100%",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",

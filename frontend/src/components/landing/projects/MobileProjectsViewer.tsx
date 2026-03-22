@@ -21,15 +21,17 @@ type MobileProjectSlideProps = {
   project: ProjectItem;
   isActive: boolean;
   isPriority: boolean;
-  setRef: (node: HTMLDivElement | null) => void;
+  setRef?: (node: HTMLDivElement | null) => void;
+  navSectionId?: string;
 };
 
-function MobileProjectSlide({
+export function MobileProjectPanel({
   id,
   project,
   isActive,
   isPriority,
   setRef,
+  navSectionId,
 }: MobileProjectSlideProps) {
   const videoRef = React.useRef<HTMLVideoElement | null>(null);
   const [videoReady, setVideoReady] = React.useState(false);
@@ -76,6 +78,8 @@ function MobileProjectSlide({
         scrollSnapAlign: "start",
         scrollSnapStop: "always",
       }}
+      data-snap-panel="true"
+      data-nav-section={navSectionId}
     >
       <Box sx={PROJECTS_SX.projectImageFrame}>
         <Box sx={PROJECTS_SX.projectImageInner}>
@@ -340,12 +344,13 @@ export default function MobileProjectsViewer({ projects }: Props) {
   return (
     <Box sx={{ width: "100%", backgroundColor: "#050505" }}>
       {projects.map((project, index) => (
-        <MobileProjectSlide
+        <MobileProjectPanel
           key={project.id}
           id={index === 0 ? "projects" : undefined}
           project={project}
           isActive={activeIndex === index}
           isPriority={index === 0}
+          navSectionId="projects"
           setRef={(node) => {
             slideRefs.current[index] = node;
           }}

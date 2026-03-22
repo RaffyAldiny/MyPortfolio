@@ -10,7 +10,7 @@ import {
   type GroupKey,
 } from "@/components/landing/skills/skillShowcase.shared";
 import usePrefersReducedMotion from "@/hooks/usePrefersReducedMotion";
-import { ensureGsap, gsap, ScrollTrigger, useIsomorphicLayoutEffect } from "@/lib/gsap";
+import { ensureGsap, gsap, useIsomorphicLayoutEffect } from "@/lib/gsap";
 
 export default function SkillsShowcase() {
   const reducedMotion = usePrefersReducedMotion();
@@ -49,6 +49,8 @@ export default function SkillsShowcase() {
     const root = rootRef.current;
     if (!root) return;
 
+    let observer: IntersectionObserver | null = null;
+
     const ctx = gsap.context(() => {
       const revealTargets = gsap.utils.toArray<HTMLElement>("[data-skill-fade]");
       const pills = gsap.utils.toArray<HTMLElement>("[data-skill-pill]");
@@ -61,28 +63,12 @@ export default function SkillsShowcase() {
       gsap.set(revealTargets, { autoAlpha: 0, y: 24 });
       gsap.set(pills, { autoAlpha: 0, y: 20, scale: 0.96 });
 
-      if (backdropRef.current) {
-        gsap.fromTo(
-          backdropRef.current,
-          { yPercent: -8 },
-          {
-            yPercent: 10,
-            ease: "none",
-            scrollTrigger: {
-              trigger: root,
-              start: "top bottom",
-              end: "bottom top",
-              scrub: true,
-            },
-          }
-        );
-      }
+      observer = new IntersectionObserver(
+        (entries) => {
+          if (!entries.some((entry) => entry.isIntersecting)) return;
 
-      ScrollTrigger.create({
-        trigger: root,
-        start: "top 72%",
-        once: true,
-        onEnter: () => {
+          observer?.disconnect();
+          observer = null;
           setHasEntered(true);
 
           gsap
@@ -105,10 +91,16 @@ export default function SkillsShowcase() {
               "-=0.32"
             );
         },
-      });
+        { threshold: 0.22 }
+      );
+
+      observer.observe(root);
     }, root);
 
-    return () => ctx.revert();
+    return () => {
+      observer?.disconnect();
+      ctx.revert();
+    };
   }, [reducedMotion]);
 
   useIsomorphicLayoutEffect(() => {
@@ -161,7 +153,8 @@ export default function SkillsShowcase() {
       ref={rootRef}
       sx={{
         width: "100%",
-        minHeight: { xs: "100svh", md: "100dvh" },
+        height: "100%",
+        minHeight: "100%",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",

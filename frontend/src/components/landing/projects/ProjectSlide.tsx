@@ -22,6 +22,8 @@ type Props = {
   isPriority: boolean;
   isActive: boolean;
   isMobile: boolean;
+  panelId?: string;
+  navSectionId?: string;
 };
 
 function ProjectSlide({
@@ -30,6 +32,8 @@ function ProjectSlide({
   isPriority,
   isActive,
   isMobile,
+  panelId,
+  navSectionId,
 }: Props) {
   const videoRef = React.useRef<HTMLVideoElement | null>(null);
   const videoSrc = isMobile ? project.video.mobile : project.video.desktop;
@@ -83,13 +87,15 @@ function ProjectSlide({
 
   return (
     <Box
-      id={project.id}
+      id={panelId ?? project.id}
       sx={{
         ...PROJECTS_SX.stickySlide,
         zIndex,
         bgcolor: "#000",
         boxShadow: `0 -10px 24px ${DARK_GREEN_SHADOW}`,
       }}
+      data-snap-panel="true"
+      data-nav-section={navSectionId}
       data-project-slide
       data-project-id={project.id}
     >

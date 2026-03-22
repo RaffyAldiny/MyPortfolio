@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import * as React from "react";
 import {
@@ -10,9 +10,6 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import GitHubIcon from "@mui/icons-material/GitHub";
-import LinkedInIcon from "@mui/icons-material/LinkedIn";
-import FacebookIcon from "@mui/icons-material/Facebook";
 import KeyboardArrowUpRoundedIcon from "@mui/icons-material/KeyboardArrowUpRounded";
 import KeyboardArrowDownRoundedIcon from "@mui/icons-material/KeyboardArrowDownRounded";
 import { alpha } from "@mui/material/styles";
@@ -21,70 +18,25 @@ type SectionItem = { id: string; label: string };
 
 type Props = {
   sections: ReadonlyArray<SectionItem>;
-  scrollOffsetPx?: number;
-  darkSectionId?: string | string[];
+  activeId: string;
+  onSelect: (id: string) => void;
+  hidden?: boolean;
   wrapAround?: boolean;
 };
 
 const ACTIVE_GREEN = "#1CDB2F";
 const ACTIVE_GREEN_DARK = "#0F5E19";
 const SOFT_GREEN = "#79D883";
-const SOCIALS = [
-  { label: "GitHub", Icon: GitHubIcon, href: "https://github.com/RaffyAldiny" },
-  { label: "LinkedIn", Icon: LinkedInIcon, href: "https://linkedin.com/" },
-  { label: "Facebook", Icon: FacebookIcon, href: "https://facebook.com/" },
-] as const;
-
-function Dot({
-  active,
-  sizePx,
-}: {
-  active: boolean;
-  sizePx: number;
-}) {
-  const size = `${sizePx}px`;
-
-  return (
-    <Box
-      sx={{
-        width: size,
-        height: size,
-        minWidth: size,
-        minHeight: size,
-        borderRadius: "999px",
-        display: "inline-block",
-        flexShrink: 0,
-        overflow: "hidden",
-        boxSizing: "border-box",
-        background: active ? ACTIVE_GREEN : "transparent",
-        border: `1px solid ${
-          active
-            ? alpha(ACTIVE_GREEN, 0.5)
-            : alpha(ACTIVE_GREEN_DARK, 0.42)
-        }`,
-        boxShadow: active ? "0 0 0 3px rgba(28,219,47,0.1)" : "none",
-        transform: "translateZ(0)",
-        transition: "all 140ms ease",
-      }}
-    />
-  );
-}
 
 export default function LeftTimelineNav({
   sections,
-  scrollOffsetPx = 0,
+  activeId,
+  onSelect,
+  hidden = false,
   wrapAround = true,
 }: Props) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const effectiveScrollOffsetPx = scrollOffsetPx;
-
-  const [activeId, setActiveId] = React.useState(sections[0]?.id ?? "");
-  const activeIdRef = React.useRef(activeId);
-
-  React.useEffect(() => {
-    activeIdRef.current = activeId;
-  }, [activeId]);
 
   const activeIndex = React.useMemo(() => {
     const index = sections.findIndex((section) => section.id === activeId);
@@ -96,118 +48,6 @@ export default function LeftTimelineNav({
   const activeText = ACTIVE_GREEN;
   const bg = "rgba(255,255,255,0.92)";
   const border = alpha(ACTIVE_GREEN, 0.22);
-
-  const scrollToId = React.useCallback(
-    (id: string) => {
-      const el = document.getElementById(id);
-      if (!el) return;
-
-      const y = window.scrollY + el.getBoundingClientRect().top - effectiveScrollOffsetPx;
-      window.scrollTo({ top: y, behavior: "smooth" });
-    },
-    [effectiveScrollOffsetPx]
-  );
-
-  const jump = React.useCallback(
-    (dir: -1 | 1) => {
-      if (!sections.length) return;
-
-      let index = activeIndex + dir;
-      if (index < 0) index = wrapAround ? sections.length - 1 : 0;
-      if (index > sections.length - 1) index = wrapAround ? 0 : sections.length - 1;
-
-      scrollToId(sections[index].id);
-    },
-    [activeIndex, scrollToId, sections, wrapAround]
-  );
-
-  React.useEffect(() => {
-    if (!activeId && sections[0]?.id) {
-      setActiveId(sections[0].id);
-    }
-  }, [activeId, sections]);
-
-  React.useEffect(() => {
-    if (!sections.length) return;
-
-    const sectionElements = sections
-      .map((section) => ({
-        id: section.id,
-        el: document.getElementById(section.id),
-      }))
-      .filter((entry): entry is { id: string; el: HTMLElement } => Boolean(entry.el));
-
-    if (!sectionElements.length) return;
-
-    let rafId = 0;
-    let settleTimer = 0;
-
-    const commitActiveId = (nextId: string) => {
-      activeIdRef.current = nextId;
-      setActiveId((current) => (current === nextId ? current : nextId));
-    };
-
-    const pickActiveSection = () => {
-      const viewportHeight = window.innerHeight;
-      const activationY = Math.min(
-        Math.max(viewportHeight * 0.5, effectiveScrollOffsetPx + 6),
-        Math.max(0, viewportHeight - 2)
-      );
-      let nextId = sectionElements[0]?.id ?? sections[0].id;
-
-      for (const section of sectionElements) {
-        if (section.el.getBoundingClientRect().top <= activationY) {
-          nextId = section.id;
-        }
-      }
-
-      const currentId = activeIdRef.current;
-      const shouldApplyImmediately =
-        !isMobile || nextId === "projects" || currentId === "projects";
-
-      if (settleTimer) {
-        window.clearTimeout(settleTimer);
-        settleTimer = 0;
-      }
-
-      if (shouldApplyImmediately) {
-        commitActiveId(nextId);
-        return;
-      }
-
-      settleTimer = window.setTimeout(() => {
-        commitActiveId(nextId);
-        settleTimer = 0;
-      }, 90);
-    };
-
-    const schedulePick = () => {
-      if (rafId) return;
-
-      rafId = window.requestAnimationFrame(() => {
-        rafId = 0;
-        pickActiveSection();
-      });
-    };
-
-    pickActiveSection();
-    window.addEventListener("scroll", schedulePick, { passive: true });
-    window.addEventListener("resize", schedulePick, { passive: true });
-    window.addEventListener("orientationchange", schedulePick, { passive: true });
-
-    return () => {
-      if (rafId) {
-        window.cancelAnimationFrame(rafId);
-      }
-      if (settleTimer) {
-        window.clearTimeout(settleTimer);
-      }
-      window.removeEventListener("scroll", schedulePick);
-      window.removeEventListener("resize", schedulePick);
-      window.removeEventListener("orientationchange", schedulePick);
-    };
-  }, [effectiveScrollOffsetPx, isMobile, sections]);
-
   const circleBtnBase = {
     width: 40,
     height: 40,
@@ -220,6 +60,23 @@ export default function LeftTimelineNav({
     justifyContent: "center",
     flexShrink: 0,
   } as const;
+
+  const jump = React.useCallback(
+    (dir: -1 | 1) => {
+      if (!sections.length) return;
+
+      let index = activeIndex + dir;
+      if (index < 0) index = wrapAround ? sections.length - 1 : 0;
+      if (index > sections.length - 1) index = wrapAround ? 0 : sections.length - 1;
+
+      onSelect(sections[index].id);
+    },
+    [activeIndex, onSelect, sections, wrapAround]
+  );
+
+  if (hidden) {
+    return null;
+  }
 
   const btnSx = {
     ...circleBtnBase,
@@ -235,31 +92,7 @@ export default function LeftTimelineNav({
     },
   } as const;
 
-  const socialBtnSx = {
-    width: 28,
-    height: 28,
-    minWidth: 28,
-    minHeight: 28,
-    p: 0,
-    borderRadius: "50%",
-    color: ACTIVE_GREEN_DARK,
-    bgcolor: "transparent",
-    border: "none",
-    boxShadow: "none",
-    "& .MuiSvgIcon-root": {
-      fontSize: "0.92rem",
-    },
-    "&:hover": {
-      bgcolor: "rgba(235,255,232,0.76)",
-      transform: "translateY(-1px)",
-    },
-  } as const;
-
   if (isMobile) {
-    if (activeId === "projects") {
-      return null;
-    }
-
     return (
       <Box
         sx={{
@@ -267,7 +100,6 @@ export default function LeftTimelineNav({
           zIndex: 9999,
           bottom: "calc(18px + env(safe-area-inset-bottom))",
           left: "50%",
-          right: "auto",
           transform: "translateX(-50%)",
         }}
       >
@@ -294,7 +126,9 @@ export default function LeftTimelineNav({
             return (
               <Box
                 key={section.id}
-                onClick={() => scrollToId(section.id)}
+                onClick={() => onSelect(section.id)}
+                role="button"
+                tabIndex={0}
                 sx={{
                   width: isActive ? 19 : 7,
                   height: 7,
@@ -329,10 +163,6 @@ export default function LeftTimelineNav({
     );
   }
 
-  if (activeId === "projects") {
-    return null;
-  }
-
   return (
     <Box
       sx={{
@@ -358,12 +188,12 @@ export default function LeftTimelineNav({
             return (
               <Box
                 key={section.id}
-                onClick={() => scrollToId(section.id)}
+                onClick={() => onSelect(section.id)}
                 role="button"
                 tabIndex={0}
                 onKeyDown={(event) => {
                   if (event.key === "Enter" || event.key === " ") {
-                    scrollToId(section.id);
+                    onSelect(section.id);
                   }
                 }}
                 sx={{
@@ -375,7 +205,25 @@ export default function LeftTimelineNav({
                   "&:hover .label": { opacity: 1, transform: "translateX(2px)" },
                 }}
               >
-                <Dot active={isActive} sizePx={isActive ? 10 : 7} />
+                <Box
+                  sx={{
+                    width: isActive ? 10 : 7,
+                    height: isActive ? 10 : 7,
+                    minWidth: isActive ? 10 : 7,
+                    minHeight: isActive ? 10 : 7,
+                    borderRadius: "999px",
+                    display: "inline-block",
+                    flexShrink: 0,
+                    background: isActive ? ACTIVE_GREEN : "transparent",
+                    border: `1px solid ${
+                      isActive
+                        ? alpha(ACTIVE_GREEN, 0.5)
+                        : alpha(ACTIVE_GREEN_DARK, 0.42)
+                    }`,
+                    boxShadow: isActive ? "0 0 0 3px rgba(28,219,47,0.1)" : "none",
+                    transition: "all 140ms ease",
+                  }}
+                />
 
                 <Typography
                   className="label"
@@ -398,37 +246,6 @@ export default function LeftTimelineNav({
           })}
         </Stack>
 
-        <Stack
-          spacing={0.55}
-          sx={{
-            alignItems: "flex-start",
-            pl: 0.5,
-            pt: 0.15,
-          }}
-        >
-          <Stack
-            direction="row"
-            spacing={0.25}
-            sx={{
-              px: 0.45,
-              py: 0.32,
-              borderRadius: 999,
-              bgcolor: "rgba(248,255,247,0.94)",
-              border: "1px solid",
-              borderColor: border,
-              boxShadow: "0 0 0 1px rgba(28,219,47,0.04)",
-            }}
-          >
-            {SOCIALS.map(({ label, Icon, href }) => (
-              <Tooltip key={label} title={label} placement="right">
-                <IconButton component="a" href={href} target="_blank" rel="noreferrer" sx={socialBtnSx}>
-                  <Icon />
-                </IconButton>
-              </Tooltip>
-            ))}
-          </Stack>
-        </Stack>
-
         <Tooltip title="Next section" placement="right">
           <IconButton onClick={() => jump(1)} sx={btnSx}>
             <KeyboardArrowDownRoundedIcon />
@@ -438,4 +255,3 @@ export default function LeftTimelineNav({
     </Box>
   );
 }
-

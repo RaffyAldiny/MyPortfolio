@@ -24,6 +24,7 @@ import {
   HUE_VARIANT_COUNT,
   SpriteBundle,
 } from "@/components/landing/background/sprites";
+import { getSnapShell } from "@/lib/snapShell";
 
 const mistA = keyframes`
   0%   { transform: translate3d(-1.2%, -0.8%, 0) scale(1);    opacity: 0.24; }
@@ -107,6 +108,7 @@ export default function LandingBackground() {
     };
 
     let sectionObserver: IntersectionObserver | null = null;
+    const scrollHost = getSnapShell() ?? window;
 
     const resizeCanvas = () => {
       const prevW = w;
@@ -387,8 +389,10 @@ export default function LandingBackground() {
     };
 
     const observeProjectsSection = () => {
-      const projectsEl = document.getElementById("projects");
-      if (!projectsEl || !("IntersectionObserver" in window)) return;
+      const projectPanels = Array.from(
+        document.querySelectorAll<HTMLElement>('[data-nav-section="projects"]')
+      );
+      if (!projectPanels.length || !("IntersectionObserver" in window)) return;
 
       sectionObserver = new IntersectionObserver(
         (entries) => {
@@ -403,13 +407,13 @@ export default function LandingBackground() {
         }
       );
 
-      sectionObserver.observe(projectsEl);
+      projectPanels.forEach((panel) => sectionObserver?.observe(panel));
     };
 
     applyProfile(true);
     observeProjectsSection();
-    window.addEventListener("scroll", handleScrollActivity, { passive: true });
-    window.addEventListener("touchmove", handleScrollActivity, { passive: true });
+    scrollHost.addEventListener("scroll", handleScrollActivity, { passive: true });
+    scrollHost.addEventListener("touchmove", handleScrollActivity, { passive: true });
     window.addEventListener("resize", handleResize, { passive: true });
     document.addEventListener("visibilitychange", handleVisibility);
 
@@ -421,8 +425,8 @@ export default function LandingBackground() {
       if (scrollIdleTimer) {
         window.clearTimeout(scrollIdleTimer);
       }
-      window.removeEventListener("scroll", handleScrollActivity);
-      window.removeEventListener("touchmove", handleScrollActivity);
+      scrollHost.removeEventListener("scroll", handleScrollActivity);
+      scrollHost.removeEventListener("touchmove", handleScrollActivity);
       window.removeEventListener("resize", handleResize);
       document.removeEventListener("visibilitychange", handleVisibility);
       sectionObserver?.disconnect();
