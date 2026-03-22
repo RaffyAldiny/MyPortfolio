@@ -77,7 +77,7 @@ const SkillPill = React.memo(function SkillPill({ skill, animate, index, totalCo
         />
         <Typography
           sx={{
-            fontSize: { xs: 9.5, sm: 13 },
+            fontSize: { xs: 9.5, sm: 12 },
             fontWeight: 900,
             letterSpacing: { xs: 0.2, sm: 0.4 },
             textTransform: "uppercase",

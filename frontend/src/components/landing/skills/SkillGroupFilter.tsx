@@ -19,7 +19,7 @@ export default function SkillGroupFilter({ active, onChange }: Props) {
       onChange={(_, value) => value && onChange(value)}
       sx={{
         position: "relative",
-        borderRadius: { xs: 3, sm: 999 },
+        borderRadius: 999,
         p: { xs: 0.42, sm: 0.5 },
         backgroundColor: "rgba(249,252,247,0.56)",
         border: "1.5px solid rgba(28,219,47,0.32)",
@@ -30,7 +30,7 @@ export default function SkillGroupFilter({ active, onChange }: Props) {
         minWidth: "max-content",
         "& .MuiToggleButton-root": {
           border: 0,
-          borderRadius: { xs: 2.5, sm: 999 },
+          borderRadius: 999,
           textTransform: "uppercase",
           fontWeight: 900,
           letterSpacing: { xs: 0.22, sm: 0.8 },

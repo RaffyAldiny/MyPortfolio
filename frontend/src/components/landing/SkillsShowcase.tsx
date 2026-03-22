@@ -251,7 +251,7 @@ export default function SkillsShowcase() {
             justifyContent: "center",
             columnGap: { xs: 0.65, sm: 1.4, md: 1.55 },
             rowGap: { xs: 0.66, sm: 1.45, md: 1.55 },
-            maxWidth: 1120,
+            maxWidth: { xs: "100%", sm: 980, md: 1040, lg: 1040 },
             width: "100%",
             mx: "auto",
             px: { xs: 0.2, sm: 0 },

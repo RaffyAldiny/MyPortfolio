@@ -45,8 +45,8 @@ const SX = {
     textTransform: "uppercase",
     fontSize: { xs: "2.02rem", sm: "2.7rem", md: "3.35rem" },
     lineHeight: 1.1,
-    mb: { xs: 1.9, md: 0 },
-    mt: { xs: 0, md: 0 },
+    mb: 0,
+    mt: 0,
     color: "#1CDB2F",
     filter: "drop-shadow(0px 2px 8px rgba(28, 219, 47, 0.12))",
     display: "flex",
@@ -66,7 +66,7 @@ const SX = {
   avatarWrap: {
     position: "relative",
     display: "inline-flex",
-    mt: { xs: 1.1, md: 0 },
+    mt: 0,
   },
   ringOuter: {
     position: "absolute",
@@ -159,7 +159,7 @@ const SX = {
     fontWeight: 600,
     color: "text.secondary",
     letterSpacing: -0.5,
-    mt: { xs: -0.2, md: 0 },
+    mt: { xs: -0.45, md: -0.18 },
     mb: { xs: 3, md: 3.4 },
     opacity: 0.8,
     fontSize: { xs: "1rem", md: "1.4rem" },
@@ -327,27 +327,31 @@ function ProfileIntroInner() {
 
   return (
     <Stack ref={rootRef} spacing={{ xs: 2.7, md: 4 }} sx={SX.root}>
-      <Typography variant="h1" sx={SX.hook} data-hero="hook">
-        HELLO THERE!
-        <Box component="span" sx={SX.waveEmoji} data-hero="wave">
-          {"\uD83D\uDC4B"}
-        </Box>
-      </Typography>
+      <Box sx={{ pb: { xs: 1.8, md: 0 } }}>
+        <Typography variant="h1" sx={SX.hook} data-hero="hook">
+          HELLO THERE!
+          <Box component="span" sx={SX.waveEmoji} data-hero="wave">
+            {"\uD83D\uDC4B"}
+          </Box>
+        </Typography>
+      </Box>
 
-      <Box sx={SX.avatarWrap} data-hero="avatar-shell">
-        <Box sx={SX.ringOuter} data-hero="ring-outer" />
-        <Box sx={SX.ringInner} data-hero="ring-inner" />
-        <Box sx={SX.prismOverlay} />
-        <Box sx={SX.avatarFrame}>
-          <Image
-            src={imageSrc}
-            alt={name}
-            fill
-            priority
-            quality={88}
-            sizes="(max-width: 900px) 130px, 160px"
-            style={{ objectFit: "cover", filter: "grayscale(100%) contrast(1.1)" }}
-          />
+      <Box sx={{ pt: { xs: 0.3, md: 0 } }}>
+        <Box sx={SX.avatarWrap} data-hero="avatar-shell">
+          <Box sx={SX.ringOuter} data-hero="ring-outer" />
+          <Box sx={SX.ringInner} data-hero="ring-inner" />
+          <Box sx={SX.prismOverlay} />
+          <Box sx={SX.avatarFrame}>
+            <Image
+              src={imageSrc}
+              alt={name}
+              fill
+              priority
+              quality={88}
+              sizes="(max-width: 900px) 130px, 160px"
+              style={{ objectFit: "cover", filter: "grayscale(100%) contrast(1.1)" }}
+            />
+          </Box>
         </Box>
       </Box>
 
@@ -377,8 +381,9 @@ function ProfileIntroInner() {
             <Highlight>academic capstone projects</Highlight>, tailoring software to
             streamline your specific workflow. I am also passionate about{" "}
             <Highlight>AI</Highlight> and <Highlight>modern tech stacks</Highlight>,
-            building reliable and intelligent solutions that turn complex requirements
-            into systems that are simple, efficient, and easy to manage (^_^)
+            using them to build reliable, intelligent solutions that turn complex
+            requirements into systems that feel simple, efficient, and easy to
+            manage (^_^)
           </Typography>
         </Box>
       </Box>

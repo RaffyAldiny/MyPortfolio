@@ -45,9 +45,10 @@ export default function ContactHero({
         </Box>
 
         <Typography sx={SX.summary} data-contact-reveal>
-          I work best on systems that need structure, clarity, and practical
-          execution, from custom management software and academic platforms to
-          polished full-stack products with strong admin workflows.
+          I build useful, deployable systems with structure, clarity, and
+          practical execution, from custom management software and academic
+          platforms to production-ready full-stack products with strong admin
+          workflows.
         </Typography>
 
         <Box sx={SX.accentRow} data-contact-reveal>

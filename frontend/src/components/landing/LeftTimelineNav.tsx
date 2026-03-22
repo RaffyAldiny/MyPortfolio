@@ -43,7 +43,7 @@ export default function LeftTimelineNav({
     return index >= 0 ? index : 0;
   }, [activeId, sections]);
 
-  const text = "#1E3A22";
+  const text = "#1A4721";
   const textMuted = alpha(ACTIVE_GREEN_DARK, 0.82);
   const activeText = ACTIVE_GREEN;
   const bg = "rgba(255,255,255,0.92)";
