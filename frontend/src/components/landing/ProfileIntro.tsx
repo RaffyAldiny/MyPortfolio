@@ -25,7 +25,7 @@ const SX = {
     height: "100%",
     minHeight: "100%",
     display: "flex",
-    justifyContent: { xs: "flex-start", md: "center" },
+    justifyContent: "center",
     alignItems: "center",
     textAlign: "center",
     width: "100%",
