@@ -2,18 +2,15 @@
 
 import * as React from "react";
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import { useMediaQuery, useTheme } from "@mui/material";
 
 type Props = {
-  progress: number;       // 0..1 (intro + projects)
-  activeIndex: number;    // 0 = intro, 1..N = project #
-  totalSlides: number;    // intro + projects
+  progress: number; // 0..1 (intro + projects)
+  activeIndex: number; // 0 = intro, 1..N = project #
+  totalSlides: number; // intro + projects
 };
 
 const PRISM_GRADIENT =
   "linear-gradient(90deg, #F3FFF0 0%, #CFFAC9 22%, #79EE70 50%, #1CDB2F 78%, #0B5A14 100%)";
-const LABEL_GREEN = "#8DFF74";
 
 function clamp01(v: number) {
   if (v < 0) return 0;
@@ -22,99 +19,40 @@ function clamp01(v: number) {
 }
 
 export default function ProjectProgressRail({ progress, activeIndex, totalSlides }: Props) {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-
-  // ✅ never show during intro slide
   if (activeIndex === 0) return null;
 
   const p = clamp01(progress);
-
-  const totalProjects = Math.max(1, totalSlides - 1); // intro excluded
-  const labelDesktop = `PROJECT ${String(activeIndex).padStart(2, "0")} / ${String(totalProjects).padStart(2, "0")}`;
-
-  /* --- Desktop (vertical) --- */
-  const railH = 200;
-  const railW = 9;
-  const dot = 7;
-  const dotActive = 11;
-
-  /* --- Mobile (horizontal, top centered) --- */
-  const railWm = 200;
-  const railHm = 7;
-  const dotm = 5;
-  const dotActivem = 8;
-
-  const wrapperSx = isMobile
-    ? {
-        position: "fixed" as const,
-        left: "50%",
-        top: "calc(60px + env(safe-area-inset-top))",
-        transform: "translateX(-50%)",
-        zIndex: 160,
-        pointerEvents: "none" as const,
-      }
-    : {
-        position: "fixed" as const,
-        right: 28,
-        top: "50%",
-        transform: "translateY(-50%)",
-        zIndex: 140,
-        pointerEvents: "none" as const,
-      };
-
-  // Dot positions must match the progress scale:
-  // progress steps: intro=0, project1=1/totalProjects, project2=2/totalProjects ... projectN=1
-  // so dots must be at i/totalProjects, i=1..totalProjects
+  const totalProjects = Math.max(1, totalSlides - 1);
   const dotPos = (i: number) => (totalProjects <= 0 ? 1 : i / totalProjects);
 
   return (
-    <Box sx={wrapperSx}>
-      {!isMobile && (
-        <Box
-          sx={{
-            mb: 1.2,
-            px: 1.15,
-            py: 0.65,
-            borderRadius: 999,
-            bgcolor: "rgba(0,0,0,0.45)",
-            backdropFilter: "blur(10px)",
-            border: "1px solid rgba(141,255,116,0.26)",
-            boxShadow: "0 0 12px rgba(28,219,47,0.12)",
-            textAlign: "center",
-          }}
-        >
-          <Typography
-            sx={{
-              fontSize: 10.5,
-              fontWeight: 900,
-              letterSpacing: 1.8,
-              textTransform: "uppercase",
-              color: LABEL_GREEN,
-              textShadow: "0 0 10px rgba(28,219,47,0.18)",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {labelDesktop}
-          </Typography>
-        </Box>
-      )}
-
-      {/* Rail */}
-      {isMobile ? (
-        // ================= MOBILE: HORIZONTAL =================
+    <>
+      <Box
+        sx={{
+          display: { xs: "block", md: "none" },
+          position: "fixed",
+          left: "50%",
+          top: "calc(60px + env(safe-area-inset-top))",
+          transform: "translateX(-50%)",
+          zIndex: 160,
+          pointerEvents: "none",
+          width: {
+            xs: "min(78vw, 260px)",
+            sm: "min(68vw, 320px)",
+          },
+        }}
+      >
         <Box
           sx={{
             position: "relative",
-            width: railWm,
-            height: railHm,
+            width: "100%",
+            height: 8,
             borderRadius: 999,
-            bgcolor: "rgba(255,255,255,0.10)",
-            overflow: "hidden",
-            boxShadow: "0 0 0 1px rgba(141,255,116,0.12), 0 8px 24px rgba(4,18,7,0.14)",
+            bgcolor: "rgba(255,255,255,0.1)",
+            overflow: "visible",
+            boxShadow: "0 0 0 1px rgba(141,255,116,0.12)",
           }}
         >
-          {/* Fill (LEFT -> RIGHT) */}
           <Box
             sx={{
               position: "absolute",
@@ -127,86 +65,95 @@ export default function ProjectProgressRail({ progress, activeIndex, totalSlides
             }}
           />
 
-          {/* Dots at i/totalProjects */}
           {Array.from({ length: totalProjects }).map((_, idx) => {
-            const projectIndex = idx + 1; // 1..N
+            const projectIndex = idx + 1;
             const t = dotPos(projectIndex);
             const isActive = projectIndex === activeIndex;
 
             return (
               <Box
-                key={projectIndex}
+                key={`mobile-${projectIndex}`}
                 sx={{
                   position: "absolute",
                   top: "50%",
                   left: `${t * 100}%`,
                   transform: "translate(-50%, -50%)",
-                  width: isActive ? dotActivem : dotm,
-                  height: isActive ? dotActivem : dotm,
+                  width: isActive ? 10 : 7,
+                  height: isActive ? 10 : 7,
                   borderRadius: 999,
                   background: isActive ? PRISM_GRADIENT : "rgba(255,255,255,0.35)",
                   border: isActive
                     ? "1px solid rgba(255,255,255,0.35)"
-                    : "1px solid rgba(255,255,255,0.20)",
-                  boxShadow: isActive ? "0 0 0 4px rgba(224,195,252,0.14)" : "none",
+                    : "1px solid rgba(255,255,255,0.2)",
+                  boxShadow: isActive ? "0 0 0 4px rgba(28,219,47,0.16)" : "none",
                 }}
               />
             );
           })}
         </Box>
-      ) : (
-        // ================= DESKTOP: VERTICAL =================
+      </Box>
+
+      <Box
+        sx={{
+          display: { xs: "none", md: "block" },
+          position: "fixed",
+          right: { md: 56, lg: 72 },
+          top: "50%",
+          transform: "translateY(-50%)",
+          zIndex: 160,
+          pointerEvents: "none",
+        }}
+      >
         <Box
           sx={{
             position: "relative",
-            height: railH,
-            width: railW,
+            width: 10,
+            height: 220,
             borderRadius: 999,
-            bgcolor: "rgba(255,255,255,0.10)",
-            overflow: "hidden",
+            bgcolor: "rgba(255,255,255,0.1)",
+            overflow: "visible",
+            boxShadow: "0 0 0 1px rgba(141,255,116,0.12)",
           }}
         >
-          {/* Fill (TOP -> DOWN) */}
           <Box
             sx={{
               position: "absolute",
+              top: 0,
               left: 0,
               right: 0,
-              top: 0,
               height: `${p * 100}%`,
               background: "linear-gradient(to bottom, #CFFAC9, #1CDB2F)",
               borderRadius: 999,
             }}
           />
 
-          {/* Dots at i/totalProjects */}
           {Array.from({ length: totalProjects }).map((_, idx) => {
-            const projectIndex = idx + 1; // 1..N
+            const projectIndex = idx + 1;
             const t = dotPos(projectIndex);
             const isActive = projectIndex === activeIndex;
 
             return (
               <Box
-                key={projectIndex}
+                key={`desktop-${projectIndex}`}
                 sx={{
                   position: "absolute",
-                  left: "50%",
                   top: `${t * 100}%`,
+                  left: "50%",
                   transform: "translate(-50%, -50%)",
-                  width: isActive ? dotActive : dot,
-                  height: isActive ? dotActive : dot,
+                  width: isActive ? 12 : 8,
+                  height: isActive ? 12 : 8,
                   borderRadius: 999,
                   background: isActive ? PRISM_GRADIENT : "rgba(255,255,255,0.35)",
                   border: isActive
                     ? "1px solid rgba(255,255,255,0.35)"
-                    : "1px solid rgba(255,255,255,0.20)",
-                  boxShadow: isActive ? "0 0 0 4px rgba(224,195,252,0.14)" : "none",
+                    : "1px solid rgba(255,255,255,0.2)",
+                  boxShadow: isActive ? "0 0 0 4px rgba(28,219,47,0.16)" : "none",
                 }}
               />
             );
           })}
         </Box>
-      )}
-    </Box>
+      </Box>
+    </>
   );
 }

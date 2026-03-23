@@ -21,8 +21,16 @@ const PROFILE = {
 
 const SOCIAL_LINKS = [
   { label: "GitHub", href: "https://github.com/RaffyAldiny", Icon: GitHubIcon },
-  { label: "LinkedIn", href: "https://www.linkedin.com/", Icon: LinkedInIcon },
-  { label: "Facebook", href: "https://www.facebook.com/", Icon: FacebookRoundedIcon },
+  {
+    label: "LinkedIn",
+    href: "https://www.linkedin.com/in/rafael-alden-agoncillo-b15719257/",
+    Icon: LinkedInIcon,
+  },
+  {
+    label: "Facebook",
+    href: "https://www.facebook.com/profile.php?id=61567335190849",
+    Icon: FacebookRoundedIcon,
+  },
 ] as const;
 
 const PRISM_GRADIENT =

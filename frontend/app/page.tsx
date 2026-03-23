@@ -6,6 +6,7 @@ import GlobalStyles from "@mui/material/GlobalStyles";
 
 import LandingBackground from "@/components/landing/LandingBackground";
 import LeftTimelineNav from "@/components/landing/LeftTimelineNav";
+import ProjectProgressRail from "@/components/landing/ProjectProgressRail";
 import LetsWorkTogether from "@/components/landing/LetsWorkTogether";
 import ProfileIntro from "@/components/landing/ProfileIntro";
 import ResearchSpotlight from "@/components/landing/ResearchSpotlight";
@@ -152,6 +153,14 @@ export default function Home() {
     [isMobile]
   );
 
+  const activeProjectIndex = React.useMemo(
+    () => PROJECTS.findIndex((project) => project.id === activePanelId) + 1,
+    [activePanelId]
+  );
+  const totalProjects = Math.max(PROJECTS.length, 1);
+  const projectProgress = activeProjectIndex > 0 ? activeProjectIndex / totalProjects : 0;
+  const showProjectProgressRail = activeNavId === "projects" && activeProjectIndex > 0;
+
   return (
     <Box
       sx={{
@@ -175,6 +184,14 @@ export default function Home() {
       />
 
       <LandingBackground />
+
+      {showProjectProgressRail && (
+        <ProjectProgressRail
+          progress={projectProgress}
+          activeIndex={activeProjectIndex}
+          totalSlides={PROJECTS.length + 1}
+        />
+      )}
 
       <LeftTimelineNav
         sections={NAV_SECTIONS}

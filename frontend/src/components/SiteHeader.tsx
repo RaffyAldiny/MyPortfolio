@@ -37,8 +37,14 @@ const GLASS_BLUR = "blur(12px)";
 
 const SOCIALS = [
   { Icon: GitHubIcon, href: "https://github.com/" },
-  { Icon: LinkedInIcon, href: "https://linkedin.com/" },
-  { Icon: FacebookIcon, href: "https://facebook.com/" },
+  {
+    Icon: LinkedInIcon,
+    href: "https://www.linkedin.com/in/rafael-alden-agoncillo-b15719257/",
+  },
+  {
+    Icon: FacebookIcon,
+    href: "https://www.facebook.com/profile.php?id=61567335190849",
+  },
 ];
 
 const prismPulse = keyframes`
